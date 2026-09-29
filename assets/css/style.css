@@ -454,17 +454,12 @@
     }
 }
 
-.skeleton-instructor-card,
-.instructor-card {
-    min-height: 400px;
+.skeleton-instructor-card {
+    min-height: 260px;
 }
 
 .skeleton-course-wrapper {
     display: block;
-}
-
-.skeleton-instructor-card {
-    min-height: 400px;
 }
 
 .skeleton-instructor-wrapper {

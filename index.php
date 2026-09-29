@@ -156,7 +156,7 @@
 
 
     <!-- Team Section -->
-    <section id="team">
+    <section id="team" class="py-20 px-4 bg-[#f9f7f3]">
         <div class="container mx-auto max-w-6xl">
             <div class="text-center mb-12 sm:mb-16">
                 <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3 sm:mb-4">کادر حرفه ای آموزشگاه فامو
