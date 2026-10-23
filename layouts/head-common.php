@@ -55,3 +55,8 @@
 <link rel="stylesheet" href="<?php echo famo_asset('css/libs/swiper-bundle.min.css', $base . '../shared/css/libs/swiper-bundle.min.css'); ?>">
 <link rel="stylesheet" href="<?php echo $base; ?>assets/css/style.css">
 <link rel="stylesheet" href="<?php echo famo_asset('css/fonts.css', $base . '../shared/css/fonts.css'); ?>">
+
+<!-- Favicon Multi-size -->
+<link rel="icon" type="image/png" sizes="16x16" href="<?php echo famo_asset('images/favicon-16.png', $base . '../shared/images/favicon-16.png'); ?>">
+<link rel="icon" type="image/png" sizes="32x32" href="<?php echo famo_asset('images/favicon-32.png', $base . '../shared/images/favicon-32.png'); ?>">
+<link rel="icon" type="image/png" sizes="96x96" href="<?php echo famo_asset('images/favicon-96.png', $base . '../shared/images/favicon-96.png'); ?>">
