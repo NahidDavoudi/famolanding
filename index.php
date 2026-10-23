@@ -38,32 +38,32 @@
                     </div>
                 </div>
                 <!-- Illustration & Stats -->
-                <div class="lg:w-1/2 w-full relative z-10 mt-0 lg:mt-0">
-                    <div class="relative w-full max-w-lg mx-auto">
-                        <!-- Stats Card -->
-                        <div
-                            class="glass-effect rounded-2xl p-6 border border-white/20 lg:absolute lg:-bottom-16 lg:-right-6 lg:max-w-sm w-full mt-10 lg:mt-0 shadow-2xl backdrop-blur-md z-20">
-                            <h3
-                                class="text-lg font-bold mb-4 text-center text-[#E2D9C6] flex items-center justify-center">
-                                <i class="icon icon--md ml-2" data-lucide="chart-column" aria-hidden="true"></i>
+                <div class="lg:w-1/2 w-full relative z-10 mt-6 lg:mt-0">
+                    <div class="relative w-full max-w-lg mx-auto rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-[#445D84]/20">
+                        <!-- تصویر میز مطالعه -->
+                        <img src="assets/images/poster_hero.webp" alt="محیط آموزشی آموزشگاه فامو" class="w-full h-auto object-cover">
+                        
+                        <!-- Stats Card (شناور روی تصویر یا پایین آن) -->
+                        <div class="absolute bottom-3 right-3 left-3 glass-effect rounded-2xl p-4 border border-white/20 backdrop-blur-md z-20 shadow-xl">
+                            <h3 class="text-sm font-bold mb-2 text-center text-[#E2D9C6] flex items-center justify-center">
+                                <i class="icon icon--sm ml-2" data-lucide="chart-column" aria-hidden="true"></i>
                                 آمار فامو در یک نگاه
                             </h3>
-                            <div class="grid grid-cols-3 gap-3 text-center divide-x divide-x-reverse divide-white/10">
-                                                            <!-- SEO fallback values (search engines read these immediately) -->
-                                                            <div class="px-1">
-                                                                <div class="text-2xl font-bold mb-1 text-white" id="years-counter">7</div>
-                                                                <div class="text-white/70 text-xs">سال تجربه</div>
-                                                            </div>
-                                                            <div class="px-1">
-                                                                <div class="text-2xl font-bold mb-1 text-white" id="students-counter">500+</div>
-                                                                <div class="text-white/70 text-xs">قبولی کنکور</div>
-                                                            </div>
-                                                            <div class="px-1">
-                                                                <div class="text-2xl font-bold mb-1 text-white" id="teachers-counter">15</div>
-                                                                <div class="text-white/70 text-xs">استاد برتر</div>
-                                                            </div>
-                                                        </div>
+                            <div class="grid grid-cols-3 gap-2 text-center divide-x divide-x-reverse divide-white/10">
+                                <div class="px-1">
+                                    <div class="text-xl font-bold mb-1 text-white" id="years-counter">7</div>
+                                    <div class="text-white/70 text-xs">سال تجربه</div>
+                                </div>
+                                <div class="px-1">
+                                    <div class="text-xl font-bold mb-1 text-white" id="students-counter">500+</div>
+                                    <div class="text-white/70 text-xs">قبولی کنکور</div>
+                                </div>
+                                <div class="px-1">
+                                    <div class="text-xl font-bold mb-1 text-white" id="teachers-counter">15</div>
+                                    <div class="text-white/70 text-xs">استاد برتر</div>
+                                </div>
                             </div>
+                        </div>
                     </div>
                 </div>
             </div>
