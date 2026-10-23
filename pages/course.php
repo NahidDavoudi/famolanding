@@ -35,11 +35,16 @@
 
 <!-- Page Title Banner -->
 <section class="pt-28 sm:pt-32 pb-12 gradient-bg text-white text-center">
-    <h1 class="text-3xl sm:text-4xl font-bold mb-4 text-white">دوره‌های تخصصی کنکور و تیزهوشان بابل</h1>
-    <img src="<?php echo $base; ?>assets/images/courses_banner.png" alt="دوره‌های تخصصی کنکور و تیزهوشان بابل"
-        class="w-full h-full object-cover">
-    <div class="pt-10 lg:pt-20 container mx-auto px-4">
-        <p class="text-white/80 max-w-2xl mx-auto text-base sm:text-lg">برنامه‌ریزی، کادر مجرب، آزمون‌های استاندارد
+    <div class="container mx-auto px-4 max-w-5xl">
+        <h1 class="text-3xl sm:text-4xl font-bold mb-6 text-white">دوره‌های تخصصی کنکور و تیزهوشان بابل</h1>
+        
+        <!-- بنر یا پوستر با ارتفاع کنترل‌شده و گوشه‌های گرد -->
+        <div class="relative w-full h-56 sm:h-72 md:h-96 rounded-2xl overflow-hidden shadow-2xl border border-white/20 mb-8">
+            <img src="<?php echo $base; ?>assets/images/courses_banner.webp" alt="دوره‌های تخصصی کنکور و تیزهوشان بابل"
+                class="w-full h-full object-cover">
+        </div>
+
+        <p class="text-white/90 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">برنامه‌ریزی، کادر مجرب، آزمون‌های استاندارد
             و تحلیل پیشرفت فردی برای تضمین موفقیت تحصیلی</p>
     </div>
 </section>
