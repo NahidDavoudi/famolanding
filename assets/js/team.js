@@ -114,10 +114,14 @@ function renderSupporterCard(supporter) {
     const initial = supporter.name.charAt(0);
     const fieldLabel = supporter.field ? `رشته ${supporter.field}` : `پایه ${supporter.grade}`;
 
+    const avatar = supporter.avatar_url
+        ? `<img src="${supporter.avatar_url}" alt="${supporter.name}" class="w-full h-full object-cover">`
+        : `<div class="w-full h-full bg-[#E2D9C6] text-[#445D84] text-2xl font-bold flex items-center justify-center">${initial}</div>`;
+
     return `
         <article class="bg-[#f9f7f3] rounded-2xl p-6 border border-[#E2D9C6] flex items-center gap-4">
-            <div class="w-16 h-16 bg-[#E2D9C6] text-[#445D84] text-2xl font-bold rounded-full flex items-center justify-center shrink-0">
-                ${initial}
+            <div class="w-16 h-16 rounded-full overflow-hidden shadow-md shrink-0">
+                ${avatar}
             </div>
             <div>
                 <h3 class="font-bold text-[#445D84] text-lg">${supporter.name}</h3>
