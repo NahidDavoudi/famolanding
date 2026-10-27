@@ -37,8 +37,7 @@
 <!-- Support Team Section -->
 <section id="support" class="py-16 px-4 bg-white">
     <div class="container mx-auto max-w-6xl">
-        <h2 class="text-2xl font-bold text-[#445D84] mb-8 border-r-4 border-[#445D84] pr-3">تیم پشتیبانی و رفع اشکال
-            ۲۴/۷</h2>
+        <h2 class="text-2xl font-bold text-[#445D84] mb-8 border-r-4 border-[#445D84] pr-3">تیم پشتیبانی ۲۴/۷</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="supportersContainer">
             <!-- Skeleton loaders shown until the API responds -->

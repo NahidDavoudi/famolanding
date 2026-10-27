@@ -164,7 +164,6 @@
                 <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">جمعی از اساتید و دانشجویان برتر و متخصص شهرستان بابل</p>
             </div>
 
-            <!-- Course Cards - Swiper Carousel -->
             <div class="swiper instructorsSwiper relative pb-12">
                 <div class="swiper-wrapper" id="instructorsContainer">
                     <!-- Skeleton Loaders -->
