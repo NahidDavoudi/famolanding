@@ -7,6 +7,23 @@ function svgIcon(name, cls = '') {
     return `<i class="icon${c}" data-lucide="${icon}" aria-hidden="true"></i>`;
 }
 
+// Format price: Persian digits, thousands separator, "تومان" suffix
+function formatPrice(value) {
+    if (value === null || value === undefined || value === '') return '';
+    const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+    let str = String(value);
+    // Convert Persian/Arabic digits to English
+    str = str
+        .replace(/[۰-۹]/g, d => persianDigits.indexOf(d))
+        .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+    const digits = str.replace(/\D/g, '');
+    if (!digits) return String(value); // keep non-numeric values (e.g. "تماس بگیرید") as is
+    // Thousands separator
+    const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    // Convert back to Persian digits + toman
+    return grouped.replace(/\d/g, d => persianDigits[+d]) + ' تومان';
+}
+
 // FontAwesome → SVG sprite mapping for dynamic course icons
 const FA_ICON_MAP = {
     'fa-home': 'icon-home', 'fa-book': 'icon-book', 'fa-book-open': 'icon-book',
@@ -153,7 +170,7 @@ async function loadCoursesFromAPI() {
                     <div class="course-background absolute inset-0" 
                          style="background: linear-gradient(135deg, ${course.gradient_color_from}, ${course.gradient_color_to});">
                         ${course.background_image_url ? `
-                            <div class="absolute inset-0 bg-cover bg-center opacity-30" style="background-image: url('${course.background_image_url}');"></div>
+                            <div class="absolute inset-0 bg-cover bg-center opacity-30" style="background-image: url('https://api.famoacademy.ir/uploads/${course.background_image_url}');"></div>
                         ` : ''}
                     </div>
                     
@@ -174,7 +191,7 @@ async function loadCoursesFromAPI() {
                             ` : ''}
                             ${course.price ? `
                                 <div class="mt-4">
-                                    <span class="text-2xl sm:text-3xl font-bold">${course.price}</span>
+                                    <span class="text-2xl sm:text-3xl font-bold">${formatPrice(course.price)}</span>
                                 </div>
                             ` : ''}
                         </div>

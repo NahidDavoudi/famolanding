@@ -34,7 +34,21 @@ function svgIcon(name, cls = '') {
     const icon = window.famoLucideName ? window.famoLucideName(name) : name.replace(/^icon-/, '');
     return `<i class="icon${suffix}" data-lucide="${icon}" aria-hidden="true"></i>`;
 }
-
+function formatPrice(value) {
+    if (value === null || value === undefined || value === '') return '';
+    const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+    let str = String(value);
+    // تبدیل ارقام فارسی/عربی به انگلیسی
+    str = str
+        .replace(/[۰-۹]/g, d => persianDigits.indexOf(d))
+        .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+    const digits = str.replace(/\D/g, '');
+    if (!digits) return String(value); // مثل «تماس بگیرید» را دست نمی‌زنیم
+    // جداکردن سه‌رقم سه‌رقم
+    const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    // تبدیل به ارقام فارسی + تومان
+    return grouped.replace(/\d/g, d => persianDigits[+d]) + ' تومان';
+}
 function renderFeature(text) {
     return `<div class="flex items-center gap-2">
         ${svgIcon('icon-check', 'icon--sm text-[#445D84]')}
@@ -48,8 +62,8 @@ function renderCourseCard(course) {
         ? `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm font-medium text-gray-700 pt-2">${featuresHtml}</div>`
         : '';
     const priceBlock = course.price
-        ? `<div class="text-2xl font-bold text-[#445D84]">${course.price}</div>`
-        : '';
+    ? `<div class="text-2xl font-bold text-[#445D84]">${formatPrice(course.price)}</div>`
+    : '';
     const badgeBlock = course.badge_label
         ? `<span class="bg-[#445D84]/10 text-[#445D84] text-xs font-bold px-3 py-1 rounded-full inline-block">${course.badge_label}</span>`
         : '';
