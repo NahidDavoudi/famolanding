@@ -12,14 +12,6 @@
         #courses .coursesSwiper .swiper-slide {
             height: auto;
         }
-
-        #courses .course-image-fallback {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
     </style>
 </head>
 <body class="font-family text-gray-800">

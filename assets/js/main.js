@@ -184,10 +184,8 @@ function renderCourseFeatureChip(text) {
 }
 
 // Build one course card slide for the home carousel.
-function buildCourseSlide(course) {
-    const hasPrice = course.price !== null && course.price !== undefined && String(course.price).trim() !== '';
-    const priceText = hasPrice ? formatPrice(course.price) : '';
-    const priceUnit = hasPrice && isNumericPrice(course.price) ? 'تومان' : '';
+// Index: 0-based position; first 3 slides skip lazy loading (visible on load).
+function buildCourseSlide(course, index) {
     const gradient = `linear-gradient(135deg, ${safeHex(course.gradient_color_from, '#445D84')}, ${safeHex(course.gradient_color_to, '#6D8B9E')})`;
     const imageUrl = safeUrl(resolveImageUrl(course.background_image_url));
     const badgeBlock = course.badge_label
@@ -201,6 +199,8 @@ function buildCourseSlide(course) {
         ? `<div class="famo-course-meta">${metaItems}</div>`
         : '';
     const description = course.description || '';
+    const shouldLazyLoad = index >= 3;
+    const imgAttrs = `width="320" height="200" decoding="async"${shouldLazyLoad ? ' loading="lazy"' : ''}`;
 
     return `
         <div class="swiper-slide">
@@ -208,7 +208,7 @@ function buildCourseSlide(course) {
                aria-label="${esc(course.name)} - مشاهده جزئیات دوره">
                 <div class="famo-course-media" style="background-image: ${gradient};">
                     ${imageUrl
-                        ? `<img src="${esc(imageUrl)}" alt="${esc(course.name)}" width="1200" height="750" loading="lazy" class="famo-course-img">`
+                        ? `<img src="${esc(imageUrl)}" alt="${esc(course.name)}" ${imgAttrs} class="famo-course-img">`
                         : `<div class="course-image-fallback">
                                 ${svgIcon(faToSvg(course.icon), 'icon--3xl text-white/90')}
                            </div>`}
@@ -219,12 +219,6 @@ function buildCourseSlide(course) {
                     ${metaBlock}
                     ${description ? `<p class="famo-course-desc">${esc(description)}</p>` : ''}
                     <div class="famo-course-footer">
-                        <div class="famo-course-price">
-                            <span class="famo-course-price-label">هزینه دوره</span>
-                            ${hasPrice
-                                ? `<span class="famo-course-price-value">${esc(priceText)}${priceUnit ? `<span class="famo-course-price-unit">${esc(priceUnit)}</span>` : ''}</span>`
-                                : `<span class="famo-course-price-value">تماس بگیرید</span>`}
-                        </div>
                         <span class="famo-course-cta">جزئیات دوره
                             <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
                         </span>
@@ -253,7 +247,7 @@ async function loadCoursesFromAPI() {
             return;
         }
 
-        container.innerHTML = courses.map(buildCourseSlide).join('');
+        container.innerHTML = courses.map((course, i) => buildCourseSlide(course, i)).join('');
         if (window.refreshLucideIcons) window.refreshLucideIcons(container);
 
         // حالت ۰/۱/۲ دوره: بدون سوایپر (گرید ساده)؛ در غیر این صورت سوایپر ساخته می‌شود
