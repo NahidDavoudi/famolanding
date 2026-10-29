@@ -192,50 +192,51 @@
                 <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">جمعی از اساتید و دانشجویان برتر و متخصص شهرستان بابل</p>
             </div>
 
-            <div class="drag-carousel-viewport" tabindex="0"
-                 aria-label="کاروسل اساتید؛ با کشیدن یا کلیدهای جهت‌دار جابه‌جا کنید">
-                <div class="drag-carousel-track" id="instructorsContainer">
-                    <!-- Skeleton Loaders -->
-                    <div class="drag-carousel-slide skeleton-instructor-wrapper">
-                        <div class="famo-inst-skel" aria-hidden="true">
-                            <div class="skeleton skeleton-pulse w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-200 mx-auto"></div>
-                            <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-4"></div>
-                            <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
+            <div class="curve-carousel">
+                <div class="curve-carousel__wrap">
+                    <div class="curve-carousel__stage" tabindex="0"
+                         aria-label="کاروسل اساتید؛ با کشیدن یا کلیدهای جهت‌دار جابه‌جا کنید">
+                        <div class="curve-carousel__edge-blur curve-carousel__edge-blur--left" aria-hidden="true"></div>
+                        <div class="curve-carousel__edge-blur curve-carousel__edge-blur--right" aria-hidden="true"></div>
+                        <div class="curve-carousel__track is-skeleton" id="instructorsContainer">
+                            <!-- Skeleton Loaders -->
+                            <div class="skeleton-instructor-wrapper">
+                                <div class="famo-inst-skel" aria-hidden="true">
+                                    <div class="skeleton skeleton-pulse w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-200 mx-auto"></div>
+                                    <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-4"></div>
+                                    <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton-instructor-wrapper">
+                                <div class="famo-inst-skel" aria-hidden="true">
+                                    <div class="skeleton skeleton-pulse w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-200 mx-auto"></div>
+                                    <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-4"></div>
+                                    <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
+                                </div>
+                            </div>
+                            <div class="skeleton-instructor-wrapper">
+                                <div class="famo-inst-skel" aria-hidden="true">
+                                    <div class="skeleton skeleton-pulse w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-200 mx-auto"></div>
+                                    <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-4"></div>
+                                    <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="drag-carousel-slide skeleton-instructor-wrapper">
-                        <div class="famo-inst-skel" aria-hidden="true">
-                            <div class="skeleton skeleton-pulse w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-200 mx-auto"></div>
-                            <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-4"></div>
-                            <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
-                        </div>
-                    </div>
-                    <div class="drag-carousel-slide skeleton-instructor-wrapper">
-                        <div class="famo-inst-skel" aria-hidden="true">
-                            <div class="skeleton skeleton-pulse w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-200 mx-auto"></div>
-                            <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-4"></div>
-                            <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
-                        </div>
-                    </div>
-                    <div class="drag-carousel-slide skeleton-instructor-wrapper">
-                        <div class="famo-inst-skel" aria-hidden="true">
-                            <div class="skeleton skeleton-pulse w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-200 mx-auto"></div>
-                            <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-4"></div>
-                            <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
+
+                    <!-- کنترل‌ها (dotها + فلش‌ها = جایگزین درگ برای دسترس‌پذیری) -->
+                    <div class="curve-carousel__controls">
+                        <div class="curve-carousel__arrows">
+                            <button type="button" class="curve-carousel__arrow" id="instCarouselPrev" aria-label="قبلی">
+                                <i class="icon" data-lucide="chevron-right" aria-hidden="true"></i>
+                            </button>
+                            <div class="curve-carousel__dots" id="instCarouselDots"></div>
+                            <button type="button" class="curve-carousel__arrow" id="instCarouselNext" aria-label="بعدی">
+                                <i class="icon" data-lucide="chevron-left" aria-hidden="true"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- کنترل‌های جایگزین برای درگ (دسترس‌پذیری) -->
-            <div class="drag-carousel-nav">
-                <button id="instCarouselPrev" class="drag-carousel-btn" type="button" aria-label="استاد قبلی">
-                    <i class="icon" data-lucide="chevron-right" aria-hidden="true"></i>
-                </button>
-                <div class="drag-carousel-dots" id="instCarouselDots"></div>
-                <button id="instCarouselNext" class="drag-carousel-btn" type="button" aria-label="استاد بعدی">
-                    <i class="icon" data-lucide="chevron-left" aria-hidden="true"></i>
-                </button>
             </div>
 
             <div class="text-center mt-10">

@@ -339,220 +339,393 @@ function instructorCardHtml(instructor) {
     `;
 }
 
-// ==================== درگ-کاروسل ۳بعدی اساتید (بدون کتابخانه جدید؛ GSAP موجود) ====================
-// حس مشابه DragableCarousel فِرِیمر: حلقه مادام، کارت میانی برجسته، کارت‌های کناری
-// rotateY + scale + opacity، درگ با اینرسی و اسنپ فنری به کارت میانی.
-const DRAG_COPIES = 3;
+// ==================== کاروسل سه‌بعدی اساتید — پورت inspiration/CurveCarousel.js (پالت فامو، بدون autoplay) ====================
+// فیزیک فنری damped-harmonic + اسنپ همیشه به عدد صحیح + اینرسی با cap ±2
+// + blur/روشنایی/اشباع بر اساس فاصله از مرکز (عمق میدان).
+const CURVE_CFG = {
+    perspective: 1200, mobilePerspective: 900,
+    depthStep: 150, mobileDepthStep: 110,
+    rotateYStep: 18, maxRotateY: 42,
+    spacingRatio: 0.72, mobileSpacingRatio: 0.66,
+    sizeDecrease: 0.12, blurStep: 4.5, maxBlur: 14,
+    cardWidth: 320, mobileCardWidth: 262,
+    cardRadius: 20,
+    arrowSize: 42, arrowInset: 24, arrowGap: 14,
+    stiffness: 170, damping: 24, mass: 1,
+};
+
 let instCarousel = null;
 
-class InstructorDragCarousel {
-    constructor(track, opts = {}) {
-        this.track = track;
-        this.viewport = track.parentElement;
+class InstructorsCurveCarousel {
+    constructor(root, opts = {}) {
+        this.stage = root.querySelector('.curve-carousel__stage') || root;
+        this.track = root.querySelector('.curve-carousel__track');
         this.onIndex = opts.onIndex || (() => {});
-        this.slides = Array.from(track.children);
-        this.n = this.slides.length / DRAG_COPIES;
-        if (!this.slides.length || !this.n) return;
+        this.total = opts.total || 0;
+        if (!this.track || !this.total) return;
 
-        // اندازه‌ها (RTL-agnostic: فاصله واقعی اسلایدها از خود DOM گرفته می‌شود)
-        const r0 = this.slides[0].getBoundingClientRect();
-        let step = r0.width;
-        if (this.slides.length > 1) {
-            const r1 = this.slides[1].getBoundingClientRect();
-            step = Math.abs(r1.left - r0.left) || r0.width;
-        }
-        this.step = step;
-        this.vc = this.viewport.getBoundingClientRect();
-        this.halfCx = this.vc.left + this.vc.width / 2;
-        this.x = 0;
-        this.tx = 0;
-        this.tween = null;
-        this.dragging = false;
-        this.pointerId = null;
-        this.px = 0;
-        this.history = [];
+        this.cardEls = Array.from(this.track.children);
+        this.renderCount = this.cardEls.length;
+
         this.reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        this.activeIdx = -1;
+
+        this.currentPos = 0;   // شاخه پیوسته فعلی
+        this.targetPos = 0;    // شاخه هدف (همیشه عدد صحیح = اسنپ)
+        this.velocity = 0;     // کارت بر ثانیه
+        this.rafId = null;
+        this.lastTime = 0;
+
+        this.isDragging = false;
+        this.pointerId = null;
+        this.startX = 0;
+        this.startY = 0;
+        this.lastPointerX = 0;
+        this.lastPointerTime = 0;
+        this.pointerVelocityX = 0;
+        this.dragStartPos = 0;
+        this.suppressClick = false;
+
+        this.resolvedCfg = this.resolveSizing();
+        this.applySizing();
+        this.startPos(); // شروع از کپی وسط بدون قفل‌شدن جهت
 
         this.bindEvents();
-        this.measure();
-        // شروع: اولین کارتِ کپیِ میانی دقیقاً در مرکز (بدون فرض جهت RTL)
-        this.x = this.tx = this.halfCx - this.centerOf(this.slides[this.n]);
-        this.rafId = requestAnimationFrame(() => this.loop());
-        window.addEventListener('resize', this.measure);
+        window.addEventListener('resize', this.onResize);
+        this.renderFrame();
     }
 
-    measure = () => {
-        if (!this.slides.length) return;
-        const r0 = this.slides[0].getBoundingClientRect();
-        let step = r0.width;
-        if (this.slides.length > 1) {
-            const r1 = this.slides[1].getBoundingClientRect();
-            step = Math.abs(r1.left - r0.left) || r0.width;
+    throwStart() {
+        // شروع: اولین کارتِ وسطِ ستون کپی در مرکز
+        const mid = Math.floor(this.renderCount / 2);
+        this.currentPos = mid;
+        this.targetPos = mid;
+        this.renderFrame();
+    }
+
+    startPos() { this.throwStart(); }
+
+    resolveSizing() {
+        const isMobile = window.innerWidth < 768;
+        const c = CURVE_CFG;
+        return {
+            perspective: isMobile ? c.mobilePerspective : c.perspective,
+            depthStep: isMobile ? c.mobileDepthStep : c.depthStep,
+            spacingRatio: isMobile ? c.mobileSpacingRatio : c.spacingRatio,
+            cardWidth: isMobile ? c.mobileCardWidth : c.cardWidth,
+            cardRadius: c.cardRadius,
+            rotateYStep: c.rotateYStep, maxRotateY: c.maxRotateY, sizeDecrease: c.sizeDecrease,
+            blurStep: c.blurStep, maxBlur: c.maxBlur,
+            arrowSize: c.arrowSize, arrowInset: c.arrowInset, arrowGap: c.arrowGap,
+        };
+    }
+
+    applySizing() {
+        const c = this.resolvedCfg;
+        const root = this.stage.closest('.curve-carousel') || this.stage.parentElement;
+        this.stage.style.setProperty('--curve-pers', `${c.perspective}px`);
+        this.stage.style.setProperty('--curve-card-w', `${c.cardWidth}px`);
+        this.track.style.setProperty('--curve-card-w', `${c.cardWidth}px`);
+        // ارتفاع واقعی کارت‌ها را بعد از یک فورسِ layout اندازه می‌گیریم (کارت‌های محتوادی، ارتفاع آزاد)
+        this.track.style.height = 'auto';
+        let cardH = 0;
+        for (const el of this.cardEls) {
+            el.style.position = 'static';
+            el.style.transform = 'none';
+            el.style.opacity = '1';
+            cardH = Math.max(cardH, el.offsetHeight);
         }
-        this.step = step;
-        this.vc = this.viewport.getBoundingClientRect();
-        this.halfCx = this.vc.left + this.vc.width / 2;
-        this.cycleW = step * this.n;
-    };
-
-    // هزینه کم: هر اسلاید rect خودش را می‌گیرد (فقط transform قبلی اعمال شده است)
-    centerOf(el) {
-        const r = el.getBoundingClientRect();
-        return r.left + r.width / 2;
-    }
-
-    // اسلایدی که الان به مرکز نزدیک‌تر است + شاخه منطقی آن
-    nearestSlot(shift = 0) {
-        const targetCx = this.halfCx - shift;
-        let best = 0, bestD = Infinity;
-        for (let j = 0; j < this.slides.length; j++) {
-            const d = Math.abs(this.centerOf(this.slides[j]) + shift - targetCx);
-            if (d < bestD) { bestD = d; best = j; }
+        this.stage.style.height = `${cardH + 48}px`;
+        for (const el of this.cardEls) {
+            el.style.position = '';
+            el.style.transform = '';
+            el.style.opacity = '';
         }
-        return best;
+        void root;
     }
 
-    index() {
-        return this.nearestSlot() % this.n;
+    wrapDiff(diff, count) {
+        if (count <= 0) return 0;
+        let d = ((diff % count) + count) % count;
+        if (d > count / 2) d -= count;
+        return d;
     }
 
-    // اسنپ به شاخه منطقی idx (کپی‌ای که نزدیک مرکز است)
-    go(idx, instant = false) {
-        idx = ((idx % this.n) + this.n) % this.n;
-        const cur = this.x;
-        // بهترین کپی بین هر هر: j = idx، idx+n یا idx+2n — همان که به مرکز نزدیک‌تر
-        const candidates = [idx, idx + this.n, idx + 2 * this.n].map(j => ({
-            j,
-            delta: this.centerOf(this.slides[j]) - this.halfCx, // فاصله فعلی از مرکز
-        }));
-        candidates.sort((a, b) => Math.abs(a.delta) - Math.abs(b.delta));
-        const targetX = cur - candidates[0].delta;
-        if (this.tween) this.tween.kill();
-        this.tween = null;
-        if (instant || this.reduced || typeof gsap === 'undefined') {
-            this.x = this.tx = targetX;
-        } else {
-            this.tween = gsap.to(this, { tx: targetX, duration: 0.9, ease: 'power3.out' });
+    renderFrame() {
+        const c = this.resolvedCfg;
+        const stepX = c.cardWidth * c.spacingRatio;
+        const count = this.renderCount;
+
+        for (let j = 0; j < count; j += 1) {
+            const card = this.cardEls[j];
+            const diff = this.wrapDiff(j - this.currentPos, count);
+            const absDiff = Math.abs(diff);
+
+            if (absDiff > 3.3) {
+                card.style.opacity = '0';
+                card.style.pointerEvents = 'none';
+                card.style.visibility = 'hidden';
+                card.setAttribute('aria-hidden', 'true');
+                continue;
+            }
+
+            card.style.visibility = 'visible';
+
+            // فشرده‌سازی افقی غیرخطی برای کارت‌های عمیق (حس پشته ۳بعدی)
+            const compression = 1 - Math.min(absDiff, 3) * 0.055;
+            const translateX = diff * stepX * compression;
+            // عمق نفسِ Z (بدون قوس عمودی)
+            const translateZ = -Math.pow(absDiff, 0.92) * c.depthStep;
+            // چرخش inward به مرکز
+            const rawRotateY = -diff * c.rotateYStep;
+            const rotateY = Math.max(-c.maxRotateY, Math.min(c.maxRotateY, rawRotateY));
+            // سلسله‌مراتب نرمِ scale
+            const scale = Math.max(0.62, 1 - absDiff * c.sizeDecrease);
+            // blur عمق میدان + brightness/saturate
+            const blurPx = absDiff < 0.04 ? 0 : Math.min(c.maxBlur, Math.pow(absDiff, 1.15) * c.blurStep);
+            const brightness = Math.max(0.45, 1.03 - absDiff * 0.19);
+            const saturate = Math.max(0.75, 1.05 - absDiff * 0.08);
+            // کاهش نرمِ شفافیت
+            const opacity = absDiff <= 1.15 ? 1 : Math.max(0, 1 - (absDiff - 1.15) * 0.55);
+            const isCenter = absDiff < 0.45;
+
+            card.style.transform = `translate3d(calc(-50% + ${translateX.toFixed(2)}px), -50%, ${translateZ.toFixed(2)}px) rotateY(${rotateY.toFixed(2)}deg) scale(${scale.toFixed(4)})`;
+            card.style.zIndex = String(Math.round(100 - absDiff * 20));
+            card.style.opacity = opacity.toFixed(3);
+            card.style.pointerEvents = absDiff < 2.2 ? 'auto' : 'none';
+            card.classList.toggle('is-center', isCenter);
+            card.setAttribute('aria-hidden', isCenter ? 'false' : 'true');
+
+            const inner = card.firstElementChild;
+            if (inner) {
+                inner.style.filter = blurPx > 0.05
+                    ? `blur(${blurPx.toFixed(2)}px) brightness(${brightness.toFixed(2)}) saturate(${saturate.toFixed(2)})`
+                    : ` brightness(${brightness.toFixed(2)}) saturate(${saturate.toFixed(2)})`;
+            }
         }
-    }
 
-    next(instant) { this.go(this.index() + 1, instant); }
-    prev(instant) { this.go(this.index() - 1, instant); }
-
-    destroy() {
-        cancelAnimationFrame(this.rafId);
-        window.removeEventListener('resize', this.measure);
-        if (this.tween) this.tween.kill();
-    }
-
-    bindEvents() {
-        const v = this.viewport;
-        v.addEventListener('pointerdown', (e) => this.onDown(e));
-        v.addEventListener('pointermove', (e) => this.onMove(e));
-        v.addEventListener('pointerup', (e) => this.onUp(e));
-        v.addEventListener('pointercancel', (e) => this.onUp(e));
-        v.addEventListener('dragstart', (e) => e.preventDefault());
-        // جایگزین غیردو-klic برای درگ: کیبورد
-        v.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') { e.preventDefault(); this.next(); }
-            if (e.key === 'ArrowRight') { e.preventDefault(); this.prev(); }
-        });
-    }
-
-    onDown(e) {
-        if (this.pointerId !== null) return;
-        this.pointerId = e.pointerId;
-        this.dragging = true;
-        this.viewport.classList.add('is-dragging');
-        if (this.tween) { this.tween.kill(); this.tween = null; }
-        this.px = e.clientX;
-        this.history = [this.x];
-        this.viewport.setPointerCapture && this.viewport.setPointerCapture(e.pointerId);
-    }
-
-    onMove(e) {
-        if (!this.dragging || e.pointerId !== this.pointerId) return;
-        e.preventDefault(); // اسکرول عمودی اسکرول‌بار دست‌نخورده (touch-action: pan-y)
-        const dx = e.clientX - this.px;
-        this.px = e.clientX;
-        this.tx += dx;
-        const now = performance.now();
-        this.history.push([now, this.tx]);
-        while (this.history.length > 2 && now - this.history[0][0] > 100) this.history.shift();
-    }
-
-    onUp(e) {
-        if (e.pointerId === undefined || e.pointerId === this.pointerId) this.release();
-    }
-
-    release() {
-        if (!this.dragging) return;
-        this.dragging = false;
-        this.pointerId = null;
-        this.viewport.classList.remove('is-dragging');
-        // اینرسی (px/ms) از تاریخچه درگ + پرتاب
-        let v = 0;
-        if (this.history.length >= 2) {
-            const [t0, x0] = this.history[0];
-            const [t1, x1] = this.history[this.history.length - 1];
-            if (t1 - t0 > 0) v = (x1 - x0) / (t1 - t0);
-        }
-        const projected = this.tx + v * 280;
-        // کارتی که در موقعیتِ برآوردشده به مرکز نزدیک‌تر است
-        let best = 0, bestD = Infinity;
-        for (let j = 0; j < this.slides.length; j++) {
-            const baseCx = this.centerOf(this.slides[j]) - this.x; // موقعیت بدون ترنسفورم رد
-            const d = Math.abs(baseCx + projected - this.halfCx);
-            if (d < bestD) { bestD = d; best = j; }
-        }
-        const tX = this.x + this.halfCx - this.centerOf(this.slides[best]);
-        if (this.reduced || typeof gsap === 'undefined') {
-            this.x = this.tx = tX;
-        } else {
-            this.tween = gsap.to(this, { tx: tX, duration: 0.85, ease: 'power3.out' });
-        }
-    }
-
-    apply() {
-        this.track.style.transform = `translate3d(${this.x}px,0,0)`;
-        const n = this.n;
-        for (let j = 0; j < this.slides.length; j++) {
-            const el = this.slides[j];
-            let t = (this.centerOf(el) - this.halfCx) / this.step;
-            // wrap: t را به بازه ±(n/2+1) نگه می‌داریم تا کپی‌ها درست شبیه‌سازی شوند
-            while (t > n / 2 + 1) t -= n;
-            while (t < -(n / 2 + 1)) t += n;
-            const at = Math.min(1, Math.abs(t));
-            // کلید حس سه بعدی: کارت میانی درشت و جلو، کناری‌ها چرخیده به سمت مرکز و عقب
-            const scale = 1 - at * 0.3;
-            const z = -at * 150;
-            const rot = -t * 24;
-            const op = 1 - at * 0.4;
-            el.style.transform = `translate3d(0,0,${z}px) rotateY(${rot}deg) scale(${scale})`;
-            el.style.opacity = op;
-            el.style.zIndex = String(1000 - Math.round(at * 200));
-        }
-        const idx = this.index();
+        const idx = ((Math.round(this.currentPos) % this.total) + this.total) % this.total;
         if (idx !== this.activeIdx) {
             this.activeIdx = idx;
             this.onIndex(idx);
         }
     }
 
-    loop = () => {
-        // wrap: اگر بسیار دور شد، دقیقاً یک دوره (کپی کامل) برگرد — محتوا یکسان، بی‌درز
-        if (Math.abs(this.x) > this.cycleW * 2) {
-            const shiftPx = Math.round(this.x / this.cycleW) * this.cycleW;
-            this.x -= shiftPx;
-            this.tx -= shiftPx;
+    stepPhysics(now) {
+        if (!this.lastTime) this.lastTime = now;
+        const dt = Math.min(0.032, Math.max(0.001, (now - this.lastTime) / 1000));
+        this.lastTime = now;
+
+        if (this.isDragging) {
+            // دنبال‌کردن حسی و تنگِ انگشت کاربر
+            const followFactor = 1 - Math.exp(-26 * dt);
+            const prevPos = this.currentPos;
+            this.currentPos += (this.targetPos - this.currentPos) * followFactor;
+            this.velocity = (this.currentPos - prevPos) / dt;
+            this.renderFrame();
+            this.rafId = requestAnimationFrame(t => this.stepPhysics(t));
+            return;
         }
-        // نرمی: دنبال‌کردن lerp به سمت tx (کشِ نرم در درگ + سقفِ اسنپ)
-        this.x += (this.tx - this.x) * (this.dragging ? 0.4 : 0.15);
-        if (Math.abs(this.tx - this.x) < 0.05) this.x = this.tx;
-        this.apply();
-        this.rafId = requestAnimationFrame(() => this.loop());
+
+        if (this.reduced) {
+            this.currentPos = this.targetPos;
+            this.velocity = 0;
+            this.renderFrame();
+            this.rafId = null;
+            this.lastTime = 0;
+            return;
+        }
+
+        // فنر منطبق بر مرجع (Framer Motion style)
+        const displacement = this.currentPos - this.targetPos;
+        const springForce = -CURVE_CFG.stiffness * displacement;
+        const dampingForce = -CURVE_CFG.damping * this.velocity;
+        const acceleration = (springForce + dampingForce) / CURVE_CFG.mass;
+
+        this.velocity += acceleration * dt;
+        this.currentPos += this.velocity * dt;
+        this.renderFrame();
+
+        if (Math.abs(this.targetPos - this.currentPos) < 0.0015 && Math.abs(this.velocity) < 0.008) {
+            this.currentPos = this.targetPos;
+            this.velocity = 0;
+            this.renderFrame();
+            this.rafId = null;
+            this.lastTime = 0;
+        } else {
+            this.rafId = requestAnimationFrame(t => this.stepPhysics(t));
+        }
+    }
+
+    startLoop() {
+        if (this.rafId == null) {
+            this.lastTime = performance.now();
+            this.rafId = requestAnimationFrame(t => this.stepPhysics(t));
+        }
+    }
+
+    goTo(newTarget) {
+        if (this.total <= 1) return;
+        this.targetPos = newTarget;
+        this.startLoop();
+    }
+
+    move(direction) {
+        this.goTo(Math.round(this.targetPos) + direction);
+    }
+
+    next() { this.move(1); }
+    prev() { this.move(-1); }
+
+    bindEvents() {
+        const s = this.stage;
+        s.addEventListener('pointerdown', this.onPointerDown);
+        s.addEventListener('pointermove', this.onPointerMove);
+        s.addEventListener('pointerup', this.endDrag);
+        s.addEventListener('pointercancel', this.endDrag);
+        s.addEventListener('click', this.onStageClick, true);
+        s.addEventListener('dragstart', this.onDragStart);
+        s.addEventListener('wheel', this.onWheel, { passive: false });
+        s.addEventListener('keydown', this.onKeydown);
+    }
+
+    onPointerDown = (e) => {
+        if (this.total <= 1) return;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        if (e.target.closest('button')) return;
+
+        this.isDragging = true;
+        this.pointerId = e.pointerId;
+        this.startX = e.clientX;
+        this.startY = e.clientY;
+        this.lastPointerX = e.clientX;
+        this.lastPointerTime = performance.now();
+        this.pointerVelocityX = 0;
+        this.dragStartPos = this.currentPos;
+        this.targetPos = this.currentPos;
+        this.suppressClick = false;
+
+        this.stage.classList.add('is-dragging');
+        this.startLoop();
     };
+
+    onPointerMove = (e) => {
+        if (!this.isDragging || e.pointerId !== this.pointerId) return;
+
+        const now = performance.now();
+        const dx = e.clientX - this.startX;
+        const dy = e.clientY - this.startY;
+        const draggedDistance = Math.hypot(dx, dy);
+
+        if (draggedDistance > 7) {
+            this.suppressClick = true;
+            if (!this.stage.hasPointerCapture || !this.stage.hasPointerCapture(e.pointerId)) {
+                this.stage.setPointerCapture && this.stage.setPointerCapture(e.pointerId);
+            }
+        }
+
+        const dtMs = Math.max(1, now - this.lastPointerTime);
+        const instantVx = (e.clientX - this.lastPointerX) / dtMs; // px per ms
+        this.pointerVelocityX = this.pointerVelocityX * 0.65 + instantVx * 0.35;
+        this.lastPointerX = e.clientX;
+        this.lastPointerTime = now;
+
+        const dragSpan = Math.max(160, this.resolvedCfg.cardWidth * this.resolvedCfg.spacingRatio);
+        this.targetPos = this.dragStartPos - dx / dragSpan;
+        this.startLoop();
+    };
+
+    endDrag = (e) => {
+        if (!this.isDragging) return;
+        if (e && this.pointerId != null && e.pointerId != null && e.pointerId !== this.pointerId) return;
+
+        this.isDragging = false;
+        this.pointerId = null;
+        this.stage.classList.remove('is-dragging');
+
+        const dragSpan = Math.max(160, this.resolvedCfg.cardWidth * this.resolvedCfg.spacingRatio);
+        // تبدیل سرعت pointer (px/ms) به سرعت شاخه‌ای (کارت بر ثانیه)
+        const releaseCardVelocity = (-this.pointerVelocityX * 1000) / dragSpan;
+        this.velocity = releaseCardVelocity;
+
+        // برآورد مکانیزم فرود پرتاب
+        const projected = this.targetPos + releaseCardVelocity * 0.16;
+        const maxJump = Math.round(this.dragStartPos) + (releaseCardVelocity > 0 ? 2 : -2);
+        let snapped = Math.round(projected);
+
+        // اگر فلیک سریع حتی با فاصله کم بود، یک کارت جلو برو
+        const totalDx = this.lastPointerX - this.startX;
+        if (snapped === Math.round(this.dragStartPos) && Math.abs(this.pointerVelocityX) > 0.35 && Math.abs(totalDx) > 18) {
+            snapped = Math.round(this.dragStartPos) + (totalDx < 0 ? 1 : -1);
+        }
+
+        if (Math.abs(snapped - Math.round(this.dragStartPos)) > 2) {
+            snapped = maxJump;
+        }
+
+        this.targetPos = snapped;
+        this.startLoop();
+    };
+
+    // کلیک هنگام/بعد از درگ خفه می‌شود؛ کلیک روی کارت کناری → مرکز شدن آن
+    onStageClick = (e) => {
+        if (this.suppressClick) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.suppressClick = false;
+            return;
+        }
+        const cardEl = e.target.closest('.curve-carousel__card');
+        if (!cardEl) return;
+        const vIdx = Number(cardEl.dataset.virtualIdx);
+        if (Number.isNaN(vIdx)) return;
+        const diff = this.wrapDiff(vIdx - this.currentPos, this.renderCount);
+        if (Math.abs(diff) >= 0.45) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.goTo(Math.round(this.currentPos + diff));
+        }
+    };
+
+    onDragStart = (e) => e.preventDefault();
+
+    onWheel = (e) => {
+        if (this.total <= 1) return;
+        const isHorizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY) || e.shiftKey;
+        if (!isHorizontal) return;
+        const delta = e.deltaX || e.deltaY;
+        if (Math.abs(delta) < 8) return;
+        e.preventDefault();
+        const now = performance.now();
+        if (this.wheelCooldown && now - this.wheelCooldown < 260) return;
+        this.wheelCooldown = now;
+        this.move(delta > 0 ? 1 : -1);
+    };
+
+    onKeydown = (e) => {
+        if (e.key === 'ArrowLeft') { e.preventDefault(); this.next(); }
+        if (e.key === 'ArrowRight') { e.preventDefault(); this.prev(); }
+    };
+
+    onResize = () => {
+        this.resolvedCfg = this.resolveSizing();
+        this.applySizing();
+        this.renderFrame();
+    };
+
+    destroy() {
+        if (this.rafId != null) cancelAnimationFrame(this.rafId);
+        this.rafId = null;
+        const s = this.stage;
+        s.removeEventListener('pointerdown', this.onPointerDown);
+        s.removeEventListener('pointermove', this.onPointerMove);
+        s.removeEventListener('pointerup', this.endDrag);
+        s.removeEventListener('pointercancel', this.endDrag);
+        s.removeEventListener('click', this.onStageClick, true);
+        s.removeEventListener('dragstart', this.onDragStart);
+        s.removeEventListener('wheel', this.onWheel);
+        s.removeEventListener('keydown', this.onKeydown);
+        window.removeEventListener('resize', this.onResize);
+    }
 }
 
 // Load instructors from API
@@ -567,79 +740,98 @@ async function loadInstructorsFromAPI() {
         if (!container) return;
 
         hideSkeletons('instructorsContainer', 'skeleton-instructor-wrapper');
+        container.classList.remove('is-skeleton');
 
-        if (list.length === 0) {
-            container.innerHTML = '<div class="famo-empty-message">استادی یافت نشد</div>';
-            return;
-        }
-
-        const viewport = container.closest('.drag-carousel-viewport');
+        const root = container.closest('.curve-carousel');
         const dotsEl = document.getElementById('instCarouselDots');
         const prevBtn = document.getElementById('instCarouselPrev');
         const nextBtn = document.getElementById('instCarouselNext');
 
         // تعداد کمتر از ۳: گرید ساده (بدون کاروسل)
-        if (list.length < 3 || !viewport) {
-            viewport?.classList.add('drag-carousel--off');
-            container.innerHTML = list.map(instructor => `<div class="drag-carousel-slide drag-carousel-slide--grid">${instructorCardHtml(instructor)}</div>`).join('');
-            if (window.refreshLucideIcons) window.refreshLucideIcons(container);
-            if (dotsEl || prevBtn || nextBtn) {
-                dotsEl && (dotsEl.hidden = true);
-                prevBtn && (prevBtn.hidden = true);
-                nextBtn && (nextBtn.hidden = true);
-            }
+        if (list.length === 0) {
+            if (root) root.classList.add('curve-carousel--off-mode');
+            container.innerHTML = '<div class="famo-empty-message">استادی یافت نشد</div>';
+            dotsEl && (dotsEl.hidden = true);
+            prevBtn && (prevBtn.hidden = true);
+            nextBtn && (nextBtn.hidden = true);
             return;
         }
 
-        viewport?.classList.remove('drag-carousel--off');
-        if (dotsEl || prevBtn || nextBtn) {
-            dotsEl && (dotsEl.hidden = false);
-            prevBtn && (prevBtn.hidden = false);
-            nextBtn && (nextBtn.hidden = false);
-        }
+        // حلقه بی‌درز مثل مرجع: کپی‌های لازم برای پوشش wrap (حداقل ~۷ کارت)
+        const total = list.length;
+        const repeatMultiplier = total < 5 ? Math.ceil(7 / total) : 1;
+        const renderCount = Math.max(total * repeatMultiplier, 7);
 
-        // ۳ کپی از لیست برای حلقه بی‌درز
-        const copies = [];
-        for (let c = 0; c < DRAG_COPIES; c++) copies.push(...list);
-        container.innerHTML = copies
-            .map(i => `<div class="drag-carousel-slide">${instructorCardHtml(i)}</div>`)
-            .join('');
+        const cards = [];
+        for (let j = 0; j < renderCount; j += 1) {
+            const idx = j % total;
+            cards.push(
+                `<div class="curve-carousel__card" data-virtual-idx="${j}" data-item-idx="${idx}">${instructorCardHtml(list[idx])}</div>`
+            );
+        }
+        container.innerHTML = cards.join('');
         if (window.refreshLucideIcons) window.refreshLucideIcons(container);
 
-        // نقاط دات‌ها بر اساس تعداد واقعی اساتید
-        if (dotsEl) {
-            dotsEl.innerHTML = list.map((inst, i) =>
-                `<button type="button" class="drag-carousel-dot" data-inst-index="${i}" aria-label="حالت ${i + 1}: ${esc(inst.name)}"></button>`
-            ).join('');
+        const useCarousel = total >= 3 && root;
+        if (!useCarousel) {
+            if (root) root.classList.add('curve-carousel--off-mode');
+            container.innerHTML = list.map(inst => `<div class="curve-carousel__card">${instructorCardHtml(inst)}</div>`).join('');
+            if (window.refreshLucideIcons) window.refreshLucideIcons(container);
+            dotsEl && (dotsEl.hidden = true);
+            prevBtn && (prevBtn.hidden = true);
+            nextBtn && (nextBtn.hidden = true);
+            return;
         }
 
+        root.classList.remove('curve-carousel--off-mode');
+        dotsEl && (dotsEl.hidden = false);
+        prevBtn && (prevBtn.hidden = false);
+        nextBtn && (nextBtn.hidden = false);
+
         if (instCarousel) { instCarousel.destroy(); instCarousel = null; }
-        instCarousel = new InstructorDragCarousel(container, {
+
+        // نقاط: طبق مرجع حداکثر ۱۲ تا
+        if (dotsEl) {
+            dotsEl.innerHTML = total > 1 && total <= 12
+                ? list.map((inst, i) => `<button type="button" class="curve-carousel__dot" data-curve-dot="${i}" aria-label="اسلاید ${i + 1}: ${esc(inst.name)}"></button>`).join('')
+                : '';
+        }
+
+        instCarousel = new InstructorsCurveCarousel(root, {
+            total,
             onIndex: (idx) => {
-                if (dotsEl) {
-                    dotsEl.querySelectorAll('.drag-carousel-dot').forEach(d => {
-                        d.classList.toggle('is-active', Number(d.dataset.instIndex) === idx);
-                    });
-                }
+                if (!dotsEl) return;
+                dotsEl.querySelectorAll('[data-curve-dot]').forEach(d => {
+                    d.classList.toggle('is-active', Number(d.dataset.curveDot) === idx);
+                });
             },
         });
-        instCarousel.reversed = true; // RTL: چرخش جهت‌کلید حرکت با کلید به سمت وفيزیکی糸
-        prevBtn?.addEventListener('click', () => instCarousel.prev());
-        nextBtn?.addEventListener('click', () => instCarousel.next());
-        dotsEl?.addEventListener('click', (e) => {
-            const dot = e.target.closest('.drag-carousel-dot');
-            if (dot) instCarousel.go(Number(dot.dataset.instIndex));
+
+        prevBtn.disabled = false;
+        nextBtn.disabled = false;
+        prevBtn && prevBtn.addEventListener('click', () => instCarousel.prev());
+        nextBtn && nextBtn.addEventListener('click', () => instCarousel.next());
+        dotsEl && dotsEl.addEventListener('click', (e) => {
+            const dot = e.target.closest('[data-curve-dot]');
+            if (dot && instCarousel) {
+                const targetIdx = Number(dot.dataset.curveDot);
+                const currentMod = instCarousel.activeIdx;
+                const delta = instCarousel.wrapDiff(targetIdx - currentMod, instCarousel.total);
+                instCarousel.goTo(Math.round(instCarousel.targetPos) + delta);
+            }
         });
     } catch (error) {
         console.error('Error loading instructors:', error);
         const container = document.getElementById('instructorsContainer');
         if (container) {
             hideSkeletons('instructorsContainer', 'skeleton-instructor-wrapper');
+            container.classList.remove('is-skeleton');
+            const root2 = container.closest('.curve-carousel');
+            root2 && root2.classList.add('curve-carousel--off-mode');
             container.innerHTML = '<div class="famo-empty-message">خطا در بارگذاری اساتید</div>';
         }
     }
 }
-
 // Load all data on page load
 onReady(() => {
     loadCoursesFromAPI();
