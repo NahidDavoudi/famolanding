@@ -329,7 +329,7 @@ function instructorCardHtml(instructor) {
     return `
         <article class="inst-card">
             ${avatarUrl
-                ? `<img class="inst-avatar" src="${esc(avatarUrl)}" alt="${esc(instructor.name)}" width="112" height="112" loading="lazy">`
+                ? `<img class="inst-avatar" src="${esc(avatarUrl)}" alt="${esc(instructor.name)}" loading="lazy">`
                 : `<div class="inst-avatar inst-avatar-ph" aria-hidden="true">${esc(initialLetter)}</div>`}
             <h3 class="inst-name">${esc(instructor.name)}</h3>
             <p class="inst-title">${esc(instructor.title)}</p>
@@ -862,7 +862,7 @@ function animateCounter(elementId, finalValue, suffix = '') {
 // مقادیر آمار: JS منبع اصلی است؛ هر دو عدد باید دقیقاً یکی باشند.
 // pending: عدد نهایی قبولی/استاد منتظر تأیید کارفرما (HTML فعلی: 500+ قبولی، 15 استاد؛ JS قدیمی: 200 و 8).
 // تا زمان تأیید، انیمیشن شمارنده اجرا نمی‌شود تا HTML هرگز به ۰ یا مقدار نادرست نرود.
-const STATS = { students: null, teachers: null };
+const STATS = { students: 200, teachers: 10 };
 
 // Intersection Observer for stats animation with GSAP
 const statsSection = document.querySelector('#home');
@@ -880,7 +880,7 @@ if (statsSection) {
 
                 setTimeout(() => {
                     animateCounter('years-counter', 7);
-                    if (STATS.students !== null) animateCounter('students-counter', STATS.students, '+');
+                    if (STATS.students !== null) animateCounter('students-counter', STATS.students);
                     if (STATS.teachers !== null) animateCounter('teachers-counter', STATS.teachers);
                 }, 500);
 

@@ -110,7 +110,7 @@ function renderInstructorCard(instructor) {
     return `
         <article class="inst-card">
             ${avatarUrl
-                ? `<img class="inst-avatar" src="${esc(avatarUrl)}" alt="${esc(instructor.name)}" width="112" height="112" loading="lazy">`
+                ? `<img class="inst-avatar" src="${esc(avatarUrl)}" alt="${esc(instructor.name)}" loading="lazy">`
                 : `<div class="inst-avatar inst-avatar-ph" aria-hidden="true">${esc(initial)}</div>`}
             <h3 class="inst-name">${esc(instructor.name)}</h3>
             <p class="inst-title">${esc(instructor.title)}</p>

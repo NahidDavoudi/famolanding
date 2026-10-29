@@ -474,7 +474,7 @@
 
 
 /* ==================== ┌®ÏºÏ▒Ï¬ ÏºÏ│ÏºÏ¬█îÏ» (Ï½┘àÏ▒: ÏÁ┘üÏ¡┘ç ÏºÏÁ┘ä█î + ÏÁ┘üÏ¡┘ç Ï¬█î┘à) ==================== */
-.inst-card {
+/* .inst-card {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -486,13 +486,13 @@
     box-shadow: 0 6px 20px -8px rgba(68, 93, 132, 0.18);
     text-align: center;
     transition: box-shadow 0.3s ease;
-}
+} */
 
 .inst-card:hover {
     box-shadow: 0 14px 30px -10px rgba(68, 93, 132, 0.28);
 }
 
-.inst-avatar {
+/* .inst-avatar {
     width: 112px;
     height: 112px;
     border-radius: 9999px;
@@ -500,7 +500,7 @@
     flex-shrink: 0;
     background: #ffffff;
     box-shadow: 0 0 0 4px #E2D9C6, 0 8px 18px -6px rgba(68, 93, 132, 0.35);
-}
+} */
 
 @media (min-width: 768px) {
     .inst-avatar {
@@ -509,18 +509,44 @@
     }
 }
 
+.inst-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #ffffff;
+    border: 1px solid #E2D9C6;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 6px 20px -8px rgba(68, 93, 132, 0.18);
+    text-align: center;
+    padding-bottom: 1.5rem;
+}
+
+.inst-avatar {
+    width: 100%;
+    height: 225px;
+    object-fit: cover;
+    object-position: top center;
+    display: block;
+    -webkit-mask-image: linear-gradient(to bottom, #000 68%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 68%, transparent 100%);
+}
+
+/* حالت بدون عکس: بلاک پوزر با حرف اول اسم */
 .inst-avatar-ph {
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #E2D9C6, #d4c9b2);
     color: #445D84;
-    font-size: 2.5rem;
+    font-size: 2.75rem;
     font-weight: 700;
 }
 
 .inst-name {
-    margin-top: 1rem;
+    margin: -0.65rem 1.25rem 0;
+    position: relative;
+    z-index: 1;
     font-size: 1.125rem;
     font-weight: 700;
     color: #445D84;
@@ -528,26 +554,27 @@
 }
 
 .inst-title {
-    margin-top: 0.25rem;
+    margin: 0.25rem 1.25rem 0;
     font-size: 0.875rem;
     font-weight: 500;
     color: #736158;
 }
 
 .inst-bio {
-    margin-top: 0.75rem;
+    margin: 0.75rem 1.25rem 0;
     font-size: 0.875rem;
     color: #4b5563;
-    line-height: 1.8;
+    line-height: 1.9;
+    text-align: justify;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
 
 .inst-socials {
     margin-top: auto;
-    padding-top: 0.75rem;
+    padding: 0.875rem 1.25rem 0;
     display: flex;
     justify-content: center;
     gap: 0.5rem;
@@ -576,8 +603,19 @@
     outline-offset: 2px;
 }
 
+/* width کارت در کاروسل از نفس کانفیگ JS می‌آید (320px دسکتاپ / 262px موبایل) */
+.curve-carousel__card {
+    width: var(--curve-card-w, 320px);
+}
+
+
+
 
 /* ==================== کاروسل سه‌بعدی اساتید (پورت inspiration/CurveCarousel.js، پالت فامو) ==================== */
+#team {
+    overflow-x: clip;
+}
+
 #team .curve-carousel {
     position: relative;
     width: 100%;
@@ -651,8 +689,8 @@
     box-shadow: 0 24px 54px -14px rgba(68, 93, 132, 0.38);
 }
 
-.curve-carousel__card.is-center .inst-avatar {
-    box-shadow: 0 0 0 4px #E2D9C6, 0 10px 22px -6px rgba(68, 93, 132, 0.45);
+.curve-carousel__card.is-center .inst-card {
+    border-color: #bbccda;
 }
 
 /* لبه‌های شیشه‌ای محو */

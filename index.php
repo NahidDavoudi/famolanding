@@ -65,15 +65,15 @@
                             </h3>
                             <div class="grid grid-cols-3 gap-2 text-center divide-x divide-x-reverse divide-white/10">
                                 <div class="px-1">
-                                    <div class="text-xl font-bold mb-1 text-white" id="years-counter">7</div>
+                                    <div class="text-xl font-bold mb-1 text-white"><span id="years-counter">7</span><span class="text-[#E2D9C6] mr-0.5">+</span></div>
                                     <div class="text-white/70 text-xs">سال تجربه</div>
                                 </div>
                                 <div class="px-1">
-                                    <div class="text-xl font-bold mb-1 text-white" id="students-counter">500+</div>
+                                    <div class="text-xl font-bold mb-1 text-white"><span id="students-counter">500</span><span class="text-[#E2D9C6] mr-0.5">+</span></div>
                                     <div class="text-white/70 text-xs">قبولی کنکور</div>
                                 </div>
                                 <div class="px-1">
-                                    <div class="text-xl font-bold mb-1 text-white" id="teachers-counter">15</div>
+                                    <div class="text-xl font-bold mb-1 text-white"><span id="teachers-counter">15</span><span class="text-[#E2D9C6] mr-0.5">+</span></div>
                                     <div class="text-white/70 text-xs">استاد برتر</div>
                                 </div>
                             </div>
@@ -202,22 +202,22 @@
                             <!-- Skeleton Loaders -->
                             <div class="skeleton-instructor-wrapper">
                                 <div class="famo-inst-skel" aria-hidden="true">
-                                    <div class="skeleton skeleton-pulse w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-200 mx-auto"></div>
-                                    <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-4"></div>
+                                    <div class="skeleton skeleton-pulse w-full" style="height:225px;"></div>
+                                    <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-2"></div>
                                     <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
                                 </div>
                             </div>
                             <div class="skeleton-instructor-wrapper">
                                 <div class="famo-inst-skel" aria-hidden="true">
-                                    <div class="skeleton skeleton-pulse w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-200 mx-auto"></div>
-                                    <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-4"></div>
+                                    <div class="skeleton skeleton-pulse w-full" style="height:225px;"></div>
+                                    <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-2"></div>
                                     <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
                                 </div>
                             </div>
                             <div class="skeleton-instructor-wrapper">
                                 <div class="famo-inst-skel" aria-hidden="true">
-                                    <div class="skeleton skeleton-pulse w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-200 mx-auto"></div>
-                                    <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-4"></div>
+                                    <div class="skeleton skeleton-pulse w-full" style="height:225px;"></div>
+                                    <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-2"></div>
                                     <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
                                 </div>
                             </div>
@@ -250,23 +250,64 @@
     </section>
 
     <!-- About Section -->
-    <section id="about" class="py-20 px-4 bg-white">
-        <div class="container mx-auto max-w-5xl">
-            <div class="text-center mb-10">
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3 sm:mb-4">درباره آموزشگاه فامو
-                </h2>
-            </div>
+<section id="about" class="relative py-20 px-4 bg-white overflow-hidden">
+    <!-- تصویر پس‌زمینه -->
+    <div class="absolute inset-0 z-0">
+        <!-- <img src="assets/images/about_us.webp"
+             alt="آموزشگاه فامو"
+             width="1920" height="1080"
+             loading="lazy"
+             decoding="async"
+             class="w-full h-full object-cover opacity-100"> -->
+        <!-- لایه نیمه‌شفاف برای خوانایی متن -->
+        <div class="absolute inset-0 bg-white/85"></div>
+    </div>
+
+    <div class="container mx-auto max-w-6xl relative z-10">
+        <div class="text-center mb-10">
+            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3 sm:mb-4">
+                درباره آموزشگاه فامو
+            </h2>
+            <div class="w-24 h-1 bg-gradient-to-r from-[#E2D9C6] to-[#445D84] mx-auto rounded-full"></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <!-- متن -->
             <div class="text-gray-700 leading-loose text-base sm:text-lg space-y-5 text-justify">
                 <p>
-                    فامو یک موسسه آموزشی کنکور پیشرو در بابل است که با بهره‌گیری از تجربه نخبگان علمی، از جمله دانشجویان
-                    برتر
-                    رشته‌های پزشکی و مهندسی و اساتید مدال‌آور المپیاد، به هدایت دانش‌آموزان می‌پردازد. این مجموعه با
-                    تکیه بر هفت سال سابقه درخشان در مسیر قبولی دانشگاه‌های معتبر، خدماتی جامع شامل برنامه‌ریزی
-                    شخصی‌سازی‌شده و رفع اشکال دقیق تمامی دروس را برای مقاطع راهنمایی و دبیرستان فراهم می‌آورد.
+                    <span class="font-bold text-[#445D84]">فامو</span> یک موسسه آموزشی کنکور پیشرو در بابل است که با
+                    بهره‌گیری از تجربه نخبگان علمی، از جمله دانشجویان برتر رشته‌های پزشکی و مهندسی و اساتید مدال‌آور
+                    المپیاد، به هدایت دانش‌آموزان می‌پردازد.
                 </p>
+
+                <p>
+                    این مجموعه با تکیه بر <strong class="text-[#445D84]">هفت سال سابقه درخشان</strong> در مسیر قبولی
+                    دانشگاه‌های معتبر، خدماتی جامع شامل برنامه‌ریزی شخصی‌سازی‌شده و رفع اشکال دقیق تمامی دروس را برای
+                    مقاطع راهنمایی و دبیرستان فراهم می‌آورد.
+                </p>
+
+                <!-- <p>
+                    هدف ما ایجاد مسیری روشن و مطمئن برای دانش‌آموزان در جهت رسیدن به موفقیت تحصیلی و ورود به
+                    دانشگاه‌های برتر کشور است.
+                </p> -->
+
+                
+            </div>
+
+            <!-- تصویر -->
+            <div class="relative">
+                <div class="rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
+                    <img src="assets/images/about_us.webp"
+                         alt="محیط آموزشگاه فامو"
+                         width="800" height="600"
+                         loading="lazy"
+                         decoding="async"
+                         class="w-full h-auto object-cover">
+                </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
     <!-- Services Section -->
     <section id="services" class="py-20 px-4 gradient-bg-light">

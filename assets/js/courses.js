@@ -145,16 +145,17 @@ function renderCourseCard(course) {
             ${featuresBlock}
 
             <div class="course-footer">
-                <div class="course-price-box">
-                    <span class="course-price-label">هزینه دوره</span>
-                    ${hasPrice
-                        ? `<span class="course-price-value">${esc(priceText)}${priceUnit ? `<span class="course-price-unit">${esc(priceUnit)}</span>` : ''}</span>`
-                        : `<span class="course-price-value">تماس بگیرید</span>`}
-                </div>
+                
                 <a href="${DASHBOARD_URL}/" class="course-cta">مشاوره و ثبت‌نام</a>
             </div>
         </div>
     </article>`;
+    // <div class="course-price-box">
+    //                 <span class="course-price-label">هزینه دوره</span>
+    //                 ${hasPrice
+    //                     ? `<span class="course-price-value">${esc(priceText)}${priceUnit ? `<span class="course-price-unit">${esc(priceUnit)}</span>` : ''}</span>`
+    //                     : `<span class="course-price-value">تماس بگیرید</span>`}
+    //             </div>
 }
 
 function updateCourseSchema(courses) {
