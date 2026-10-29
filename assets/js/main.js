@@ -7,21 +7,28 @@ function svgIcon(name, cls = '') {
     return `<i class="icon${c}" data-lucide="${icon}" aria-hidden="true"></i>`;
 }
 
-// Format price: Persian digits, thousands separator, "تومان" suffix
+// Format price: Persian digits + thousands separator (unit is added in markup)
+// e.g. 2,500,000 -> "۲,۵۰۰,۰۰۰"
 function formatPrice(value) {
     if (value === null || value === undefined || value === '') return '';
     const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
-    let str = String(value);
+    let str = String(value).trim();
     // Convert Persian/Arabic digits to English
     str = str
         .replace(/[۰-۹]/g, d => persianDigits.indexOf(d))
         .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
     const digits = str.replace(/\D/g, '');
     if (!digits) return String(value); // keep non-numeric values (e.g. "تماس بگیرید") as is
-    // Thousands separator
+    // Thousands separator (groups of three)
     const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    // Convert back to Persian digits + toman
-    return grouped.replace(/\d/g, d => persianDigits[+d]) + ' تومان';
+    // Convert back to Persian digits
+    return grouped.replace(/\d/g, d => persianDigits[+d]);
+}
+
+// Is the course price a real number? (so we know whether to show the "تومان" unit)
+function isNumericPrice(value) {
+    if (value === null || value === undefined || value === '') return false;
+    return /\d/.test(String(value).replace(/[۰-۹]/g, '0').replace(/[٠-٩]/g, '0'));
 }
 
 // FontAwesome → SVG sprite mapping for dynamic course icons
@@ -58,7 +65,6 @@ function faToSvg(faClass) {
 }
 
 // Initialize Swiper instances (will be updated after data loads)
-let coursesSwiper = null;
 let instructorsSwiper = null;
 let supportSwiper = null;
 
@@ -156,92 +162,61 @@ async function loadCoursesFromAPI() {
         hideSkeletons('coursesContainer', 'skeleton-course-wrapper');
 
         if (!result.data || result.data.length === 0) {
-            container.innerHTML = '<div class="swiper-slide"><p class="text-center text-gray-500 py-8">دوره‌ای یافت نشد</p></div>';
+            container.innerHTML = '<p class="text-center text-gray-500 py-8 col-span-full">دوره‌ای یافت نشد</p>';
             return;
         }
 
-        container.innerHTML = result.data.map(course => `
-            <div class="swiper-slide">
-                <div class="course-card md:w-full h-48 sm:h-40 md:h-auto rounded-2xl flex items-center justify-center relative overflow-hidden min-h-[200px] cursor-pointer"
-                     tabindex="0" role="button" aria-expanded="false" aria-controls="course-desc-${course.id}"
-                     data-expanded="false"
-                     data-course-id="${course.id}" aria-label="${course.name} - برای دیدن جزئیات Enter بزنید">
-                    <!-- Background -->
-                    <div class="course-background absolute inset-0" 
-                         style="background: linear-gradient(135deg, ${course.gradient_color_from}, ${course.gradient_color_to});">
-                        ${course.background_image_url ? `
-                            <div class="absolute inset-0 bg-cover bg-center opacity-30" style="background-image: url('https://api.famoacademy.ir/uploads/${course.background_image_url}');"></div>
-                        ` : ''}
-                    </div>
-                    
-                    <!-- Overlay for blur effect -->
-                    <div class="course-overlay absolute inset-0 bg-black/40 backdrop-blur-sm opacity-0 transition-opacity duration-500 z-20"></div>
-                    
-                    <!-- Default Content (Icon and Name) -->
-                    <div class="course-content-default relative z-10 text-center p-4 transition-opacity duration-500">
-                        ${svgIcon(faToSvg(course.icon), 'icon--3xl text-white mb-3')}
-                        <h3 class="text-xl font-bold text-white">${course.name}</h3>
-                    </div>
-                    
-                    <!-- Expanded Content (Description and Price) -->
-                    <div class="course-content-expanded absolute inset-0 z-30 flex flex-col items-center justify-center p-6 opacity-0 transform translate-y-4 transition-all duration-500" id="course-desc-${course.id}">
-                        <div class="text-white text-center">
-                            ${course.description ? `
-                                <p class="text-sm sm:text-base mb-4 leading-relaxed">${course.description}</p>
-                            ` : ''}
-                            ${course.price ? `
-                                <div class="mt-4">
-                                    <span class="text-2xl sm:text-3xl font-bold">${formatPrice(course.price)}</span>
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                    
-                    <!-- Hint Text -->
-                    <div class="course-hint absolute bottom-2 left-0 right-0 text-center text-white/80 text-xs sm:text-sm z-10 transition-opacity duration-300">
-                        برای دیدن جزئیات کلیک کنید
+        container.innerHTML = result.data.map(course => {
+            const hasPrice = course.price !== null && course.price !== undefined && String(course.price).trim() !== '';
+            const priceText = hasPrice ? formatPrice(course.price) : '';
+            const priceUnit = hasPrice && isNumericPrice(course.price) ? 'تومان' : '';
+            const cardGradient = `linear-gradient(135deg, ${course.gradient_color_from || '#445D84'}, ${course.gradient_color_to || '#6D8B9E'})`;
+            const imageUrl = course.background_image_url
+                ? `https://api.famoacademy.ir/uploads/${course.background_image_url}`
+                : '';
+            const badgeBlock = course.badge_label
+                ? `<span class="course-badge">${course.badge_label}</span>`
+                : '';
+            const shortDescription = course.description || '';
+
+            return `
+            <a class="course-card group" href="pages/course.php#course-${course.id}"
+               aria-label="${course.name} - مشاهده جزئیات دوره">
+                <!-- تصویر دوره (بدون overlay) -->
+                <div class="course-image-wrapper" style="background: ${cardGradient};">
+                    ${imageUrl
+                        ? `<img src="${imageUrl}" alt="${course.name}" loading="lazy" class="course-image">`
+                        : `<div class="course-image-fallback">
+                                ${svgIcon(faToSvg(course.icon), 'icon--3xl text-white/90')}
+                           </div>`}
+                    ${badgeBlock}
+                </div>
+
+                <!-- نام دوره -->
+                <div class="course-body">
+                    <h3 class="course-name">${course.name}</h3>
+
+                    <!-- توضیح کوتاه دوره -->
+                    ${shortDescription ? `<p class="course-desc">${shortDescription}</p>` : ''}
+
+                    <!-- قیمت دوره (کاملاً زیر تصویر و نام، بدون کراپ شدن) -->
+                    <div class="course-footer">
+                        <span class="course-price-label">هزینه دوره</span>
+                        ${hasPrice
+                            ? `<span class="course-price-value">${priceText}${priceUnit ? `<span class="course-price-unit">${priceUnit}</span>` : ''}</span>`
+                            : `<span class="course-price-value course-price-value--text">تماس بگیرید</span>`}
                     </div>
                 </div>
-            </div>
-        `).join('');
+            </a>
+        `;
+        }).join('');
         if (window.refreshLucideIcons) window.refreshLucideIcons(container);
-
-        // Attach click event listeners to course cards
-        attachCourseCardListeners();
-
-        // Initialize or update Swiper
-        if (!coursesSwiper) {
-            coursesSwiper = new Swiper('.coursesSwiper', {
-                slidesPerView: 1,
-                spaceBetween: 20,
-                loop: true,
-                grabCursor: true,
-                pagination: {
-                    el: '.coursesSwiper .swiper-pagination',
-                    clickable: true,
-                },
-                navigation: {
-                    nextEl: '.coursesSwiper .swiper-button-next',
-                    prevEl: '.coursesSwiper .swiper-button-prev',
-                },
-                breakpoints: {
-                    640: {
-                        slidesPerView: 1,
-                    },
-                    1024: {
-                        slidesPerView: 1,
-                    },
-                },
-            });
-        } else {
-            coursesSwiper.update();
-        }
     } catch (error) {
         console.error('Error loading courses:', error);
         const container = document.getElementById('coursesContainer');
         if (container) {
             hideSkeletons('coursesContainer', 'skeleton-course-wrapper');
-            container.innerHTML = '<div class="swiper-slide"><p class="text-center text-gray-500 py-8">خطا در بارگذاری دوره‌ها</p></div>';
+            container.innerHTML = '<p class="text-center text-gray-500 py-8 col-span-full">خطا در بارگذاری دوره‌ها</p>';
         }
     }
 }
@@ -437,63 +412,6 @@ async function loadSupportersFromAPI() {
             container.innerHTML = '<div class="swiper-slide"><p class="text-center text-gray-500 py-8">خطا در بارگذاری پشتیبانان</p></div>';
         }
     }
-}
-
-// Function to attach click event listeners to course cards
-function attachCourseCardListeners() {
-    const courseCards = document.querySelectorAll('.course-card');
-
-    courseCards.forEach(card => {
-        // Remove existing listeners by cloning
-        const newCard = card.cloneNode(true);
-        card.parentNode.replaceChild(newCard, card);
-
-        newCard.addEventListener('click', function (e) {
-            // Prevent event bubbling if clicking on Swiper navigation
-            if (e.target.closest('.swiper-button-next') || e.target.closest('.swiper-button-prev') || e.target.closest('.swiper-pagination')) {
-                return;
-            }
-
-            const isExpanded = this.getAttribute('data-expanded') === 'true';
-            const overlay = this.querySelector('.course-overlay');
-            const defaultContent = this.querySelector('.course-content-default');
-            const expandedContent = this.querySelector('.course-content-expanded');
-            const hint = this.querySelector('.course-hint');
-
-            if (isExpanded) {
-                // Collapse: return to default state
-                this.setAttribute('data-expanded', 'false');
-                this.setAttribute('aria-expanded', 'false');
-                this.classList.remove('expanded');
-                if (overlay) overlay.style.opacity = '0';
-                if (defaultContent) defaultContent.style.opacity = '1';
-                if (expandedContent) {
-                    expandedContent.style.opacity = '0';
-                    expandedContent.style.transform = 'translateY(1rem)';
-                }
-                if (hint) hint.style.opacity = '1';
-            } else {
-                // Expand: show description and price
-                this.setAttribute('data-expanded', 'true');
-                this.setAttribute('aria-expanded', 'true');
-                this.classList.add('expanded');
-                if (overlay) overlay.style.opacity = '1';
-                if (defaultContent) defaultContent.style.opacity = '0';
-                if (expandedContent) {
-                    expandedContent.style.opacity = '1';
-                    expandedContent.style.transform = 'translateY(0)';
-                }
-                if (hint) hint.style.opacity = '0';
-            }
-        });
-
-        newCard.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                this.click();
-            }
-        });
-    });
 }
 
 // Load all data on page load
@@ -883,3 +801,4 @@ onReady(() => {
         setTimeout(() => clearInterval(checkGSAP), 5000);
     }
 });
+

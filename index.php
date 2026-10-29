@@ -7,6 +7,67 @@
     <title><?php echo $page_title; ?></title>
     <meta name="description" content="<?php echo $meta_description; ?>">
     <?php include 'layouts/head-common.php'; ?>
+    <!-- استایل کارت‌های دوره: تصویر در بالا، نام و قیمت زیر آن (بدون overlay روی تصویر) -->
+    <style>
+        #courses .coursesSwiper .swiper-slide {
+            height: auto;
+        }
+
+        #courses .course-card {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            position: relative;
+            outline: none;
+        }
+
+        #courses .course-card:focus-visible {
+            outline: 2px solid #445D84;
+            outline-offset: 3px;
+        }
+
+        #courses .course-image-wrapper {
+            flex: 0 0 auto;
+            background-color: #445D84;
+        }
+
+        #courses .course-image {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        #courses .course-badge {
+            position: absolute;
+            top: 0.75rem;
+            inset-inline-start: 0.75rem;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.95);
+            color: #445D84;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            box-shadow: 0 4px 10px rgba(68, 93, 132, 0.15);
+        }
+
+        #courses .course-body {
+            flex: 1 1 auto;
+        }
+
+        #courses .course-name {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        #courses .course-price-value {
+            font-variant-numeric: tabular-nums;
+        }
+    </style>
 </head>
 <body class="font-family text-gray-800">
     <!-- Header -->
@@ -85,55 +146,51 @@
             <div class="swiper coursesSwiper relative pb-12">
                 <div class="swiper-wrapper" id="coursesContainer">
                     <!-- Skeleton Loaders -->
-                    <div class="swiper-slide skeleton-course-wrapper">
-                        <div
-                            class="skeleton-course-card md:w-full h-48 sm:h-40 md:h-auto rounded-2xl flex items-center justify-center relative overflow-hidden min-h-[200px]">
-                            <div
-                                class="skeleton skeleton-pulse absolute inset-0 bg-gradient-to-r from-gray-300 to-gray-200">
-                            </div>
-                            <div class="relative z-10 text-center p-4">
-                                <div class="skeleton skeleton-pulse w-16 h-16 rounded-full bg-white/30 mx-auto mb-4">
+                    <div class="swiper-slide skeleton-course-wrapper h-auto">
+                        <div class="skeleton-course-card course-card-skeleton bg-white rounded-2xl border border-[#E2D9C6] shadow-lg overflow-hidden h-full">
+                            <div class="skeleton skeleton-pulse w-full h-44 sm:h-52 bg-gradient-to-r from-gray-200 to-gray-100"></div>
+                            <div class="px-4 py-4 sm:px-5 sm:py-5 flex items-start justify-between gap-3">
+                                <div class="space-y-2 w-full">
+                                    <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
+                                    <div class="skeleton skeleton-pulse h-3 w-1/3 bg-gray-100 rounded"></div>
                                 </div>
-                                <div class="skeleton skeleton-pulse h-6 w-32 bg-white/30 rounded mx-auto"></div>
+                                <div class="skeleton skeleton-pulse h-5 w-20 bg-gray-200 rounded shrink-0"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="swiper-slide skeleton-course-wrapper">
-                        <div
-                            class="skeleton-course-card md:w-full h-48 sm:h-40 md:h-auto rounded-2xl flex items-center justify-center relative overflow-hidden min-h-[200px]">
-                            <div
-                                class="skeleton skeleton-pulse absolute inset-0 bg-gradient-to-r from-gray-300 to-gray-200">
-                            </div>
-                            <div class="relative z-10 text-center p-4">
-                                <div class="skeleton skeleton-pulse w-16 h-16 rounded-full bg-white/30 mx-auto mb-4">
+                    <div class="swiper-slide skeleton-course-wrapper h-auto">
+                        <div class="skeleton-course-card course-card-skeleton bg-white rounded-2xl border border-[#E2D9C6] shadow-lg overflow-hidden h-full">
+                            <div class="skeleton skeleton-pulse w-full h-44 sm:h-52 bg-gradient-to-r from-gray-200 to-gray-100"></div>
+                            <div class="px-4 py-4 sm:px-5 sm:py-5 flex items-start justify-between gap-3">
+                                <div class="space-y-2 w-full">
+                                    <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
+                                    <div class="skeleton skeleton-pulse h-3 w-1/3 bg-gray-100 rounded"></div>
                                 </div>
-                                <div class="skeleton skeleton-pulse h-6 w-32 bg-white/30 rounded mx-auto"></div>
+                                <div class="skeleton skeleton-pulse h-5 w-20 bg-gray-200 rounded shrink-0"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="swiper-slide skeleton-course-wrapper">
-                        <div
-                            class="skeleton-course-card md:w-full h-48 sm:h-40 md:h-auto rounded-2xl flex items-center justify-center relative overflow-hidden min-h-[200px]">
-                            <div
-                                class="skeleton skeleton-pulse absolute inset-0 bg-gradient-to-r from-gray-300 to-gray-200">
-                            </div>
-                            <div class="relative z-10 text-center p-4">
-                                <div class="skeleton skeleton-pulse w-16 h-16 rounded-full bg-white/30 mx-auto mb-4">
+                    <div class="swiper-slide skeleton-course-wrapper h-auto">
+                        <div class="skeleton-course-card course-card-skeleton bg-white rounded-2xl border border-[#E2D9C6] shadow-lg overflow-hidden h-full">
+                            <div class="skeleton skeleton-pulse w-full h-44 sm:h-52 bg-gradient-to-r from-gray-200 to-gray-100"></div>
+                            <div class="px-4 py-4 sm:px-5 sm:py-5 flex items-start justify-between gap-3">
+                                <div class="space-y-2 w-full">
+                                    <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
+                                    <div class="skeleton skeleton-pulse h-3 w-1/3 bg-gray-100 rounded"></div>
                                 </div>
-                                <div class="skeleton skeleton-pulse h-6 w-32 bg-white/30 rounded mx-auto"></div>
+                                <div class="skeleton skeleton-pulse h-5 w-20 bg-gray-200 rounded shrink-0"></div>
                             </div>
                         </div>
                     </div>
-                    <div class="swiper-slide skeleton-course-wrapper">
-                        <div
-                            class="skeleton-course-card md:w-full h-48 sm:h-40 md:h-auto rounded-2xl flex items-center justify-center relative overflow-hidden min-h-[200px]">
-                            <div
-                                class="skeleton skeleton-pulse absolute inset-0 bg-gradient-to-r from-gray-300 to-gray-200">
-                            </div>
-                            <div class="relative z-10 text-center p-4">
-                                <div class="skeleton skeleton-pulse w-16 h-16 rounded-full bg-white/30 mx-auto mb-4">
+                    <div class="swiper-slide skeleton-course-wrapper h-auto">
+                        <div class="skeleton-course-card course-card-skeleton bg-white rounded-2xl border border-[#E2D9C6] shadow-lg overflow-hidden h-full">
+                            <div class="skeleton skeleton-pulse w-full h-44 sm:h-52 bg-gradient-to-r from-gray-200 to-gray-100"></div>
+                            <div class="px-4 py-4 sm:px-5 sm:py-5 flex items-start justify-between gap-3">
+                                <div class="space-y-2 w-full">
+                                    <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
+                                    <div class="skeleton skeleton-pulse h-3 w-1/3 bg-gray-100 rounded"></div>
                                 </div>
-                                <div class="skeleton skeleton-pulse h-6 w-32 bg-white/30 rounded mx-auto"></div>
+                                <div class="skeleton skeleton-pulse h-5 w-20 bg-gray-200 rounded shrink-0"></div>
                             </div>
                         </div>
                     </div>

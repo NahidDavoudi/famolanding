@@ -1,6 +1,7 @@
 const { default: API, onReady } = await import(`${window.APP_CONFIG.assetUrl}/js/api.js`);
 
 const DASHBOARD_URL = (window.APP_CONFIG && window.APP_CONFIG.dashboardUrl) || '';
+const UPLOADS_BASE = (window.APP_CONFIG && window.APP_CONFIG.uploadsUrl) || 'https://api.famoacademy.ir/uploads';
 
 let mobileMenuBtn = null;
 let mobileMenu = null;
@@ -34,10 +35,12 @@ function svgIcon(name, cls = '') {
     const icon = window.famoLucideName ? window.famoLucideName(name) : name.replace(/^icon-/, '');
     return `<i class="icon${suffix}" data-lucide="${icon}" aria-hidden="true"></i>`;
 }
+
+// جداکردن سه‌رقم سه‌رقم با ارقام فارسی: 2500000 → ۲,۵۰۰,۰۰۰
 function formatPrice(value) {
     if (value === null || value === undefined || value === '') return '';
     const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
-    let str = String(value);
+    let str = String(value).trim();
     // تبدیل ارقام فارسی/عربی به انگلیسی
     str = str
         .replace(/[۰-۹]/g, d => persianDigits.indexOf(d))
@@ -46,42 +49,99 @@ function formatPrice(value) {
     if (!digits) return String(value); // مثل «تماس بگیرید» را دست نمی‌زنیم
     // جداکردن سه‌رقم سه‌رقم
     const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    // تبدیل به ارقام فارسی + تومان
-    return grouped.replace(/\d/g, d => persianDigits[+d]) + ' تومان';
+    // تبدیل به ارقام فارسی
+    return grouped.replace(/\d/g, d => persianDigits[+d]);
 }
+
+// آیا قیمت عددی است؟ (برای نمایش واحد «تومان»)
+function isNumericPrice(value) {
+    if (value === null || value === undefined || value === '') return false;
+    return /\d/.test(String(value).replace(/[۰-۹]/g, '0').replace(/[٠-٩]/g, '0'));
+}
+
+// آدرس تصویر دوره: آدرس کامل، مسیر نسبی یا فقط نام فایل در پوشه uploads
+function resolveImageUrl(value) {
+    if (!value) return '';
+    const src = String(value).trim();
+    if (!src) return '';
+    if (/^(https?:)?\/\//i.test(src) || src.startsWith('data:')) return src;
+    if (src.startsWith('/')) return src;
+    if (src.startsWith('uploads/') || src.startsWith('../') || src.startsWith('assets/')) return src;
+    return `${UPLOADS_BASE.replace(/\/$/, '')}/${src}`;
+}
+
+// FontAwesome → نام آیکون داخلی (برای حالت بدون تصویر)
+const FA_ICON_MAP = {
+    'fa-home': 'home', 'fa-book': 'book', 'fa-book-open': 'book',
+    'fa-school': 'school', 'fa-graduation-cap': 'school', 'fa-user-graduate': 'school',
+    'fa-chalkboard-teacher': 'school', 'fa-chart-line': 'chart-bar', 'fa-chart-bar': 'chart-bar',
+    'fa-user': 'user', 'fa-users': 'users', 'fa-user-friends': 'users',
+    'fa-calendar': 'calendar', 'fa-calendar-alt': 'calendar',
+    'fa-star': 'star', 'fa-headset': 'headset', 'fa-phone': 'phone',
+    'fa-envelope': 'mail', 'fa-search': 'search', 'fa-check': 'check',
+    'fa-clock': 'clock', 'fa-calculator': 'chart-bar', 'fa-flask': 'report',
+    'fa-atom': 'star', 'fa-brain': 'school', 'fa-clipboard': 'clipboard',
+    'fa-globe': 'external-link', 'fa-laptop-code': 'settings', 'fa-paint-brush': 'edit',
+};
+
+function faToSvgName(faClass) {
+    if (!faClass) return 'book';
+    for (const part of String(faClass).split(/\s+/)) {
+        if (FA_ICON_MAP[part]) return FA_ICON_MAP[part];
+    }
+    return 'book';
+}
+
 function renderFeature(text) {
-    return `<div class="flex items-center gap-2">
-        ${svgIcon('icon-check', 'icon--sm text-[#445D84]')}
-        <span>${text}</span>
-    </div>`;
+    return `<li>${svgIcon('icon-check', 'icon--sm text-[#445D84]')}<span>${text}</span></li>`;
 }
 
 function renderCourseCard(course) {
+    const hasPrice = course.price !== null && course.price !== undefined && String(course.price).trim() !== '';
+    const priceText = hasPrice ? formatPrice(course.price) : '';
+    const priceUnit = hasPrice && isNumericPrice(course.price) ? 'تومان' : '';
+    const imageUrl = resolveImageUrl(course.background_image_url || course.image_url || course.image);
+    const gradientFrom = course.gradient_color_from || '#445D84';
+    const gradientTo = course.gradient_color_to || '#6D8B9E';
+    const bodyText = course.full_description || course.description || '';
     const featuresHtml = (course.features || []).map(renderFeature).join('');
     const featuresBlock = featuresHtml
-        ? `<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm font-medium text-gray-700 pt-2">${featuresHtml}</div>`
+        ? `<ul class="course-features">${featuresHtml}</ul>`
         : '';
-    const priceBlock = course.price
-    ? `<div class="text-2xl font-bold text-[#445D84]">${formatPrice(course.price)}</div>`
-    : '';
     const badgeBlock = course.badge_label
-        ? `<span class="bg-[#445D84]/10 text-[#445D84] text-xs font-bold px-3 py-1 rounded-full inline-block">${course.badge_label}</span>`
+        ? `<span class="course-badge">${course.badge_label}</span>`
         : '';
-    const bodyText = course.full_description || course.description || '';
+    const metaItems = [
+        course.target_grades ? `<span>${course.target_grades}</span>` : '',
+        course.format ? `<span>${course.format}</span>` : '',
+    ].filter(Boolean).join('');
+    const metaBlock = metaItems ? `<div class="course-meta">${metaItems}</div>` : '';
 
-    return `<article id="course-${course.id}"
-        class="bg-white rounded-2xl shadow-xl border border-[#E2D9C6] overflow-hidden p-6 sm:p-8 flex flex-col md:flex-row gap-8 items-center">
-        <div class="md:w-2/3 space-y-4">
+    return `<article id="course-${course.id}" class="course-card">
+        <!-- تصویر دوره (بدون overlay) -->
+        <div class="course-image-wrapper" style="background: linear-gradient(135deg, ${gradientFrom}, ${gradientTo});">
+            ${imageUrl
+                ? `<img src="${imageUrl}" alt="${course.name}" loading="lazy" class="course-image">`
+                : `<div class="course-image-fallback">${svgIcon(`icon-${faToSvgName(course.icon)}`, 'icon--3xl text-white/90')}</div>`}
             ${badgeBlock}
-            <h2 class="text-2xl font-bold text-[#445D84]">${course.name}</h2>
-            <p class="text-gray-600 leading-relaxed text-justify">${bodyText}</p>
-            ${featuresBlock}
         </div>
-        <div class="md:w-1/3 bg-[#f9f7f3] p-6 rounded-xl border border-[#E2D9C6] text-center w-full space-y-4">
-            ${course.target_grades ? `<div class="text-[#445D84] font-bold text-lg">${course.target_grades}</div>` : ''}
-            ${course.format ? `<p class="text-xs text-gray-500">${course.format}</p>` : ''}
-            ${priceBlock}
-            <a href="${DASHBOARD_URL}/" class="block bg-[#445D84] text-white py-3 rounded-xl font-bold hover:bg-[#344868] transition">مشاوره و ثبت‌نام</a>
+
+        <!-- نام، توضیحات و قیمت زیر تصویر -->
+        <div class="course-body">
+            <h2 class="course-name">${course.name}</h2>
+            ${metaBlock}
+            ${bodyText ? `<p class="course-desc">${bodyText}</p>` : ''}
+            ${featuresBlock}
+
+            <div class="course-footer">
+                <div class="course-price-box">
+                    <span class="course-price-label">هزینه دوره</span>
+                    ${hasPrice
+                        ? `<span class="course-price-value">${priceText}${priceUnit ? `<span class="course-price-unit">${priceUnit}</span>` : ''}</span>`
+                        : `<span class="course-price-value">تماس بگیرید</span>`}
+                </div>
+                <a href="${DASHBOARD_URL}/" class="course-cta">مشاوره و ثبت‌نام</a>
+            </div>
         </div>
     </article>`;
 }
@@ -107,7 +167,7 @@ async function loadCourses() {
         const result = await API.get('/public/courses');
         const courses = result.data || [];
         if (courses.length === 0) {
-            container.innerHTML = '<p class="text-center text-gray-500 py-8">در حال حاضر دوره‌ای ثبت نشده است</p>';
+            container.innerHTML = '<p class="text-center text-gray-500 py-8" style="grid-column: 1 / -1;">در حال حاضر دوره‌ای ثبت نشده است</p>';
             return;
         }
         container.innerHTML = courses.map(renderCourseCard).join('');
@@ -115,7 +175,7 @@ async function loadCourses() {
         updateCourseSchema(courses);
     } catch (error) {
         console.error('Error loading courses:', error);
-        container.innerHTML = '<p class="text-center text-gray-500 py-8">خطا در بارگذاری دوره‌ها</p>';
+        container.innerHTML = '<p class="text-center text-gray-500 py-8" style="grid-column: 1 / -1;">خطا در بارگذاری دوره‌ها</p>';
     }
 }
 
