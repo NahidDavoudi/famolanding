@@ -1,5 +1,16 @@
 const { default: API, onReady } = await import(`${window.APP_CONFIG.assetUrl}/js/api.js`);
 
+// Escape dynamic text before injecting into HTML: & < > " '
+function esc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// Only allow https:// or /-rooted URLs (same-origin relative paths) into markup.
+function safeUrl(value) {
+    const s = String(value ?? '').trim();
+    return (/^https?:\/\//i.test(s) || s.startsWith('/')) ? s : '';
+}
+
 // Mobile Menu Toggle - Global variables for menu elements
 let mobileMenuBtn = null;
 let mobileMenu = null;
@@ -77,34 +88,33 @@ const SOCIAL_ICON_MAP = {
 function renderSocialLinks(links) {
     if (!links || links.length === 0) return '';
     const items = links.map(link => {
+        const url = safeUrl(link.url);
+        if (!url) return '';
         const icon = SOCIAL_ICON_MAP[link.platform] || 'icon-external-link';
         return `
-            <a href="${link.url}" target="_blank" rel="noopener"
-                class="bg-[#445D84]/10 w-9 h-9 rounded-full flex items-center justify-center hover:bg-[#445D84] hover:text-white text-[#445D84] transition"
-                aria-label="${link.platform}">
+            <a href="${esc(url)}" target="_blank" rel="noopener"
+                class="inst-social" aria-label="${esc(link.platform)}">
                 ${svgIcon(icon, 'icon--sm')}
             </a>
         `;
-    }).join('');
-    return `<div class="flex justify-center gap-3 pt-2">${items}</div>`;
+    }).filter(Boolean).join('');
+    return items ? `<div class="inst-socials">${items}</div>` : '';
 }
 
+// کارت مشترک اساتید (یکسان با صفحه اصلی — main.js): آواتار بزرگ، بدون ظاهر کلیک‌پذیر
 function renderInstructorCard(instructor) {
     const initial = instructor.initial_letter || instructor.name.charAt(0);
-    const avatar = instructor.image_url
-        ? `<img src="${instructor.image_url}" alt="${instructor.name}" class="w-24 h-24 rounded-full object-cover mx-auto shadow-md">`
-        : `<div class="w-24 h-24 bg-[#445D84] text-white text-3xl font-bold rounded-full flex items-center justify-center mx-auto shadow-md">${initial}</div>`;
-
     const bio = instructor.full_bio || instructor.description || '';
+    const avatarUrl = safeUrl(instructor.image_url);
 
     return `
-        <article class="bg-white rounded-2xl p-6 shadow-lg border border-[#E2D9C6] text-center space-y-4">
-            ${avatar}
-            <div>
-                <h3 class="text-xl font-bold text-[#445D84]">${instructor.name}</h3>
-                <p class="text-sm text-[#8B786D] font-medium mt-1">${instructor.title}</p>
-            </div>
-            <p class="text-gray-600 text-sm leading-relaxed text-justify">${bio}</p>
+        <article class="inst-card">
+            ${avatarUrl
+                ? `<img class="inst-avatar" src="${esc(avatarUrl)}" alt="${esc(instructor.name)}" width="112" height="112" loading="lazy">`
+                : `<div class="inst-avatar inst-avatar-ph" aria-hidden="true">${esc(initial)}</div>`}
+            <h3 class="inst-name">${esc(instructor.name)}</h3>
+            <p class="inst-title">${esc(instructor.title)}</p>
+            ${bio ? `<p class="inst-bio">${esc(bio)}</p>` : ''}
             ${renderSocialLinks(instructor.social_links)}
         </article>
     `;
@@ -177,3 +187,10 @@ onReady(() => {
     loadInstructors();
     loadSupporters();
 });
+
+// Set current Persian year in footer
+const copyrightYear = document.getElementById('copyright-year');
+if (copyrightYear) {
+    const persianYear = new Date().toLocaleDateString('fa-IR', { year: 'numeric' });
+    copyrightYear.textContent = persianYear.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+}

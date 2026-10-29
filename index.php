@@ -7,65 +7,18 @@
     <title><?php echo $page_title; ?></title>
     <meta name="description" content="<?php echo $meta_description; ?>">
     <?php include 'layouts/head-common.php'; ?>
-    <!-- استایل کارت‌های دوره: تصویر در بالا، نام و قیمت زیر آن (بدون overlay روی تصویر) -->
+    <!-- استایل کارت‌های دوره (طرح مشترک با pages/course.php): فاصله‌ها و رنگ‌ها از توکن‌های برند -->
     <style>
         #courses .coursesSwiper .swiper-slide {
             height: auto;
         }
 
-        #courses .course-card {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            position: relative;
-            outline: none;
-        }
-
-        #courses .course-card:focus-visible {
-            outline: 2px solid #445D84;
-            outline-offset: 3px;
-        }
-
-        #courses .course-image-wrapper {
-            flex: 0 0 auto;
-            background-color: #445D84;
-        }
-
-        #courses .course-image {
-            display: block;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-        }
-
-        #courses .course-badge {
+        #courses .course-image-fallback {
             position: absolute;
-            top: 0.75rem;
-            inset-inline-start: 0.75rem;
-            z-index: 2;
-            background: rgba(255, 255, 255, 0.95);
-            color: #445D84;
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            box-shadow: 0 4px 10px rgba(68, 93, 132, 0.15);
-        }
-
-        #courses .course-body {
-            flex: 1 1 auto;
-        }
-
-        #courses .course-name {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        #courses .course-price-value {
-            font-variant-numeric: tabular-nums;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 </head>
@@ -102,7 +55,7 @@
                 <div class="lg:w-1/2 w-full relative z-10 mt-6 lg:mt-0">
                     <div class="relative w-full max-w-lg mx-auto rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-[#445D84]/20">
                         <!-- تصویر میز مطالعه -->
-                        <img src="assets/images/poster_hero.webp" alt="محیط آموزشی آموزشگاه فامو" class="w-full h-auto object-cover">
+                        <img src="assets/images/poster_hero.webp" alt="محیط آموزشی آموزشگاه فامو" width="2817" height="1585" decoding="async" fetchpriority="high" class="w-full h-auto object-cover">
                         
                         <!-- Stats Card (شناور روی تصویر یا پایین آن) -->
                         <div class="absolute bottom-3 right-3 left-3 glass-effect rounded-2xl p-4 border border-white/20 backdrop-blur-md z-20 shadow-xl">
@@ -147,56 +100,74 @@
                 <div class="swiper-wrapper" id="coursesContainer">
                     <!-- Skeleton Loaders -->
                     <div class="swiper-slide skeleton-course-wrapper h-auto">
-                        <div class="skeleton-course-card course-card-skeleton bg-white rounded-2xl border border-[#E2D9C6] shadow-lg overflow-hidden h-full">
-                            <div class="skeleton skeleton-pulse w-full h-44 sm:h-52 bg-gradient-to-r from-gray-200 to-gray-100"></div>
-                            <div class="px-4 py-4 sm:px-5 sm:py-5 flex items-start justify-between gap-3">
-                                <div class="space-y-2 w-full">
-                                    <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
-                                    <div class="skeleton skeleton-pulse h-3 w-1/3 bg-gray-100 rounded"></div>
+                        <div class="famo-course-card course-card-skeleton" aria-hidden="true">
+                            <div class="skeleton skeleton-pulse famo-course-media" style="aspect-ratio: 16/10;"></div>
+                            <div class="famo-course-body">
+                                <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
+                                <div class="skeleton skeleton-pulse h-3 w-1/2 bg-gray-100 rounded mt-2"></div>
+                                <div class="famo-course-footer">
+                                    <div class="famo-course-price">
+                                        <span class="skeleton skeleton-pulse h-2.5 w-14 block bg-gray-100 rounded"></span>
+                                        <span class="skeleton skeleton-pulse h-4 w-24 block bg-gray-200 rounded mt-2"></span>
+                                    </div>
+                                    <span class="skeleton skeleton-pulse h-8 w-24 block bg-gray-200 rounded"></span>
                                 </div>
-                                <div class="skeleton skeleton-pulse h-5 w-20 bg-gray-200 rounded shrink-0"></div>
                             </div>
                         </div>
                     </div>
                     <div class="swiper-slide skeleton-course-wrapper h-auto">
-                        <div class="skeleton-course-card course-card-skeleton bg-white rounded-2xl border border-[#E2D9C6] shadow-lg overflow-hidden h-full">
-                            <div class="skeleton skeleton-pulse w-full h-44 sm:h-52 bg-gradient-to-r from-gray-200 to-gray-100"></div>
-                            <div class="px-4 py-4 sm:px-5 sm:py-5 flex items-start justify-between gap-3">
-                                <div class="space-y-2 w-full">
-                                    <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
-                                    <div class="skeleton skeleton-pulse h-3 w-1/3 bg-gray-100 rounded"></div>
+                        <div class="famo-course-card course-card-skeleton" aria-hidden="true">
+                            <div class="skeleton skeleton-pulse famo-course-media" style="aspect-ratio: 16/10;"></div>
+                            <div class="famo-course-body">
+                                <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
+                                <div class="skeleton skeleton-pulse h-3 w-1/2 bg-gray-100 rounded mt-2"></div>
+                                <div class="famo-course-footer">
+                                    <div class="famo-course-price">
+                                        <span class="skeleton skeleton-pulse h-2.5 w-14 block bg-gray-100 rounded"></span>
+                                        <span class="skeleton skeleton-pulse h-4 w-24 block bg-gray-200 rounded mt-2"></span>
+                                    </div>
+                                    <span class="skeleton skeleton-pulse h-8 w-24 block bg-gray-200 rounded"></span>
                                 </div>
-                                <div class="skeleton skeleton-pulse h-5 w-20 bg-gray-200 rounded shrink-0"></div>
                             </div>
                         </div>
                     </div>
                     <div class="swiper-slide skeleton-course-wrapper h-auto">
-                        <div class="skeleton-course-card course-card-skeleton bg-white rounded-2xl border border-[#E2D9C6] shadow-lg overflow-hidden h-full">
-                            <div class="skeleton skeleton-pulse w-full h-44 sm:h-52 bg-gradient-to-r from-gray-200 to-gray-100"></div>
-                            <div class="px-4 py-4 sm:px-5 sm:py-5 flex items-start justify-between gap-3">
-                                <div class="space-y-2 w-full">
-                                    <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
-                                    <div class="skeleton skeleton-pulse h-3 w-1/3 bg-gray-100 rounded"></div>
+                        <div class="famo-course-card course-card-skeleton" aria-hidden="true">
+                            <div class="skeleton skeleton-pulse famo-course-media" style="aspect-ratio: 16/10;"></div>
+                            <div class="famo-course-body">
+                                <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
+                                <div class="skeleton skeleton-pulse h-3 w-1/2 bg-gray-100 rounded mt-2"></div>
+                                <div class="famo-course-footer">
+                                    <div class="famo-course-price">
+                                        <span class="skeleton skeleton-pulse h-2.5 w-14 block bg-gray-100 rounded"></span>
+                                        <span class="skeleton skeleton-pulse h-4 w-24 block bg-gray-200 rounded mt-2"></span>
+                                    </div>
+                                    <span class="skeleton skeleton-pulse h-8 w-24 block bg-gray-200 rounded"></span>
                                 </div>
-                                <div class="skeleton skeleton-pulse h-5 w-20 bg-gray-200 rounded shrink-0"></div>
                             </div>
                         </div>
                     </div>
                     <div class="swiper-slide skeleton-course-wrapper h-auto">
-                        <div class="skeleton-course-card course-card-skeleton bg-white rounded-2xl border border-[#E2D9C6] shadow-lg overflow-hidden h-full">
-                            <div class="skeleton skeleton-pulse w-full h-44 sm:h-52 bg-gradient-to-r from-gray-200 to-gray-100"></div>
-                            <div class="px-4 py-4 sm:px-5 sm:py-5 flex items-start justify-between gap-3">
-                                <div class="space-y-2 w-full">
-                                    <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
-                                    <div class="skeleton skeleton-pulse h-3 w-1/3 bg-gray-100 rounded"></div>
+                        <div class="famo-course-card course-card-skeleton" aria-hidden="true">
+                            <div class="skeleton skeleton-pulse famo-course-media" style="aspect-ratio: 16/10;"></div>
+                            <div class="famo-course-body">
+                                <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
+                                <div class="skeleton skeleton-pulse h-3 w-1/2 bg-gray-100 rounded mt-2"></div>
+                                <div class="famo-course-footer">
+                                    <div class="famo-course-price">
+                                        <span class="skeleton skeleton-pulse h-2.5 w-14 block bg-gray-100 rounded"></span>
+                                        <span class="skeleton skeleton-pulse h-4 w-24 block bg-gray-200 rounded mt-2"></span>
+                                    </div>
+                                    <span class="skeleton skeleton-pulse h-8 w-24 block bg-gray-200 rounded"></span>
                                 </div>
-                                <div class="skeleton skeleton-pulse h-5 w-20 bg-gray-200 rounded shrink-0"></div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Swiper Navigation -->
+                <!-- Swiper Navigation (RTL، aria-label فارسی) -->
+                <!-- <button type="button" class="swiper-button-prev" aria-label="دوره قبلی"></button>
+                <button type="button" class="swiper-button-next" aria-label="دوره بعدی"></button> -->
 
                 <div class="swiper-pagination"></div>
             </div>
@@ -221,66 +192,50 @@
                 <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">جمعی از اساتید و دانشجویان برتر و متخصص شهرستان بابل</p>
             </div>
 
-            <div class="swiper instructorsSwiper relative pb-12">
-                <div class="swiper-wrapper" id="instructorsContainer">
+            <div class="drag-carousel-viewport" tabindex="0"
+                 aria-label="کاروسل اساتید؛ با کشیدن یا کلیدهای جهت‌دار جابه‌جا کنید">
+                <div class="drag-carousel-track" id="instructorsContainer">
                     <!-- Skeleton Loaders -->
-                    <div class="swiper-slide skeleton-instructor-wrapper">
-                        <div
-                            class="skeleton-instructor-card md:w-full h-48 sm:h-40 md:h-auto rounded-2xl flex items-center justify-center relative overflow-hidden min-h-[200px]">
-                            <div
-                                class="skeleton skeleton-pulse absolute inset-0 bg-gradient-to-r from-gray-300 to-gray-200">
-                            </div>
-                            <div class="relative z-10 text-center p-4">
-                                <div class="skeleton skeleton-pulse w-16 h-16 rounded-full bg-white/30 mx-auto mb-4">
-                                </div>
-                                <div class="skeleton skeleton-pulse h-6 w-32 bg-white/30 rounded mx-auto"></div>
-                            </div>
+                    <div class="drag-carousel-slide skeleton-instructor-wrapper">
+                        <div class="famo-inst-skel" aria-hidden="true">
+                            <div class="skeleton skeleton-pulse w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-200 mx-auto"></div>
+                            <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-4"></div>
+                            <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
                         </div>
                     </div>
-                    <div class="swiper-slide skeleton-instructor-wrapper">
-                        <div
-                            class="skeleton-instructor-card md:w-full h-48 sm:h-40 md:h-auto rounded-2xl flex items-center justify-center relative overflow-hidden min-h-[200px]">
-                            <div
-                                class="skeleton skeleton-pulse absolute inset-0 bg-gradient-to-r from-gray-300 to-gray-200">
-                            </div>
-                            <div class="relative z-10 text-center p-4">
-                                <div class="skeleton skeleton-pulse w-16 h-16 rounded-full bg-white/30 mx-auto mb-4">
-                                </div>
-                                <div class="skeleton skeleton-pulse h-6 w-32 bg-white/30 rounded mx-auto"></div>
-                            </div>
+                    <div class="drag-carousel-slide skeleton-instructor-wrapper">
+                        <div class="famo-inst-skel" aria-hidden="true">
+                            <div class="skeleton skeleton-pulse w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-200 mx-auto"></div>
+                            <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-4"></div>
+                            <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
                         </div>
                     </div>
-                    <div class="swiper-slide skeleton-instructor-wrapper">
-                        <div
-                            class="skeleton-instructor-card md:w-full h-48 sm:h-40 md:h-auto rounded-2xl flex items-center justify-center relative overflow-hidden min-h-[200px]">
-                            <div
-                                class="skeleton skeleton-pulse absolute inset-0 bg-gradient-to-r from-gray-300 to-gray-200">
-                            </div>
-                            <div class="relative z-10 text-center p-4">
-                                <div class="skeleton skeleton-pulse w-16 h-16 rounded-full bg-white/30 mx-auto mb-4">
-                                </div>
-                                <div class="skeleton skeleton-pulse h-6 w-32 bg-white/30 rounded mx-auto"></div>
-                            </div>
+                    <div class="drag-carousel-slide skeleton-instructor-wrapper">
+                        <div class="famo-inst-skel" aria-hidden="true">
+                            <div class="skeleton skeleton-pulse w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-200 mx-auto"></div>
+                            <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-4"></div>
+                            <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
                         </div>
                     </div>
-                    <div class="swiper-slide skeleton-instructor-wrapper">
-                        <div
-                            class="skeleton-instructor-card md:w-full h-48 sm:h-40 md:h-auto rounded-2xl flex items-center justify-center relative overflow-hidden min-h-[200px]">
-                            <div
-                                class="skeleton skeleton-pulse absolute inset-0 bg-gradient-to-r from-gray-300 to-gray-200">
-                            </div>
-                            <div class="relative z-10 text-center p-4">
-                                <div class="skeleton skeleton-pulse w-16 h-16 rounded-full bg-white/30 mx-auto mb-4">
-                                </div>
-                                <div class="skeleton skeleton-pulse h-6 w-32 bg-white/30 rounded mx-auto"></div>
-                            </div>
+                    <div class="drag-carousel-slide skeleton-instructor-wrapper">
+                        <div class="famo-inst-skel" aria-hidden="true">
+                            <div class="skeleton skeleton-pulse w-24 h-24 md:w-28 md:h-28 rounded-full bg-gray-200 mx-auto"></div>
+                            <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-4"></div>
+                            <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Swiper Navigation -->
-
-                <div class="swiper-pagination"></div>
+            <!-- کنترل‌های جایگزین برای درگ (دسترس‌پذیری) -->
+            <div class="drag-carousel-nav">
+                <button id="instCarouselPrev" class="drag-carousel-btn" type="button" aria-label="استاد قبلی">
+                    <i class="icon" data-lucide="chevron-right" aria-hidden="true"></i>
+                </button>
+                <div class="drag-carousel-dots" id="instCarouselDots"></div>
+                <button id="instCarouselNext" class="drag-carousel-btn" type="button" aria-label="استاد بعدی">
+                    <i class="icon" data-lucide="chevron-left" aria-hidden="true"></i>
+                </button>
             </div>
 
             <div class="text-center mt-10">

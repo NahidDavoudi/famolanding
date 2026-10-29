@@ -1,5 +1,10 @@
 const { default: API, onReady } = await import(`${window.APP_CONFIG.assetUrl}/js/api.js`);
 
+// Escape dynamic text before injecting into HTML: & < > " '
+function esc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
 const DASHBOARD_URL = (window.APP_CONFIG && window.APP_CONFIG.dashboardUrl) || '';
 const UPLOADS_BASE = (window.APP_CONFIG && window.APP_CONFIG.uploadsUrl) || 'https://api.famoacademy.ir/uploads';
 
@@ -93,7 +98,13 @@ function faToSvgName(faClass) {
 }
 
 function renderFeature(text) {
-    return `<li>${svgIcon('icon-check', 'icon--sm text-[#445D84]')}<span>${text}</span></li>`;
+    return `<li>${svgIcon('icon-check', 'icon--sm text-[#445D84]')}<span>${esc(text)}</span></li>`;
+}
+
+// گرادیان فقط با hex معتبر؛ در غیر این صورت رنگ ثابت برند
+function safeHex(value, fallback) {
+    const s = String(value ?? '').trim();
+    return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(s) ? s : fallback;
 }
 
 function renderCourseCard(course) {
@@ -101,19 +112,19 @@ function renderCourseCard(course) {
     const priceText = hasPrice ? formatPrice(course.price) : '';
     const priceUnit = hasPrice && isNumericPrice(course.price) ? 'تومان' : '';
     const imageUrl = resolveImageUrl(course.background_image_url || course.image_url || course.image);
-    const gradientFrom = course.gradient_color_from || '#445D84';
-    const gradientTo = course.gradient_color_to || '#6D8B9E';
+    const gradientFrom = safeHex(course.gradient_color_from, '#445D84');
+    const gradientTo = safeHex(course.gradient_color_to, '#6D8B9E');
     const bodyText = course.full_description || course.description || '';
     const featuresHtml = (course.features || []).map(renderFeature).join('');
     const featuresBlock = featuresHtml
         ? `<ul class="course-features">${featuresHtml}</ul>`
         : '';
     const badgeBlock = course.badge_label
-        ? `<span class="course-badge">${course.badge_label}</span>`
+        ? `<span class="course-badge">${esc(course.badge_label)}</span>`
         : '';
     const metaItems = [
-        course.target_grades ? `<span>${course.target_grades}</span>` : '',
-        course.format ? `<span>${course.format}</span>` : '',
+        course.target_grades ? `<span>${esc(course.target_grades)}</span>` : '',
+        course.format ? `<span>${esc(course.format)}</span>` : '',
     ].filter(Boolean).join('');
     const metaBlock = metaItems ? `<div class="course-meta">${metaItems}</div>` : '';
 
@@ -121,23 +132,23 @@ function renderCourseCard(course) {
         <!-- تصویر دوره (بدون overlay) -->
         <div class="course-image-wrapper" style="background: linear-gradient(135deg, ${gradientFrom}, ${gradientTo});">
             ${imageUrl
-                ? `<img src="${imageUrl}" alt="${course.name}" loading="lazy" class="course-image">`
+                ? `<img src="${esc(imageUrl)}" alt="${esc(course.name)}" loading="lazy" class="course-image">`
                 : `<div class="course-image-fallback">${svgIcon(`icon-${faToSvgName(course.icon)}`, 'icon--3xl text-white/90')}</div>`}
             ${badgeBlock}
         </div>
 
         <!-- نام، توضیحات و قیمت زیر تصویر -->
         <div class="course-body">
-            <h2 class="course-name">${course.name}</h2>
+            <h2 class="course-name">${esc(course.name)}</h2>
             ${metaBlock}
-            ${bodyText ? `<p class="course-desc">${bodyText}</p>` : ''}
+            ${bodyText ? `<p class="course-desc">${esc(bodyText)}</p>` : ''}
             ${featuresBlock}
 
             <div class="course-footer">
                 <div class="course-price-box">
                     <span class="course-price-label">هزینه دوره</span>
                     ${hasPrice
-                        ? `<span class="course-price-value">${priceText}${priceUnit ? `<span class="course-price-unit">${priceUnit}</span>` : ''}</span>`
+                        ? `<span class="course-price-value">${esc(priceText)}${priceUnit ? `<span class="course-price-unit">${esc(priceUnit)}</span>` : ''}</span>`
                         : `<span class="course-price-value">تماس بگیرید</span>`}
                 </div>
                 <a href="${DASHBOARD_URL}/" class="course-cta">مشاوره و ثبت‌نام</a>
@@ -167,7 +178,7 @@ async function loadCourses() {
         const result = await API.get('/public/courses');
         const courses = result.data || [];
         if (courses.length === 0) {
-            container.innerHTML = '<p class="text-center text-gray-500 py-8" style="grid-column: 1 / -1;">در حال حاضر دوره‌ای ثبت نشده است</p>';
+            container.innerHTML = '<div class="famo-empty-message">در حال حاضر دوره‌ای ثبت نشده است</div>';
             return;
         }
         container.innerHTML = courses.map(renderCourseCard).join('');
@@ -175,7 +186,7 @@ async function loadCourses() {
         updateCourseSchema(courses);
     } catch (error) {
         console.error('Error loading courses:', error);
-        container.innerHTML = '<p class="text-center text-gray-500 py-8" style="grid-column: 1 / -1;">خطا در بارگذاری دوره‌ها</p>';
+        container.innerHTML = '<div class="famo-empty-message">خطا در بارگذاری دوره‌ها</div>';
     }
 }
 
@@ -183,3 +194,10 @@ onReady(() => {
     initMobileMenu();
     loadCourses();
 });
+
+// Set current Persian year in footer
+const copyrightYear = document.getElementById('copyright-year');
+if (copyrightYear) {
+    const persianYear = new Date().toLocaleDateString('fa-IR', { year: 'numeric' });
+    copyrightYear.textContent = persianYear.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+}

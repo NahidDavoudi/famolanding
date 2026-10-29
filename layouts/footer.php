@@ -7,7 +7,7 @@
             <div>
                 <div class="flex items-center gap-4 mb-6">
                     <div class="bg-[#445D84] w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                        <img src="<?php echo famo_asset('images/logo.png', $base . '../shared/images/logo.png'); ?>" alt="logo" class="w-10 h-10 object-contain">
+                        <img src="<?php echo famo_asset('images/logo.png', $base . '../shared/images/logo.png'); ?>" alt="لوگوی آموزشگاه فامو" width="40" height="40" loading="lazy" decoding="async" class="w-10 h-10 object-contain">
                     </div>
                     <div>
                         <h3 class="text-2xl font-bold">آموزشگاه <span class="text-[#E2D9C6]">فامو</span></h3>
@@ -41,7 +41,7 @@
             <div>
                 <h4 class="text-xl font-bold mb-6 text-[#E2D9C6]">دسترسی سریع</h4>
                 <ul class="space-y-3">
-                    <li><a href="#home"
+                    <li><a href="<?php echo $base; ?>#home"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
                         خانه
@@ -56,12 +56,12 @@
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
                         اساتید
                     </a></li>
-                    <li><a href="#services"
+                    <li><a href="<?php echo $base; ?>#services"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
                         خدمات ویژه
                     </a></li>
-                    <li><a href="#faq-contact"
+                    <li><a href="<?php echo $base; ?>#faq-contact"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
                         سوالات و تماس

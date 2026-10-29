@@ -1,5 +1,36 @@
 const { default: API, onReady } = await import(`${window.APP_CONFIG.assetUrl}/js/api.js`);
 
+const UPLOADS_BASE = (window.APP_CONFIG && window.APP_CONFIG.uploadsUrl) || 'https://api.famoacademy.ir/uploads';
+
+// Escape dynamic text before injecting into HTML: & < > " '
+function esc(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// Only allow https:// or /-rooted URLs (same-origin relative paths) into markup.
+function safeUrl(value) {
+    const s = String(value ?? '').trim();
+    return (/^https?:\/\//i.test(s) || s.startsWith('/')) ? s : '';
+}
+
+// Only accept hex colors for gradients; otherwise fall back to the brand color.
+function safeHex(value, fallback) {
+    const s = String(value ?? '').trim();
+    return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(s) ? s : fallback;
+}
+
+// Course image resolver: full URL, root-relative path, or bare filename in uploads.
+// ponytail: کپی resolveImageUrl از courses.js؛ وقتی آپدیت shared ماژول شد یکپارچه شود
+function resolveImageUrl(value) {
+    if (!value) return '';
+    const src = String(value).trim();
+    if (!src) return '';
+    if (/^(https?:)?\/\//i.test(src) || src.startsWith('data:')) return src;
+    if (src.startsWith('/')) return src;
+    if (src.startsWith('uploads/') || src.startsWith('../') || src.startsWith('assets/')) return src;
+    return `${UPLOADS_BASE.replace(/\/$/, '')}/${src}`;
+}
+
 // Helper: create a Lucide icon element.
 function svgIcon(name, cls = '') {
     const c = cls ? ` ${cls}` : '';
@@ -63,10 +94,6 @@ function faToSvg(faClass) {
     }
     return 'icon-book'; // fallback
 }
-
-// Initialize Swiper instances (will be updated after data loads)
-let instructorsSwiper = null;
-let supportSwiper = null;
 
 // Mobile Menu Toggle - Global variables for menu elements
 let mobileMenuBtn = null;
@@ -149,76 +176,383 @@ function hideSkeletons(containerId, skeletonClass) {
     });
 }
 
+// Swiper instance for the courses carousel (created once after data renders)
+let coursesSwiper = null;
+
+function renderCourseFeatureChip(text) {
+    return `<span>${esc(text)}</span>`;
+}
+
+// Build one course card slide for the home carousel.
+function buildCourseSlide(course) {
+    const hasPrice = course.price !== null && course.price !== undefined && String(course.price).trim() !== '';
+    const priceText = hasPrice ? formatPrice(course.price) : '';
+    const priceUnit = hasPrice && isNumericPrice(course.price) ? 'تومان' : '';
+    const gradient = `linear-gradient(135deg, ${safeHex(course.gradient_color_from, '#445D84')}, ${safeHex(course.gradient_color_to, '#6D8B9E')})`;
+    const imageUrl = safeUrl(resolveImageUrl(course.background_image_url));
+    const badgeBlock = course.badge_label
+        ? `<span class="famo-course-badge">${esc(course.badge_label)}</span>`
+        : '';
+    const metaItems = [
+        course.target_grades ? `<span>${esc(course.target_grades)}</span>` : '',
+        course.format ? `<span>${esc(course.format)}</span>` : '',
+    ].filter(Boolean).join('');
+    const metaBlock = metaItems
+        ? `<div class="famo-course-meta">${metaItems}</div>`
+        : '';
+    const description = course.description || '';
+
+    return `
+        <div class="swiper-slide">
+            <a class="famo-course-card" href="pages/course.php#course-${esc(course.id)}"
+               aria-label="${esc(course.name)} - مشاهده جزئیات دوره">
+                <div class="famo-course-media" style="background-image: ${gradient};">
+                    ${imageUrl
+                        ? `<img src="${esc(imageUrl)}" alt="${esc(course.name)}" width="1200" height="750" loading="lazy" class="famo-course-img">`
+                        : `<div class="course-image-fallback">
+                                ${svgIcon(faToSvg(course.icon), 'icon--3xl text-white/90')}
+                           </div>`}
+                    ${badgeBlock}
+                </div>
+                <div class="famo-course-body">
+                    <h3 class="famo-course-name">${esc(course.name)}</h3>
+                    ${metaBlock}
+                    ${description ? `<p class="famo-course-desc">${esc(description)}</p>` : ''}
+                    <div class="famo-course-footer">
+                        <div class="famo-course-price">
+                            <span class="famo-course-price-label">هزینه دوره</span>
+                            ${hasPrice
+                                ? `<span class="famo-course-price-value">${esc(priceText)}${priceUnit ? `<span class="famo-course-price-unit">${esc(priceUnit)}</span>` : ''}</span>`
+                                : `<span class="famo-course-price-value">تماس بگیرید</span>`}
+                        </div>
+                        <span class="famo-course-cta">جزئیات دوره
+                            <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    `;
+}
+
 // Load courses from API
 async function loadCoursesFromAPI() {
     showSkeletons('coursesContainer', 'skeleton-course-wrapper');
 
     try {
         const result = await API.get('/public/courses');
+        const courses = result.data || [];
 
         const container = document.getElementById('coursesContainer');
         if (!container) return;
 
-        hideSkeletons('coursesContainer', 'skeleton-course-wrapper');
-
-        if (!result.data || result.data.length === 0) {
-            container.innerHTML = '<p class="text-center text-gray-500 py-8 col-span-full">دوره‌ای یافت نشد</p>';
+        if (courses.length === 0) {
+            const swiperRoot = container.closest('.coursesSwiper');
+            if (swiperRoot) swiperRoot.classList.add('coursesSwiper--disabled');
+            container.innerHTML = '<div class="famo-empty-message">در حال حاضر دوره‌ای ثبت نشده است</div>';
             return;
         }
 
-        container.innerHTML = result.data.map(course => {
-            const hasPrice = course.price !== null && course.price !== undefined && String(course.price).trim() !== '';
-            const priceText = hasPrice ? formatPrice(course.price) : '';
-            const priceUnit = hasPrice && isNumericPrice(course.price) ? 'تومان' : '';
-            const cardGradient = `linear-gradient(135deg, ${course.gradient_color_from || '#445D84'}, ${course.gradient_color_to || '#6D8B9E'})`;
-            const imageUrl = course.background_image_url
-                ? `https://api.famoacademy.ir/uploads/${course.background_image_url}`
-                : '';
-            const badgeBlock = course.badge_label
-                ? `<span class="course-badge">${course.badge_label}</span>`
-                : '';
-            const shortDescription = course.description || '';
-
-            return `
-            <a class="course-card group" href="pages/course.php#course-${course.id}"
-               aria-label="${course.name} - مشاهده جزئیات دوره">
-                <!-- تصویر دوره (بدون overlay) -->
-                <div class="course-image-wrapper" style="background: ${cardGradient};">
-                    ${imageUrl
-                        ? `<img src="${imageUrl}" alt="${course.name}" loading="lazy" class="course-image">`
-                        : `<div class="course-image-fallback">
-                                ${svgIcon(faToSvg(course.icon), 'icon--3xl text-white/90')}
-                           </div>`}
-                    ${badgeBlock}
-                </div>
-
-                <!-- نام دوره -->
-                <div class="course-body">
-                    <h3 class="course-name">${course.name}</h3>
-
-                    <!-- توضیح کوتاه دوره -->
-                    ${shortDescription ? `<p class="course-desc">${shortDescription}</p>` : ''}
-
-                    <!-- قیمت دوره (کاملاً زیر تصویر و نام، بدون کراپ شدن) -->
-                    <div class="course-footer">
-                        <span class="course-price-label">هزینه دوره</span>
-                        ${hasPrice
-                            ? `<span class="course-price-value">${priceText}${priceUnit ? `<span class="course-price-unit">${priceUnit}</span>` : ''}</span>`
-                            : `<span class="course-price-value course-price-value--text">تماس بگیرید</span>`}
-                    </div>
-                </div>
-            </a>
-        `;
-        }).join('');
+        container.innerHTML = courses.map(buildCourseSlide).join('');
         if (window.refreshLucideIcons) window.refreshLucideIcons(container);
+
+        // حالت ۰/۱/۲ دوره: بدون سوایپر (گرید ساده)؛ در غیر این صورت سوایپر ساخته می‌شود
+        const swiperRoot = container.closest('.coursesSwiper');
+        if (courses.length > 2 && window.Swiper) {
+            if (swiperRoot) swiperRoot.classList.remove('coursesSwiper--disabled');
+            if (!coursesSwiper) {
+                coursesSwiper = new Swiper('.coursesSwiper', {
+                    slidesPerView: 1.15,
+                    spaceBetween: 16,
+                    grabCursor: true,
+                    loop: courses.length > 3,
+                    pagination: {
+                        el: '.coursesSwiper .swiper-pagination',
+                        clickable: true,
+                    },
+                    navigation: {
+                        nextEl: '.coursesSwiper .swiper-button-next',
+                        prevEl: '.coursesSwiper .swiper-button-prev',
+                    },
+                    breakpoints: {
+                        640: { slidesPerView: 2 },
+                        1024: { slidesPerView: 3 },
+                        1280: { slidesPerView: 4 },
+                    },
+                });
+            } else {
+                coursesSwiper.update();
+            }
+        } else if (swiperRoot) {
+            swiperRoot.classList.add('coursesSwiper--disabled');
+        }
     } catch (error) {
         console.error('Error loading courses:', error);
         const container = document.getElementById('coursesContainer');
         if (container) {
-            hideSkeletons('coursesContainer', 'skeleton-course-wrapper');
-            container.innerHTML = '<p class="text-center text-gray-500 py-8 col-span-full">خطا در بارگذاری دوره‌ها</p>';
+            container.innerHTML = '<div class="famo-empty-message">خطا در بارگذاری دوره‌ها</div>';
         }
     }
+}
+
+// Maps a social_links.platform value to a sprite icon (برای لینک‌های اجتماعی اساتید)
+const SOCIAL_ICON_MAP = {
+    telegram: 'icon-telegram',
+    instagram: 'icon-brand-instagram',
+    whatsapp: 'icon-brand-whatsapp',
+};
+
+// Design مشترک لینک‌های اجتماعی اساتید
+function renderSocialLinks(links) {
+    if (!links || links.length === 0) return '';
+    const items = links.map(link => {
+        const url = safeUrl(link.url);
+        if (!url) return '';
+        const icon = SOCIAL_ICON_MAP[link.platform] || 'icon-external-link';
+        return `
+            <a href="${esc(url)}" target="_blank" rel="noopener"
+                class="inst-social" aria-label="${esc(link.platform)}">
+                ${svgIcon(icon, 'icon--sm')}
+            </a>
+        `;
+    }).filter(Boolean).join('');
+    return items ? `<div class="inst-socials">${items}</div>` : '';
+}
+
+// markup مشترک کارت استاد (صفحه اصلی + pages/team.php): آواتار بزرگ، بدون ظاهر کلیک‌پذیر
+function instructorCardHtml(instructor) {
+    const initialLetter = instructor.initial_letter || (instructor.name ? instructor.name.charAt(0) : '');
+    const bio = instructor.description || '';
+    const avatarUrl = safeUrl(instructor.image_url);
+    const socialsBlock = renderSocialLinks(instructor.social_links);
+
+    return `
+        <article class="inst-card">
+            ${avatarUrl
+                ? `<img class="inst-avatar" src="${esc(avatarUrl)}" alt="${esc(instructor.name)}" width="112" height="112" loading="lazy">`
+                : `<div class="inst-avatar inst-avatar-ph" aria-hidden="true">${esc(initialLetter)}</div>`}
+            <h3 class="inst-name">${esc(instructor.name)}</h3>
+            <p class="inst-title">${esc(instructor.title)}</p>
+            ${bio ? `<p class="inst-bio">${esc(bio)}</p>` : ''}
+            ${socialsBlock}
+        </article>
+    `;
+}
+
+// ==================== درگ-کاروسل ۳بعدی اساتید (بدون کتابخانه جدید؛ GSAP موجود) ====================
+// حس مشابه DragableCarousel فِرِیمر: حلقه مادام، کارت میانی برجسته، کارت‌های کناری
+// rotateY + scale + opacity، درگ با اینرسی و اسنپ فنری به کارت میانی.
+const DRAG_COPIES = 3;
+let instCarousel = null;
+
+class InstructorDragCarousel {
+    constructor(track, opts = {}) {
+        this.track = track;
+        this.viewport = track.parentElement;
+        this.onIndex = opts.onIndex || (() => {});
+        this.slides = Array.from(track.children);
+        this.n = this.slides.length / DRAG_COPIES;
+        if (!this.slides.length || !this.n) return;
+
+        // اندازه‌ها (RTL-agnostic: فاصله واقعی اسلایدها از خود DOM گرفته می‌شود)
+        const r0 = this.slides[0].getBoundingClientRect();
+        let step = r0.width;
+        if (this.slides.length > 1) {
+            const r1 = this.slides[1].getBoundingClientRect();
+            step = Math.abs(r1.left - r0.left) || r0.width;
+        }
+        this.step = step;
+        this.vc = this.viewport.getBoundingClientRect();
+        this.halfCx = this.vc.left + this.vc.width / 2;
+        this.x = 0;
+        this.tx = 0;
+        this.tween = null;
+        this.dragging = false;
+        this.pointerId = null;
+        this.px = 0;
+        this.history = [];
+        this.reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        this.activeIdx = -1;
+
+        this.bindEvents();
+        this.measure();
+        // شروع: اولین کارتِ کپیِ میانی دقیقاً در مرکز (بدون فرض جهت RTL)
+        this.x = this.tx = this.halfCx - this.centerOf(this.slides[this.n]);
+        this.rafId = requestAnimationFrame(() => this.loop());
+        window.addEventListener('resize', this.measure);
+    }
+
+    measure = () => {
+        if (!this.slides.length) return;
+        const r0 = this.slides[0].getBoundingClientRect();
+        let step = r0.width;
+        if (this.slides.length > 1) {
+            const r1 = this.slides[1].getBoundingClientRect();
+            step = Math.abs(r1.left - r0.left) || r0.width;
+        }
+        this.step = step;
+        this.vc = this.viewport.getBoundingClientRect();
+        this.halfCx = this.vc.left + this.vc.width / 2;
+        this.cycleW = step * this.n;
+    };
+
+    // هزینه کم: هر اسلاید rect خودش را می‌گیرد (فقط transform قبلی اعمال شده است)
+    centerOf(el) {
+        const r = el.getBoundingClientRect();
+        return r.left + r.width / 2;
+    }
+
+    // اسلایدی که الان به مرکز نزدیک‌تر است + شاخه منطقی آن
+    nearestSlot(shift = 0) {
+        const targetCx = this.halfCx - shift;
+        let best = 0, bestD = Infinity;
+        for (let j = 0; j < this.slides.length; j++) {
+            const d = Math.abs(this.centerOf(this.slides[j]) + shift - targetCx);
+            if (d < bestD) { bestD = d; best = j; }
+        }
+        return best;
+    }
+
+    index() {
+        return this.nearestSlot() % this.n;
+    }
+
+    // اسنپ به شاخه منطقی idx (کپی‌ای که نزدیک مرکز است)
+    go(idx, instant = false) {
+        idx = ((idx % this.n) + this.n) % this.n;
+        const cur = this.x;
+        // بهترین کپی بین هر هر: j = idx، idx+n یا idx+2n — همان که به مرکز نزدیک‌تر
+        const candidates = [idx, idx + this.n, idx + 2 * this.n].map(j => ({
+            j,
+            delta: this.centerOf(this.slides[j]) - this.halfCx, // فاصله فعلی از مرکز
+        }));
+        candidates.sort((a, b) => Math.abs(a.delta) - Math.abs(b.delta));
+        const targetX = cur - candidates[0].delta;
+        if (this.tween) this.tween.kill();
+        this.tween = null;
+        if (instant || this.reduced || typeof gsap === 'undefined') {
+            this.x = this.tx = targetX;
+        } else {
+            this.tween = gsap.to(this, { tx: targetX, duration: 0.9, ease: 'power3.out' });
+        }
+    }
+
+    next(instant) { this.go(this.index() + 1, instant); }
+    prev(instant) { this.go(this.index() - 1, instant); }
+
+    destroy() {
+        cancelAnimationFrame(this.rafId);
+        window.removeEventListener('resize', this.measure);
+        if (this.tween) this.tween.kill();
+    }
+
+    bindEvents() {
+        const v = this.viewport;
+        v.addEventListener('pointerdown', (e) => this.onDown(e));
+        v.addEventListener('pointermove', (e) => this.onMove(e));
+        v.addEventListener('pointerup', (e) => this.onUp(e));
+        v.addEventListener('pointercancel', (e) => this.onUp(e));
+        v.addEventListener('dragstart', (e) => e.preventDefault());
+        // جایگزین غیردو-klic برای درگ: کیبورد
+        v.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') { e.preventDefault(); this.next(); }
+            if (e.key === 'ArrowRight') { e.preventDefault(); this.prev(); }
+        });
+    }
+
+    onDown(e) {
+        if (this.pointerId !== null) return;
+        this.pointerId = e.pointerId;
+        this.dragging = true;
+        this.viewport.classList.add('is-dragging');
+        if (this.tween) { this.tween.kill(); this.tween = null; }
+        this.px = e.clientX;
+        this.history = [this.x];
+        this.viewport.setPointerCapture && this.viewport.setPointerCapture(e.pointerId);
+    }
+
+    onMove(e) {
+        if (!this.dragging || e.pointerId !== this.pointerId) return;
+        e.preventDefault(); // اسکرول عمودی اسکرول‌بار دست‌نخورده (touch-action: pan-y)
+        const dx = e.clientX - this.px;
+        this.px = e.clientX;
+        this.tx += dx;
+        const now = performance.now();
+        this.history.push([now, this.tx]);
+        while (this.history.length > 2 && now - this.history[0][0] > 100) this.history.shift();
+    }
+
+    onUp(e) {
+        if (e.pointerId === undefined || e.pointerId === this.pointerId) this.release();
+    }
+
+    release() {
+        if (!this.dragging) return;
+        this.dragging = false;
+        this.pointerId = null;
+        this.viewport.classList.remove('is-dragging');
+        // اینرسی (px/ms) از تاریخچه درگ + پرتاب
+        let v = 0;
+        if (this.history.length >= 2) {
+            const [t0, x0] = this.history[0];
+            const [t1, x1] = this.history[this.history.length - 1];
+            if (t1 - t0 > 0) v = (x1 - x0) / (t1 - t0);
+        }
+        const projected = this.tx + v * 280;
+        // کارتی که در موقعیتِ برآوردشده به مرکز نزدیک‌تر است
+        let best = 0, bestD = Infinity;
+        for (let j = 0; j < this.slides.length; j++) {
+            const baseCx = this.centerOf(this.slides[j]) - this.x; // موقعیت بدون ترنسفورم رد
+            const d = Math.abs(baseCx + projected - this.halfCx);
+            if (d < bestD) { bestD = d; best = j; }
+        }
+        const tX = this.x + this.halfCx - this.centerOf(this.slides[best]);
+        if (this.reduced || typeof gsap === 'undefined') {
+            this.x = this.tx = tX;
+        } else {
+            this.tween = gsap.to(this, { tx: tX, duration: 0.85, ease: 'power3.out' });
+        }
+    }
+
+    apply() {
+        this.track.style.transform = `translate3d(${this.x}px,0,0)`;
+        const n = this.n;
+        for (let j = 0; j < this.slides.length; j++) {
+            const el = this.slides[j];
+            let t = (this.centerOf(el) - this.halfCx) / this.step;
+            // wrap: t را به بازه ±(n/2+1) نگه می‌داریم تا کپی‌ها درست شبیه‌سازی شوند
+            while (t > n / 2 + 1) t -= n;
+            while (t < -(n / 2 + 1)) t += n;
+            const at = Math.min(1, Math.abs(t));
+            // کلید حس سه بعدی: کارت میانی درشت و جلو، کناری‌ها چرخیده به سمت مرکز و عقب
+            const scale = 1 - at * 0.3;
+            const z = -at * 150;
+            const rot = -t * 24;
+            const op = 1 - at * 0.4;
+            el.style.transform = `translate3d(0,0,${z}px) rotateY(${rot}deg) scale(${scale})`;
+            el.style.opacity = op;
+            el.style.zIndex = String(1000 - Math.round(at * 200));
+        }
+        const idx = this.index();
+        if (idx !== this.activeIdx) {
+            this.activeIdx = idx;
+            this.onIndex(idx);
+        }
+    }
+
+    loop = () => {
+        // wrap: اگر بسیار دور شد، دقیقاً یک دوره (کپی کامل) برگرد — محتوا یکسان، بی‌درز
+        if (Math.abs(this.x) > this.cycleW * 2) {
+            const shiftPx = Math.round(this.x / this.cycleW) * this.cycleW;
+            this.x -= shiftPx;
+            this.tx -= shiftPx;
+        }
+        // نرمی: دنبال‌کردن lerp به سمت tx (کشِ نرم در درگ + سقفِ اسنپ)
+        this.x += (this.tx - this.x) * (this.dragging ? 0.4 : 0.15);
+        if (Math.abs(this.tx - this.x) < 0.05) this.x = this.tx;
+        this.apply();
+        this.rafId = requestAnimationFrame(() => this.loop());
+    };
 }
 
 // Load instructors from API
@@ -227,189 +561,81 @@ async function loadInstructorsFromAPI() {
 
     try {
         const result = await API.get('/public/instructors');
+        const list = result.data || [];
 
         const container = document.getElementById('instructorsContainer');
         if (!container) return;
 
         hideSkeletons('instructorsContainer', 'skeleton-instructor-wrapper');
 
-        if (!result.data || result.data.length === 0) {
-            container.innerHTML = '<div class="swiper-slide"><p class="text-center text-gray-500 py-8">استادی یافت نشد</p></div>';
+        if (list.length === 0) {
+            container.innerHTML = '<div class="famo-empty-message">استادی یافت نشد</div>';
             return;
         }
 
-        // Gradient colors for instructors (cycling)
-        const gradients = [
-            ['#445D84', '#5a779e'],
-            ['#F2E8C9', '#B3A8A1'],
-            ['#6D8B9E', '#8aa5b8'],
-            ['#445D84', '#6D8B9E']
-        ];
+        const viewport = container.closest('.drag-carousel-viewport');
+        const dotsEl = document.getElementById('instCarouselDots');
+        const prevBtn = document.getElementById('instCarouselPrev');
+        const nextBtn = document.getElementById('instCarouselNext');
 
-        container.innerHTML = result.data.map((instructor, index) => {
-            const gradient = gradients[index % gradients.length];
-            const initialLetter = instructor.initial_letter || instructor.name.charAt(0);
-            const description = instructor.description || '';
-
-            return `
-        <div class="swiper-slide">
-            <div class="instructor-card bg-gradient-to-b from-white to-[#f9f7f3] rounded-2xl overflow-hidden shadow-xl border border-[#E2D9C6] h-full hover-lift transition-all duration-300 cursor-pointer" 
-                 data-name="${instructor.name}" 
-                 data-title="${instructor.title}" 
-                 data-details="${description}">
-                <div class="h-40 flex items-center justify-center relative overflow-hidden" 
-                     style="background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});">
-                    <div class="absolute inset-0 animate-shimmer"></div>
-                    <div class="w-24 h-24 rounded-full bg-white border-4 border-[#E2D9C6] overflow-hidden shadow-lg relative z-10">
-                        ${instructor.image_url ? `
-                            <img src="${instructor.image_url}" alt="${instructor.name}" class="w-full h-full object-cover">
-                        ` : `
-                            <div class="w-full h-full bg-gradient-to-br from-[#E2D9C6] to-[#d4c9b2] flex items-center justify-center text-3xl font-bold" 
-                                 style="color: ${gradient[0]};">
-                                ${initialLetter}
-                            </div>
-                        `}
-                    </div>
-                </div>
-                <div class="p-4 text-center">
-                    <h3 class="text-xl font-bold text-[#445D84] mb-2">${instructor.name}</h3>
-                    <p class="text-[#8B786D] font-medium mb-3">${instructor.title}</p>
-                </div>
-            </div>
-        </div>
-    `;
-        }).join('');
-
-        // Initialize or update Swiper
-        if (!instructorsSwiper) {
-            instructorsSwiper = new Swiper('.instructorsSwiper', {
-                slidesPerView: 1,
-                spaceBetween: 20,
-                loop: true,
-                grabCursor: true,
-                pagination: {
-                    el: '.instructorsSwiper .swiper-pagination',
-                    clickable: true,
-                    dynamicBullets: true,
-
-                },
-                navigation: {
-                    nextEl: '.instructorsSwiper .swiper-button-next',
-                    prevEl: '.instructorsSwiper .swiper-button-prev',
-                },
-                breakpoints: {
-                    640: {
-                        slidesPerView: 2,
-                    },
-                    1024: {
-                        slidesPerView: 3,
-                    },
-                },
-            });
-        } else {
-            instructorsSwiper.update();
+        // تعداد کمتر از ۳: گرید ساده (بدون کاروسل)
+        if (list.length < 3 || !viewport) {
+            viewport?.classList.add('drag-carousel--off');
+            container.innerHTML = list.map(instructor => `<div class="drag-carousel-slide drag-carousel-slide--grid">${instructorCardHtml(instructor)}</div>`).join('');
+            if (window.refreshLucideIcons) window.refreshLucideIcons(container);
+            if (dotsEl || prevBtn || nextBtn) {
+                dotsEl && (dotsEl.hidden = true);
+                prevBtn && (prevBtn.hidden = true);
+                nextBtn && (nextBtn.hidden = true);
+            }
+            return;
         }
 
-        // Re-attach modal event listeners
-        attachInstructorModalListeners();
+        viewport?.classList.remove('drag-carousel--off');
+        if (dotsEl || prevBtn || nextBtn) {
+            dotsEl && (dotsEl.hidden = false);
+            prevBtn && (prevBtn.hidden = false);
+            nextBtn && (nextBtn.hidden = false);
+        }
+
+        // ۳ کپی از لیست برای حلقه بی‌درز
+        const copies = [];
+        for (let c = 0; c < DRAG_COPIES; c++) copies.push(...list);
+        container.innerHTML = copies
+            .map(i => `<div class="drag-carousel-slide">${instructorCardHtml(i)}</div>`)
+            .join('');
+        if (window.refreshLucideIcons) window.refreshLucideIcons(container);
+
+        // نقاط دات‌ها بر اساس تعداد واقعی اساتید
+        if (dotsEl) {
+            dotsEl.innerHTML = list.map((inst, i) =>
+                `<button type="button" class="drag-carousel-dot" data-inst-index="${i}" aria-label="حالت ${i + 1}: ${esc(inst.name)}"></button>`
+            ).join('');
+        }
+
+        if (instCarousel) { instCarousel.destroy(); instCarousel = null; }
+        instCarousel = new InstructorDragCarousel(container, {
+            onIndex: (idx) => {
+                if (dotsEl) {
+                    dotsEl.querySelectorAll('.drag-carousel-dot').forEach(d => {
+                        d.classList.toggle('is-active', Number(d.dataset.instIndex) === idx);
+                    });
+                }
+            },
+        });
+        instCarousel.reversed = true; // RTL: چرخش جهت‌کلید حرکت با کلید به سمت وفيزیکی糸
+        prevBtn?.addEventListener('click', () => instCarousel.prev());
+        nextBtn?.addEventListener('click', () => instCarousel.next());
+        dotsEl?.addEventListener('click', (e) => {
+            const dot = e.target.closest('.drag-carousel-dot');
+            if (dot) instCarousel.go(Number(dot.dataset.instIndex));
+        });
     } catch (error) {
         console.error('Error loading instructors:', error);
         const container = document.getElementById('instructorsContainer');
         if (container) {
             hideSkeletons('instructorsContainer', 'skeleton-instructor-wrapper');
-            container.innerHTML = '<div class="swiper-slide"><p class="text-center text-gray-500 py-8">خطا در بارگذاری اساتید</p></div>';
-        }
-    }
-}
-
-// Load supporters from API
-async function loadSupportersFromAPI() {
-    showSkeletons('supportersContainer', 'skeleton-supporter-wrapper');
-
-    try {
-        const result = await API.get('/public/supporters');
-
-        const container = document.getElementById('supportersContainer');
-        if (!container) return;
-
-        hideSkeletons('supportersContainer', 'skeleton-supporter-wrapper');
-
-        if (!result.data || result.data.length === 0) {
-            container.innerHTML = '<div class="swiper-slide"><p class="text-center text-gray-500 py-8">پشتیبانی یافت نشد</p></div>';
-            return;
-        }
-
-        // Gradient colors for supporters (cycling)
-        const gradients = [
-            ['#445D84', '#5a779e'],
-            ['#8B786D', '#a3958a'],
-            ['#6D8B9E', '#8aa5b8'],
-            ['#445D84', '#6D8B9E']
-        ];
-
-        container.innerHTML = result.data.map((supporter, index) => {
-            const gradient = gradients[index % gradients.length];
-            const initialLetter = supporter.name.charAt(0);
-
-            return `
-                <div class="swiper-slide">
-                    <div class="bg-white rounded-2xl overflow-hidden shadow-xl border border-[#E2D9C6] h-full hover-lift transition-all duration-500">
-                        <div class="h-40 flex items-center justify-center relative overflow-hidden" 
-                             style="background: linear-gradient(135deg, ${gradient[0]}, ${gradient[1]});">
-                            <div class="absolute inset-0 animate-shimmer"></div>
-                            <div class="w-24 h-24 rounded-full bg-white border-4 border-[#E2D9C6] overflow-hidden shadow-lg relative z-10">
-                                <div class="w-full h-full bg-gradient-to-br from-[#E2D9C6] to-[#d4c9b2] flex items-center justify-center text-3xl font-bold" 
-                                     style="color: ${gradient[0]};">
-                                    ${initialLetter}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="p-6 text-center">
-                            <h3 class="text-lg font-bold text-[#445D84] mb-2">${supporter.name}</h3>
-                            <p class="text-[#8B786D] font-medium mb-3 text-sm">پشتیبان ${supporter.field ? `رشته ${supporter.field}` : `پایه ${supporter.grade}`}</p>
-                            <div class="flex justify-center space-x-2 space-x-reverse">
-                                <span class="bg-[#E2D9C6] text-[#445D84] px-3 py-1 rounded-full text-xs font-bold">پشتیبانی ۲۴/۷</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        // Initialize or update Swiper
-        if (!supportSwiper) {
-            supportSwiper = new Swiper('.supportSwiper', {
-                slidesPerView: 1,
-                spaceBetween: 20,
-                loop: true,
-                grabCursor: true,
-                pagination: {
-                    el: '.supportSwiper .swiper-pagination',
-                    clickable: true,
-                    dynamicBullets: true,
-                },
-                navigation: {
-                    nextEl: '.supportSwiper .swiper-button-next',
-                    prevEl: '.supportSwiper .swiper-button-prev',
-                },
-                breakpoints: {
-                    640: {
-                        slidesPerView: 2,
-                    },
-                    1024: {
-                        slidesPerView: 3,
-                    },
-                },
-            });
-        } else {
-            supportSwiper.update();
-        }
-    } catch (error) {
-        console.error('Error loading supporters:', error);
-        const container = document.getElementById('supportersContainer');
-        if (container) {
-            hideSkeletons('supportersContainer', 'skeleton-supporter-wrapper');
-            container.innerHTML = '<div class="swiper-slide"><p class="text-center text-gray-500 py-8">خطا در بارگذاری پشتیبانان</p></div>';
+            container.innerHTML = '<div class="famo-empty-message">خطا در بارگذاری اساتید</div>';
         }
     }
 }
@@ -418,19 +644,15 @@ async function loadSupportersFromAPI() {
 onReady(() => {
     loadCoursesFromAPI();
     loadInstructorsFromAPI();
-    loadSupportersFromAPI();
-    // Re-initialize FAQ after content loads
-    setTimeout(() => {
-    }, 500);
 });
 
 // Stats Counter Animation with GSAP
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-function animateCounter(elementId, finalValue) {
+function animateCounter(elementId, finalValue, suffix = '') {
     const element = document.getElementById(elementId);
     if (!element) return;
     if (prefersReducedMotion || typeof gsap === 'undefined') {
-        element.textContent = finalValue;
+        element.textContent = finalValue + suffix;
         return;
     }
 
@@ -440,10 +662,15 @@ function animateCounter(elementId, finalValue) {
         duration: 2,
         ease: "power2.out",
         onUpdate: () => {
-            element.textContent = Math.floor(obj.value);
+            element.textContent = Math.floor(obj.value) + suffix;
         }
     });
 }
+
+// مقادیر آمار: JS منبع اصلی است؛ هر دو عدد باید دقیقاً یکی باشند.
+// pending: عدد نهایی قبولی/استاد منتظر تأیید کارفرما (HTML فعلی: 500+ قبولی، 15 استاد؛ JS قدیمی: 200 و 8).
+// تا زمان تأیید، انیمیشن شمارنده اجرا نمی‌شود تا HTML هرگز به ۰ یا مقدار نادرست نرود.
+const STATS = { students: null, teachers: null };
 
 // Intersection Observer for stats animation with GSAP
 const statsSection = document.querySelector('#home');
@@ -461,8 +688,8 @@ if (statsSection) {
 
                 setTimeout(() => {
                     animateCounter('years-counter', 7);
-                    animateCounter('students-counter', 200);
-                    animateCounter('teachers-counter', 8);
+                    if (STATS.students !== null) animateCounter('students-counter', STATS.students, '+');
+                    if (STATS.teachers !== null) animateCounter('teachers-counter', STATS.teachers);
                 }, 500);
 
                 observer.unobserve(entry.target);
@@ -471,204 +698,6 @@ if (statsSection) {
     }, { threshold: 0.5 });
 
     observer.observe(statsSection);
-}
-
-// FAQ Accordion with GSAP
-const FAQ = {
-    init() {
-        const items = document.querySelectorAll('.faq-item');
-        if (items.length === 0) return;
-
-        items.forEach(item => {
-            const newItem = item.cloneNode(true);
-            item.parentNode.replaceChild(newItem, item);
-
-            const question = newItem.querySelector('.faq-question');
-            const answer = newItem.querySelector('.faq-answer');
-
-            if (question && answer) {
-                if (State.isGSAPReady) {
-                    gsap.set(answer, { maxHeight: 0 });
-                }
-
-                question.addEventListener('click', () => {
-                    this.toggle(newItem, answer);
-                });
-                question.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        this.toggle(newItem, answer);
-                    }
-                });
-            }
-        });
-    },
-
-    toggle(item, answer) {
-        const isActive = item.classList.contains('active');
-        const icon = item.querySelector('.faq-icon');
-
-        // Close all other items first
-        document.querySelectorAll('.faq-item.active').forEach(otherItem => {
-            if (otherItem !== item) {
-                this.close(otherItem);
-            }
-        });
-
-        // Toggle current item
-        isActive ? this.close(item) : this.open(item, answer, icon);
-    },
-
-    open(item, answer, icon) {
-        item.classList.add('active');
-        const q = item.querySelector('.faq-question');
-        if (q) q.setAttribute('aria-expanded', 'true');
-
-        if (State.isGSAPReady) {
-            gsap.to(answer, {
-                maxHeight: answer.scrollHeight + 'px',
-                duration: CONFIG.animations.durations.medium,
-                ease: CONFIG.animations.easings.smooth,
-                onComplete: () => { answer.style.maxHeight = 'none'; }
-            });
-
-            if (icon) {
-                gsap.to(icon, {
-                    rotation: 180,
-                    duration: CONFIG.animations.durations.fast,
-                    ease: CONFIG.animations.easings.smooth
-                });
-            }
-
-            gsap.to(item, {
-                backgroundColor: 'rgba(68, 93, 132, 0.05)',
-                duration: CONFIG.animations.durations.fast
-            });
-        } else {
-            answer.style.maxHeight = answer.scrollHeight + 'px';
-            if (icon) icon.style.transform = 'rotate(180deg)';
-        }
-    },
-
-    close(item) {
-        const answer = item.querySelector('.faq-answer');
-        const icon = item.querySelector('.faq-icon');
-
-        item.classList.remove('active');
-        const q = item.querySelector('.faq-question');
-        if (q) q.setAttribute('aria-expanded', 'false');
-
-        if (State.isGSAPReady) {
-            const currentHeight = answer.scrollHeight;
-            answer.style.maxHeight = currentHeight + 'px';
-
-            gsap.to(answer, {
-                maxHeight: 0,
-                duration: CONFIG.animations.durations.fast,
-                ease: CONFIG.animations.easings.smoothIn
-            });
-
-            if (icon) {
-                gsap.to(icon, {
-                    rotation: 0,
-                    duration: CONFIG.animations.durations.fast
-                });
-            }
-
-            gsap.to(item, {
-                backgroundColor: 'transparent',
-                duration: CONFIG.animations.durations.fast
-            });
-        } else {
-            answer.style.maxHeight = '0';
-            if (icon) icon.style.transform = 'rotate(0deg)';
-        }
-    }
-};
-// Initialize FAQ when DOM is ready
-onReady(() => {
-    setTimeout(initFAQ, 100);
-});
-
-// Function to attach instructor modal listeners
-function attachInstructorModalListeners() {
-    const instructorModal = document.getElementById('instructorModal');
-    const closeModalBtn = document.getElementById('closeModal');
-    const modalContent = document.getElementById('modalContent');
-    const instructorCards = document.querySelectorAll('.instructor-card');
-
-    if (!instructorModal || !modalContent) return;
-
-    instructorCards.forEach(card => {
-        // Remove existing listeners to avoid duplicates
-        const newCard = card.cloneNode(true);
-        card.parentNode.replaceChild(newCard, card);
-
-        newCard.addEventListener('click', () => {
-            const name = newCard.getAttribute('data-name');
-            const title = newCard.getAttribute('data-title');
-            const details = newCard.getAttribute('data-details');
-
-            // Extract first letter for avatar
-            const firstLetter = name.charAt(0);
-
-            modalContent.innerHTML = `
-                <div class="flex flex-col items-center text-center">
-                    <div class="w-40 h-40 rounded-full bg-gradient-to-br from-[#E2D9C6] to-[#d4c9b2] flex items-center justify-center text-6xl text-[#445D84] font-bold mb-6 shadow-lg">
-                        ${firstLetter}
-                    </div>
-                    <h3 class="text-2xl font-bold text-[#445D84] mb-2">${name}</h3>
-                    <p class="text-lg text-[#8B786D] font-medium mb-6">${title}</p>
-                    <div class="bg-gradient-to-r from-[#f9f7f3] to-white p-6 rounded-xl border border-[#E2D9C6]">
-                        <p class="text-gray-600 leading-relaxed text-justify">${details || 'اطلاعات بیشتری در دسترس نیست.'}</p>
-                    </div>
-                    <div class="mt-8 flex space-x-4 space-x-reverse">
-                        <button id="closeModal2" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-300 transition duration-300">
-                            بستن
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            if (instructorModal) {
-                instructorModal.classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-
-                // Add event listener to close button inside modal
-                const closeModal2 = document.getElementById('closeModal2');
-                if (closeModal2) {
-                    closeModal2.addEventListener('click', () => {
-                        instructorModal.classList.add('hidden');
-                        document.body.style.overflow = 'auto';
-                    });
-                }
-            }
-        });
-    });
-
-    // Close modal handlers
-    if (closeModalBtn && instructorModal) {
-        closeModalBtn.addEventListener('click', () => {
-            instructorModal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        });
-    }
-
-    if (instructorModal) {
-        instructorModal.addEventListener('click', (e) => {
-            if (e.target === instructorModal) {
-                instructorModal.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-            }
-        });
-    }
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && instructorModal && !instructorModal.classList.contains('hidden')) {
-            instructorModal.classList.add('hidden');
-            document.body.style.overflow = 'auto';
-        }
-    });
 }
 
 // Set current Persian year in footer
@@ -732,30 +761,13 @@ function initScrollAnimations() {
     // Animate instructor cards on scroll (after they're loaded)
 
     setTimeout(() => {
-        const instructorCardsAnimate = document.querySelectorAll('.instructor-card');
+        const instructorCardsAnimate = document.querySelectorAll('.inst-card');
         instructorCardsAnimate.forEach((card, index) => {
             gsap.from(card, {
                 opacity: 0,
                 scale: 0.8,
                 rotationY: -15,
                 duration: 0.6,
-                delay: index * 0.1,
-                ease: "power2.out",
-                scrollTrigger: {
-                    trigger: card,
-                    start: "top 85%",
-                    toggleActions: "play none none none"
-                }
-            });
-        });
-
-        // Animate support team cards
-        const supportCards = document.querySelectorAll('.supportSwiper .swiper-slide');
-        supportCards.forEach((card, index) => {
-            gsap.from(card, {
-                opacity: 0,
-                y: 30,
-                duration: 0.5,
                 delay: index * 0.1,
                 ease: "power2.out",
                 scrollTrigger: {

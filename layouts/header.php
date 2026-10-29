@@ -2,13 +2,13 @@
 <?php require_once __DIR__ . '/../config.php'; ?>
 <header class="fixed top-0 left-0 right-0 z-50 px-2 sm:px-4 py-2 sm:py-4">
     <div
-        class="bg-[#445D84] bg-opacity-95 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-xl border border-white/20 px-3 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto">
+        class="bg-[#445D84] header-alpha backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-xl border border-white/20 px-3 sm:px-6 py-3 sm:py-4 max-w-7xl mx-auto">
         <div class="container mx-auto flex justify-between items-center">
             <!-- Logo -->
             <div class="flex items-center gap-4">
                 <div class="bg-[#445D84] w-12 h-12 rounded-full flex items-center justify-center shrink-0">
                     <a href="<?php echo $base?>index.php">
-                        <img src="<?php echo famo_asset('images/logo.png', $base . '../shared/images/logo.png'); ?>" alt="logo" class="w-12 h-12 object-contain">
+                        <img src="<?php echo famo_asset('images/logo.png', $base . '../shared/images/logo.png'); ?>" alt="لوگوی آموزشگاه فامو" width="48" height="48" decoding="async" class="w-12 h-12 object-contain">
                     </a>
                 </div>
                 <div>

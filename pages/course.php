@@ -71,11 +71,11 @@
             box-shadow: 0 20px 35px -16px rgba(68, 93, 132, 0.5);
         }
 
-        /* تصویر دوره (بدون overlay) */
+        /* تصویر دوره: نسبت ثابت 16/10 (بدون overlay) */
         #courses .course-image-wrapper {
             position: relative;
             width: 100%;
-            height: 180px;
+            aspect-ratio: 16 / 10;
             flex: 0 0 auto;
             overflow: hidden;
         }
@@ -145,7 +145,7 @@
             gap: 6px 10px;
             margin-top: 8px;
             font-size: 12px;
-            color: #8B786D;
+            color: #736158;
         }
 
         #courses .course-meta span {
@@ -201,7 +201,7 @@
 
         #courses .course-price-label {
             font-size: 11px;
-            color: #9ca3af;
+            color: #6b7280;
         }
 
         #courses .course-price-value {
@@ -215,7 +215,7 @@
         #courses .course-price-unit {
             font-size: 11px;
             font-weight: 500;
-            color: #8B786D;
+            color: #736158;
             margin-inline-start: 4px;
         }
 
@@ -239,6 +239,11 @@
             background: #344868;
         }
 
+        #courses .course-cta:focus-visible {
+            outline: 2px solid #445D84;
+            outline-offset: 2px;
+        }
+
         /* ---------- اسکلتون لودینگ هم‌شکل با کارت ---------- */
         #courses .course-card-skeleton {
             background: #ffffff;
@@ -253,7 +258,7 @@
         }
 
         #courses .course-card-skeleton .skeleton-img {
-            height: 150px;
+            aspect-ratio: 16 / 10;
             margin: -16px -18px 6px;
             border-radius: 0;
         }
@@ -295,7 +300,7 @@
         <!-- بنر یا پوستر با ارتفاع کنترل‌شده و گوشه‌های گرد -->
         <div class="relative w-full h-56 sm:h-72 md:h-96 rounded-2xl overflow-hidden shadow-2xl border border-white/20 mb-8">
             <img src="<?php echo $base; ?>assets/images/courses_banner.webp" alt="دوره‌های تخصصی کنکور و تیزهوشان بابل"
-                class="w-full h-full object-cover">
+                width="2752" height="1536" decoding="async" class="w-full h-full object-cover">
         </div>
 
         <p class="text-white/90 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">برنامه‌ریزی، کادر مجرب، آزمون‌های استاندارد

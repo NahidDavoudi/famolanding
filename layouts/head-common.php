@@ -1,5 +1,6 @@
 <!-- Shared head: included by every page inside its own <head>. Requires $base. -->
 <?php require_once __DIR__ . '/../config.php'; ?>
+<meta name="color-scheme" content="light">
 <?= famo_config_script() ?>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-4NHPK2145Z"></script>

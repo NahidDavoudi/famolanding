@@ -84,19 +84,22 @@ class ScrollAnimations {
             this.setupScrollAnimations();
         }
 
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', (e) => {
-                const targetId = anchor.getAttribute('href');
-                if (targetId === '#') return;
+        // Smooth scroll only on pages without main.js (main.js owns it on the home page
+        // because it also closes the mobile menu after clicking an anchor).
+        if (!document.querySelector('script[src*="main.js"]')) {
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', (e) => {
+                    const targetId = anchor.getAttribute('href');
+                    if (targetId === '#') return;
 
-                const target = document.querySelector(targetId);
-                if (target) {
-                    e.preventDefault();
-                    this.smoothScrollTo(target);
-                }
+                    const target = document.querySelector(targetId);
+                    if (target) {
+                        e.preventDefault();
+                        this.smoothScrollTo(target);
+                    }
+                });
             });
-        });
+        }
     }
 
     static smoothScrollTo(element) {
@@ -220,7 +223,7 @@ class FAQAnimations {
             duration: AnimationConfig.durations.medium,
             ease: AnimationConfig.easings.smooth,
             scrollTrigger: {
-                trigger: '.faq-section',
+                trigger: '#faq-contact',
                 start: "top 75%"
             }
         });
