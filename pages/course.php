@@ -246,10 +246,10 @@
 
         /* ---------- اسکلتون لودینگ هم‌شکل با کارت ---------- */
         #courses .course-card-skeleton {
-            background: #ffffff;
-            border: 1px solid #E2D9C6;
+            background: var(--skeleton-bg, #f5f5f5);
+            border: 1px solid var(--skeleton-border, #e0e0e0);
             border-radius: 16px;
-            box-shadow: 0 10px 25px -12px rgba(68, 93, 132, 0.25);
+            box-shadow: 0 10px 25px -12px rgba(0, 0, 0, 0.08);
             padding: 16px 18px 18px;
             display: flex;
             flex-direction: column;
