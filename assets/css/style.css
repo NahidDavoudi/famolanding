@@ -685,6 +685,11 @@
     box-shadow: 0 10px 26px -10px rgba(68, 93, 132, 0.25);
 }
 
+.curve-carousel__card .inst-bio {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+}
+
 .curve-carousel__card.is-center .inst-card {
     box-shadow: 0 24px 54px -14px rgba(68, 93, 132, 0.38);
 }
@@ -1096,20 +1101,20 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.6) 50%,
-        transparent 100%
-    );
+    background: linear-gradient(90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.6) 50%,
+            transparent 100%);
     animation: shimmer 1.5s ease-in-out infinite;
-    animation-direction: reverse; /* RTL direction */
+    animation-direction: reverse;
+    /* RTL direction */
 }
 
 @keyframes shimmer {
     0% {
         transform: translateX(-100%);
     }
+
     100% {
         transform: translateX(100%);
     }
@@ -1119,6 +1124,7 @@
     .skeleton-shimmer::after {
         animation: none;
     }
+
     .skeleton-shimmer {
         background-color: var(--skeleton-bg);
     }
@@ -1155,7 +1161,7 @@
         min-height: auto;
         height: 100%;
     }
-    
+
     .course-card-skeleton .skeleton-image {
         min-height: 180px;
     }
