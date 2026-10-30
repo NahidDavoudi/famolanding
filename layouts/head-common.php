@@ -3,13 +3,13 @@
 <meta name="color-scheme" content="light">
 <?= famo_config_script() ?>
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-4NHPK2145Z"></script>
+<!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-4NHPK2145Z"></script>
 <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-4NHPK2145Z');
-</script>
+</script> -->
 
 <!-- Structured Data -->
 <script type="application/ld+json">
