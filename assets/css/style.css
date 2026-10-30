@@ -485,40 +485,53 @@
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
 }
 
-/* ==================== کارت خدمات: ایلوستریشن در بالای کارت ====================
-   تصاویر نهایی را با نسبت 16/10 (پیشنهاد: 1200×750) در مسیرهای assets/images/services/ جایگزین کنید. */
+/* ==================== کارت خدمات: ایلوستریشن 1:1 به‌صورت «جزیره معلق» (نئومورفیسم مینیمال) ====================
+   تصاویر مربعی (1:1) هستند و با object-fit: contain هرگز بریده نمی‌شوند. */
 .service-card {
+    --service-surface: color-mix(in srgb, var(--ds-color-primary-light-100) 55%, var(--ds-color-white));
     display: flex;
     flex-direction: column;
     height: 100%;
     min-width: 0;
-    overflow: hidden;
-    background: var(--ds-color-surface);
-    border: 1px solid var(--ds-color-border);
-    border-radius: 20px;
-    box-shadow: 0 12px 28px -14px rgba(68, 93, 132, 0.3);
+    padding: 0.875rem 0.875rem 0;
+    background: var(--service-surface);
+    border: 1px solid color-mix(in srgb, var(--ds-color-border) 60%, transparent);
+    border-radius: 22px;
+    box-shadow: 0 12px 28px -16px rgba(68, 93, 132, 0.28);
 }
 
 .service-media {
     width: 100%;
-    aspect-ratio: 16 / 10;
+    aspect-ratio: 1 / 1;
     flex: 0 0 auto;
-    overflow: hidden;
-    background: linear-gradient(135deg, var(--ds-color-border) 0%, var(--ds-color-primary-light-100) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 18px;
+    background: var(--service-surface);
+    /* برجسته‌ی نرم: سایه تیره پایین/راست + هایلایت سفید بالا/چپ */
+    box-shadow:
+        7px 7px 16px rgba(68, 93, 132, 0.16),
+        -7px -7px 16px rgba(255, 255, 255, 0.95);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
 }
 
 .service-illustration {
     display: block;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center;
-    transition: transform 0.5s ease;
+    border-radius: 12px;
 }
 
 @media (hover: hover) {
-    .service-card:hover .service-illustration {
-        transform: scale(1.045);
+    .service-card:hover .service-media {
+        transform: translateY(-4px);
+        box-shadow:
+            9px 12px 22px rgba(68, 93, 132, 0.2),
+            -7px -7px 16px rgba(255, 255, 255, 0.95);
     }
 }
 
@@ -527,7 +540,7 @@
     flex: 1 1 auto;
     flex-direction: column;
     align-items: center;
-    padding: 1.25rem 1.3rem 1.5rem;
+    padding: 1.25rem 0.9rem 1.5rem;
     text-align: center;
 }
 
@@ -547,7 +560,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .service-illustration {
+    .service-media {
         transition: none;
     }
 }
