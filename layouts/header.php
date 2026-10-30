@@ -8,7 +8,7 @@
             <div class="flex items-center gap-4">
                 <div class="bg-[#445D84] w-12 h-12 rounded-full flex items-center justify-center shrink-0">
                     <a href="<?php echo $base?>index.php">
-                        <img src="<?php echo famo_asset('images/logo.png', $base . '../shared/images/logo.png'); ?>" alt="لوگوی آموزشگاه فامو" width="48" height="48" decoding="async" class="w-12 h-12 object-contain">
+                        <img src="<?php echo famo_asset('images/logo.webp', $base . '../shared/images/logo.webp'); ?>" alt="لوگوی آموزشگاه فامو" width="48" height="48" decoding="async" class="w-12 h-12 object-contain">
                     </a>
                 </div>
                 <div>
