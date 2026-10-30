@@ -51,6 +51,7 @@
 <script src="<?php echo $base; ?>assets/js/animation.js"></script>
 
 <!-- Font Vazir -->
+<link rel="stylesheet" href="<?php echo famo_asset('css/tokens.css', $base . '../shared/css/tokens.css'); ?>">
 <link rel="stylesheet" href="<?php echo famo_asset('css/output.css', $base . '../shared/css/output.css'); ?>">
 <link rel="stylesheet" href="<?php echo $base; ?>assets/css/icons.css">
 <link rel="stylesheet" href="<?php echo famo_asset('css/libs/swiper-bundle.min.css', $base . '../shared/css/libs/swiper-bundle.min.css'); ?>">
