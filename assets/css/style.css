@@ -300,6 +300,172 @@
     background: linear-gradient(135deg, #E2D9C6 0%, #f0e8d8 100%);
 }
 
+/* ==================== Hero (بخش خانه): تصویر ← تیتر ← توضیح ← کارت آمار ← دکمه‌ها ====================
+   همه اندازه‌های جدید این بخش با کلاس اختصاصی آمده تا به rebuild شدن Tailwind (output.css) وابسته نباشد. */
+.hero-section {
+    /* فضای نوبار fixed: موبایل ~۹۰px و از sm به بالا ~۱۱۲px */
+    padding-top: 6.75rem;
+    padding-bottom: 2.5rem;
+}
+
+@media (min-width: 640px) {
+    .hero-section {
+        padding-top: 8.25rem;
+        padding-bottom: 3rem;
+    }
+}
+
+.hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+/* ۱) تصویر */
+.hero-media {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 18px 38px -16px rgba(0, 0, 0, 0.35);
+    background: #3a5170;
+}
+
+@media (min-width: 768px) {
+    .hero-media {
+        aspect-ratio: 21 / 9;
+        max-height: 45vh;
+    }
+}
+
+.hero-media-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* ۲) تیتر */
+.hero-title {
+    margin: 1.25rem 0 0;
+    font-size: clamp(1.5rem, 1.1rem + 1.8vw, 2.5rem);
+    line-height: 1.4;
+    font-weight: 700;
+    text-align: center;
+    text-wrap: balance;
+}
+
+.hero-title-accent {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.85em;
+    color: #E2D9C6;
+}
+
+/* ۳) توضیح */
+.hero-desc {
+    margin: 0.75rem auto 0;
+    max-width: 36rem;
+    font-size: clamp(0.95rem, 0.9rem + 0.3vw, 1.1rem);
+    line-height: 1.9;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+/* ۴) کارت آمار */
+.hero-stats {
+    width: 100%;
+    max-width: 40rem;
+    margin: 1.25rem auto 0;
+    padding: 1rem 1.25rem;
+    background: #f9f7f3;
+    border: 1px solid #E2D9C6;
+    border-radius: 1rem;
+    box-shadow: 0 14px 30px -14px rgba(0, 0, 0, 0.35);
+}
+
+.hero-stats-grid {
+    gap: 0.5rem;
+}
+
+/* جداکننده نازک بین ستون‌ها (logical property = امن در RTL) */
+.hero-stat + .hero-stat {
+    border-inline-start: 1px solid #E2D9C6;
+}
+
+.hero-stat {
+    padding-inline: 0.25rem;
+}
+
+.hero-stat-number {
+    color: #445D84;
+    line-height: 1.3;
+    font-variant-numeric: tabular-nums;
+}
+
+.hero-stat-plus {
+    color: #736158;
+    margin-inline-start: 0.125rem;
+}
+
+.hero-stat-label {
+    margin-top: 0.25rem;
+    color: #4b5563;
+    line-height: 1.7;
+}
+
+/* ۵) دکمه‌ها */
+.hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}
+
+.hero-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* صفحه‌های خیلی کوچک: دکمه‌ها زیر هم و هم‌عرض */
+@media (max-width: 380px) {
+    .hero-ctas {
+        flex-direction: column;
+        width: 100%;
+        max-width: 18rem;
+    }
+
+    .hero-cta {
+        width: 100%;
+    }
+}
+
+/* لپ‌تاپ کوتاه (مثل 1366×768): فشرده‌سازی ملایم ریتم عمودی تا کارت آمار بالای خط تا بماند */
+@media (min-width: 768px) and (max-height: 820px) {
+    .hero-section {
+        padding-top: 7.75rem;
+        padding-bottom: 2.25rem;
+    }
+
+    .hero-title {
+        margin-top: 1rem;
+    }
+
+    .hero-stats {
+        margin-top: 1rem;
+        padding-top: 0.875rem;
+        padding-bottom: 0.875rem;
+    }
+
+    .hero-ctas {
+        margin-top: 1rem;
+    }
+}
+
 .hover-lift {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -317,6 +483,73 @@
 .hover-lift:hover {
     transform: translateY(-8px);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* ==================== کارت خدمات: ایلوستریشن در بالای کارت ====================
+   تصاویر نهایی را با نسبت 16/10 (پیشنهاد: 1200×750) در مسیرهای assets/images/services/ جایگزین کنید. */
+.service-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-width: 0;
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #E2D9C6;
+    border-radius: 20px;
+    box-shadow: 0 12px 28px -14px rgba(68, 93, 132, 0.3);
+}
+
+.service-media {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    flex: 0 0 auto;
+    overflow: hidden;
+    background: linear-gradient(135deg, #E2D9C6 0%, #f3eee2 100%);
+}
+
+.service-illustration {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 0.5s ease;
+}
+
+@media (hover: hover) {
+    .service-card:hover .service-illustration {
+        transform: scale(1.045);
+    }
+}
+
+.service-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.25rem 1.3rem 1.5rem;
+    text-align: center;
+}
+
+.service-title {
+    margin: 0;
+    color: #445D84;
+    font-size: 1.15rem;
+    font-weight: 700;
+    line-height: 1.8;
+}
+
+.service-desc {
+    margin: 0.6rem 0 0;
+    color: #5f6b7a;
+    font-size: 0.92rem;
+    line-height: 1.95;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .service-illustration {
+        transition: none;
+    }
 }
 
 .glass-effect {
@@ -459,16 +692,15 @@
 
 /* اسکلتون هم‌شکل کارت جدید اساتید */
 .famo-inst-skel {
+    /* هم‌جعبه با .inst-card: مدیا چسبیده به لبه‌ها، بدون پدینگ داخلی دور تصویر */
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
     height: 100%;
-    min-height: 300px;
     background: #fff;
     border: 1px solid #E2D9C6;
     border-radius: 20px;
-    padding: 1.75rem 1.25rem;
+    overflow: hidden;
+    padding-bottom: 1.5rem;
     box-shadow: 0 6px 20px -8px rgba(68, 93, 132, 0.18);
 }
 
@@ -601,6 +833,57 @@
 .inst-social:focus-visible {
     outline: 2px solid #445D84;
     outline-offset: 2px;
+}
+
+/* کارت یکسان اعضای کادر (استاد + پشتیبان): روی همان جعبه .inst-card */
+.person-media {
+    position: relative;
+    height: 225px;
+    flex: 0 0 auto;
+    background: #ffffff;
+}
+
+.person-media .inst-avatar {
+    height: 100%;
+}
+
+.person-role-badge {
+    position: absolute;
+    top: 0.75rem;
+    inset-inline-start: 0.75rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    min-height: 28px;
+    padding: 0.2rem 0.75rem;
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #445D84;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.6;
+    box-shadow: 0 6px 16px rgba(68, 93, 132, 0.2);
+}
+
+.person-card--supporter .person-role-badge {
+    background: #445D84;
+    color: #ffffff;
+}
+
+.person-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    padding: 0.35rem 0.85rem;
+    border: 1px solid #E2D9C6;
+    border-radius: 9999px;
+    background: #f9f7f3;
+    color: #445D84;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1.7;
+    text-align: center;
 }
 
 /* width کارت در کاروسل از نفس کانفیگ JS می‌آید (320px دسکتاپ / 262px موبایل) */
@@ -1164,5 +1447,156 @@
 
     .course-card-skeleton .skeleton-image {
         min-height: 180px;
+    }
+}
+
+/* ==================== اسکلتون صفحه اصلی: هم‌شکل با کارت واقعی (بدون پرش ارتفاع) ====================
+   سیستم واحد: skeleton-shimmer (قبلاً تعریف بود ولی هیچ‌جا استفاده نمی‌شد).
+   رنگ نوارها از پالت برند گرفته شده تا روی bg کرم هم دیده شود. */
+.course-card-skeleton .skeleton-shimmer,
+.famo-inst-skel .skeleton-shimmer {
+    background-color: #e6dfd0;
+    border-radius: 6px;
+}
+
+.course-card-skeleton .skel-media,
+.famo-inst-skel .skel-inst-media {
+    background-color: #d9d0ba;
+    border-radius: 0;
+}
+
+/* کارت دوره (خانه): آینه buildCourseSlide در main.js
+   مدیا از .famo-course-media نسبت 16/10 را می‌گیرد؛ فوتر فقط CTA دارد (قیمت در کارت خانه نیست). */
+.skel-bar--title {
+    width: 85%;
+    height: 16px;
+    margin-top: 6px;
+}
+
+.skel-bar--title-short {
+    width: 55%;
+    height: 16px;
+    margin-top: 18px;
+}
+
+.skel-chips {
+    display: flex;
+    gap: 6px;
+    margin-top: 14px;
+}
+
+.skel-chips span {
+    width: 64px;
+    height: 21px;
+    border-radius: 9999px;
+}
+
+.skel-chips span:last-child {
+    width: 48px;
+}
+
+.skel-bar--desc {
+    width: 100%;
+    height: 12px;
+    margin-top: 18px;
+}
+
+.skel-bar--desc-short {
+    width: 70%;
+    height: 12px;
+    margin-top: 18px;
+}
+
+.skel-cta {
+    display: block;
+    width: 104px;
+    height: 36px;
+    border-radius: 10px;
+}
+
+/* کارت استاد (خانه): آینه .inst-card / instructorCardHtml */
+.skel-inst-media {
+    width: 100%;
+    height: 225px;
+    flex: 0 0 auto;
+    -webkit-mask-image: linear-gradient(to bottom, #000 68%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 68%, transparent 100%);
+}
+
+.skel-bar--inst-name {
+    align-self: center;
+    width: 45%;
+    height: 16px;
+    margin-top: 8px;
+}
+
+.skel-bar--inst-title {
+    align-self: center;
+    width: 32%;
+    height: 12px;
+    margin-top: 14px;
+}
+
+.skel-bar--inst-bio {
+    align-self: center;
+    width: 86%;
+    height: 12px;
+    margin-top: 19px;
+}
+
+.skel-bar--inst-bio-short {
+    align-self: center;
+    width: 64%;
+    height: 12px;
+    margin-top: 15px;
+}
+
+.skel-inst-socials {
+    margin-top: auto;
+    padding-top: 14px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.skel-inst-socials span {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
+/* قبل از ساخته‌شدن Swiper: اسکلتون دوره‌ها با همان عرض اسلاید واقعی نمایش داده شود
+   (بدون این حالت، هر اسلاید ۱۰۰٪ عرض می‌گیرد و فقط یک کارت غول‌پیکر دیده می‌شود). */
+.coursesSwiper--loading .swiper-wrapper {
+    display: flex;
+    gap: 16px;
+}
+
+.coursesSwiper--loading .swiper-slide {
+    flex: 0 0 calc(100% / 1.15);
+    min-width: 0;
+}
+
+@media (min-width: 640px) {
+    .coursesSwiper--loading .swiper-slide {
+        flex-basis: calc((100% - 16px) / 2);
+    }
+}
+
+@media (min-width: 1024px) {
+    .coursesSwiper--loading .swiper-slide {
+        flex-basis: calc((100% - 32px) / 3);
+    }
+}
+
+@media (min-width: 1280px) {
+    .coursesSwiper--loading .swiper-slide {
+        flex-basis: calc((100% - 48px) / 4);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .skeleton-pulse {
+        animation: none;
     }
 }

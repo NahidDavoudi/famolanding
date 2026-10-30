@@ -18,60 +18,52 @@
     <!-- Header -->
    <?php include 'layouts/header.php' ?>
     <!-- Hero Section -->
-    <section id="home" class="pt-32 sm:pt-32 pb-12 sm:pb-20 px-4 gradient-bg text-white">
-        <div class="container mx-auto max-w-6xl">
-            <div class="flex flex-col lg:flex-row items-center justify-between gap-8">
-                <div class="lg:w-1/2 text-center lg:text-right">
-                    <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6 leading-tight">
-                        مشاوره تخصصی، آزمون‌های جامع و آموزش مفهومی
-                        <span class="text-[#E2D9C6] block mt-2">کنکور و تیزهوشان</span>
-                    </h1>
-                    <p class="text-base sm:text-lg mb-6 sm:mb-8 text-white/90 leading-relaxed">
-                        آموزشگاه فامو با تیمی از اساتید مجرب و مشاوران حرفه‌ای، همراه دانش‌آموزان در مسیر موفقیت تحصیلی
-                        است.
-                    </p>
-                    <div class="flex flex-row justify-center items-center gap-3 sm:gap-5">
-                        <a href="<?= htmlspecialchars(famo_login_url() . '/', ENT_QUOTES, 'UTF-8') ?>"
-                            class="bg-gradient-to-r from-[#E2D9C6] to-[#d4c9b2] text-[#445D84] px-8 py-3 rounded-full font-bold hover:shadow-xl transition-all duration-300 hover:scale-105 shadow-lg inline-flex items-center min-h-[44px]">
-                            <i class="icon ml-2" data-lucide="school" aria-hidden="true"></i>
-                            رزرو نوبت
-                        </a>
-                        <a href="#courses"
-                            class="bg-transparent border-2 border-[#E2D9C6] text-[#E2D9C6] px-4 py-3 rounded-full font-bold hover:bg-[#E2D9C6] hover:text-[#445D84] transition-all duration-300 inline-flex items-center min-h-[44px]">
-                            <i class="icon ml-2" data-lucide="book-open" aria-hidden="true"></i>
-                            مشاهده دوره‌ها
-                        </a>
+    <section id="home" class="hero-section gradient-bg text-white px-4">
+        <div class="container mx-auto max-w-6xl hero-inner">
+            <!-- ۱) تصویر هیرو: تمام‌عرض، بدون overlay -->
+            <div class="hero-media">
+                <img src="assets/images/poster_hero.webp" alt="محیط آموزشی آموزشگاه فامو" width="2817" height="1585" decoding="async" fetchpriority="high" class="hero-media-img">
+            </div>
+
+            <!-- ۲) تیتر -->
+            <h1 class="hero-title">
+                مشاوره تخصصی، آزمون‌های جامع و آموزش مفهومی
+                <span class="hero-title-accent">کنکور و تیزهوشان</span>
+            </h1>
+
+            <!-- ۳) توضیح کوتاه -->
+            <p class="hero-desc">اساتید مجرب و مشاوران حرفه‌ای، همراه دانش‌آموزان تا قبولی.</p>
+
+            <!-- ۴) کارت آمار: خارج از تصویر، روی پس‌زمینه روشن -->
+            <div class="hero-stats">
+                <div class="grid grid-cols-3 text-center hero-stats-grid">
+                    <div class="hero-stat">
+                        <div class="hero-stat-number text-2xl sm:text-3xl font-bold"><span id="years-counter">7</span><span class="hero-stat-plus">+</span></div>
+                        <div class="hero-stat-label text-sm">سال تجربه</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-number text-2xl sm:text-3xl font-bold"><span id="students-counter">200</span><span class="hero-stat-plus">+</span></div>
+                        <div class="hero-stat-label text-sm">قبولی کنکور</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-number text-2xl sm:text-3xl font-bold"><span id="teachers-counter">10</span><span class="hero-stat-plus">+</span></div>
+                        <div class="hero-stat-label text-sm">استاد برتر</div>
                     </div>
                 </div>
-                <!-- Illustration & Stats -->
-                <div class="lg:w-1/2 w-full relative z-10 mt-6 lg:mt-0">
-                    <div class="relative w-full max-w-lg mx-auto rounded-3xl overflow-hidden shadow-2xl border border-white/20 bg-[#445D84]/20">
-                        <!-- تصویر میز مطالعه -->
-                        <img src="assets/images/poster_hero.webp" alt="محیط آموزشی آموزشگاه فامو" width="2817" height="1585" decoding="async" fetchpriority="high" class="w-full h-auto object-cover">
-                        
-                        <!-- Stats Card (شناور روی تصویر یا پایین آن) -->
-                        <div class="absolute bottom-3 right-3 left-3 glass-effect rounded-2xl p-4 border border-white/20 backdrop-blur-md z-20 shadow-xl">
-                            <h3 class="text-sm font-bold mb-2 text-center text-[#E2D9C6] flex items-center justify-center">
-                                <i class="icon icon--sm ml-2" data-lucide="chart-column" aria-hidden="true"></i>
-                                آمار فامو در یک نگاه
-                            </h3>
-                            <div class="grid grid-cols-3 gap-2 text-center divide-x divide-x-reverse divide-white/10">
-                                <div class="px-1">
-                                    <div class="text-xl font-bold mb-1 text-white"><span id="years-counter">7</span><span class="text-[#E2D9C6] mr-0.5">+</span></div>
-                                    <div class="text-white/70 text-xs">سال تجربه</div>
-                                </div>
-                                <div class="px-1">
-                                    <div class="text-xl font-bold mb-1 text-white"><span id="students-counter">500</span><span class="text-[#E2D9C6] mr-0.5">+</span></div>
-                                    <div class="text-white/70 text-xs">قبولی کنکور</div>
-                                </div>
-                                <div class="px-1">
-                                    <div class="text-xl font-bold mb-1 text-white"><span id="teachers-counter">15</span><span class="text-[#E2D9C6] mr-0.5">+</span></div>
-                                    <div class="text-white/70 text-xs">استاد برتر</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            </div>
+
+            <!-- ۵) دکمه‌ها: هم‌اندازه -->
+            <div class="hero-ctas">
+                <a href="<?= htmlspecialchars(famo_login_url() . '/', ENT_QUOTES, 'UTF-8') ?>"
+                    class="hero-cta bg-gradient-to-r from-[#E2D9C6] to-[#d4c9b2] text-[#445D84] px-6 py-3 rounded-full font-bold hover:shadow-xl transition-all duration-300 hover:scale-105 shadow-lg min-h-[44px]">
+                    <i class="icon ml-2" data-lucide="school" aria-hidden="true"></i>
+                    رزرو نوبت
+                </a>
+                <a href="#courses"
+                    class="hero-cta bg-transparent border-2 border-[#E2D9C6] text-[#E2D9C6] px-6 py-3 rounded-full font-bold hover:bg-[#E2D9C6] hover:text-[#445D84] transition-all duration-300 min-h-[44px]">
+                    <i class="icon ml-2" data-lucide="book-open" aria-hidden="true"></i>
+                    مشاهده دوره‌ها
+                </a>
             </div>
         </div>
     </section>
@@ -88,69 +80,65 @@
             </div>
 
             <!-- Course Cards - Swiper Carousel -->
-            <div class="swiper coursesSwiper relative pb-12">
-                <div class="swiper-wrapper" id="coursesContainer">
+            <div class="swiper coursesSwiper coursesSwiper--loading relative pb-12">
+                <div class="swiper-wrapper" id="coursesContainer" aria-busy="true">
                     <!-- Skeleton Loaders -->
                     <div class="swiper-slide skeleton-course-wrapper h-auto">
                         <div class="famo-course-card course-card-skeleton" aria-hidden="true">
-                            <div class="skeleton skeleton-pulse famo-course-media" style="aspect-ratio: 16/10;"></div>
+                            <div class="famo-course-media skeleton-shimmer skel-media"></div>
                             <div class="famo-course-body">
-                                <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
-                                <div class="skeleton skeleton-pulse h-3 w-1/2 bg-gray-100 rounded mt-2"></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--title"></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--title-short"></div>
+                                <div class="skel-chips"><span class="skeleton-shimmer"></span><span class="skeleton-shimmer"></span></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--desc"></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--desc-short"></div>
                                 <div class="famo-course-footer">
-                                    <div class="famo-course-price">
-                                        <span class="skeleton skeleton-pulse h-2.5 w-14 block bg-gray-100 rounded"></span>
-                                        <span class="skeleton skeleton-pulse h-4 w-24 block bg-gray-200 rounded mt-2"></span>
-                                    </div>
-                                    <span class="skeleton skeleton-pulse h-8 w-24 block bg-gray-200 rounded"></span>
+                                    <span class="skeleton-shimmer skel-cta"></span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="swiper-slide skeleton-course-wrapper h-auto">
                         <div class="famo-course-card course-card-skeleton" aria-hidden="true">
-                            <div class="skeleton skeleton-pulse famo-course-media" style="aspect-ratio: 16/10;"></div>
+                            <div class="famo-course-media skeleton-shimmer skel-media"></div>
                             <div class="famo-course-body">
-                                <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
-                                <div class="skeleton skeleton-pulse h-3 w-1/2 bg-gray-100 rounded mt-2"></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--title"></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--title-short"></div>
+                                <div class="skel-chips"><span class="skeleton-shimmer"></span><span class="skeleton-shimmer"></span></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--desc"></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--desc-short"></div>
                                 <div class="famo-course-footer">
-                                    <div class="famo-course-price">
-                                        <span class="skeleton skeleton-pulse h-2.5 w-14 block bg-gray-100 rounded"></span>
-                                        <span class="skeleton skeleton-pulse h-4 w-24 block bg-gray-200 rounded mt-2"></span>
-                                    </div>
-                                    <span class="skeleton skeleton-pulse h-8 w-24 block bg-gray-200 rounded"></span>
+                                    <span class="skeleton-shimmer skel-cta"></span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="swiper-slide skeleton-course-wrapper h-auto">
                         <div class="famo-course-card course-card-skeleton" aria-hidden="true">
-                            <div class="skeleton skeleton-pulse famo-course-media" style="aspect-ratio: 16/10;"></div>
+                            <div class="famo-course-media skeleton-shimmer skel-media"></div>
                             <div class="famo-course-body">
-                                <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
-                                <div class="skeleton skeleton-pulse h-3 w-1/2 bg-gray-100 rounded mt-2"></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--title"></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--title-short"></div>
+                                <div class="skel-chips"><span class="skeleton-shimmer"></span><span class="skeleton-shimmer"></span></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--desc"></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--desc-short"></div>
                                 <div class="famo-course-footer">
-                                    <div class="famo-course-price">
-                                        <span class="skeleton skeleton-pulse h-2.5 w-14 block bg-gray-100 rounded"></span>
-                                        <span class="skeleton skeleton-pulse h-4 w-24 block bg-gray-200 rounded mt-2"></span>
-                                    </div>
-                                    <span class="skeleton skeleton-pulse h-8 w-24 block bg-gray-200 rounded"></span>
+                                    <span class="skeleton-shimmer skel-cta"></span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="swiper-slide skeleton-course-wrapper h-auto">
                         <div class="famo-course-card course-card-skeleton" aria-hidden="true">
-                            <div class="skeleton skeleton-pulse famo-course-media" style="aspect-ratio: 16/10;"></div>
+                            <div class="famo-course-media skeleton-shimmer skel-media"></div>
                             <div class="famo-course-body">
-                                <div class="skeleton skeleton-pulse h-4 w-3/4 bg-gray-200 rounded"></div>
-                                <div class="skeleton skeleton-pulse h-3 w-1/2 bg-gray-100 rounded mt-2"></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--title"></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--title-short"></div>
+                                <div class="skel-chips"><span class="skeleton-shimmer"></span><span class="skeleton-shimmer"></span></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--desc"></div>
+                                <div class="skeleton-shimmer skel-bar skel-bar--desc-short"></div>
                                 <div class="famo-course-footer">
-                                    <div class="famo-course-price">
-                                        <span class="skeleton skeleton-pulse h-2.5 w-14 block bg-gray-100 rounded"></span>
-                                        <span class="skeleton skeleton-pulse h-4 w-24 block bg-gray-200 rounded mt-2"></span>
-                                    </div>
-                                    <span class="skeleton skeleton-pulse h-8 w-24 block bg-gray-200 rounded"></span>
+                                    <span class="skeleton-shimmer skel-cta"></span>
                                 </div>
                             </div>
                         </div>
@@ -179,38 +167,47 @@
     <section id="team" class="py-20 px-4 bg-[#f9f7f3]">
         <div class="container mx-auto max-w-6xl">
             <div class="text-center mb-12 sm:mb-16">
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3 sm:mb-4">کادر حرفه ای آموزشگاه فامو
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3 sm:mb-4">کادر حرفه‌ای آموزشگاه فامو
                 </h2>
-                <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">جمعی از اساتید و دانشجویان برتر و متخصص شهرستان بابل</p>
+                <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">اساتید، مشاوران و پشتیبانان برتر بابل؛ همراه دانش‌آموزان از آموزش تا رفع اشکال</p>
             </div>
 
             <div class="curve-carousel">
                 <div class="curve-carousel__wrap">
                     <div class="curve-carousel__stage" tabindex="0"
-                         aria-label="کاروسل اساتید؛ با کشیدن یا کلیدهای جهت‌دار جابه‌جا کنید">
+                         aria-label="کاروسل کادر آموزشی فامو؛ با کشیدن یا کلیدهای جهت‌دار جابه‌جا کنید">
                         <div class="curve-carousel__edge-blur curve-carousel__edge-blur--left" aria-hidden="true"></div>
                         <div class="curve-carousel__edge-blur curve-carousel__edge-blur--right" aria-hidden="true"></div>
-                        <div class="curve-carousel__track is-skeleton" id="instructorsContainer">
+                        <div class="curve-carousel__track is-skeleton" id="instructorsContainer" aria-busy="true">
                             <!-- Skeleton Loaders -->
                             <div class="skeleton-instructor-wrapper">
                                 <div class="famo-inst-skel" aria-hidden="true">
-                                    <div class="skeleton skeleton-pulse w-full" style="height:225px;"></div>
-                                    <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-2"></div>
-                                    <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
+                                    <div class="skeleton-shimmer skel-inst-media"></div>
+                                    <div class="skeleton-shimmer skel-bar skel-bar--inst-name"></div>
+                                    <div class="skeleton-shimmer skel-bar skel-bar--inst-title"></div>
+                                    <div class="skeleton-shimmer skel-bar skel-bar--inst-bio"></div>
+                                    <div class="skeleton-shimmer skel-bar skel-bar--inst-bio-short"></div>
+                                    <div class="skel-inst-socials"><span class="skeleton-shimmer"></span><span class="skeleton-shimmer"></span></div>
                                 </div>
                             </div>
                             <div class="skeleton-instructor-wrapper">
                                 <div class="famo-inst-skel" aria-hidden="true">
-                                    <div class="skeleton skeleton-pulse w-full" style="height:225px;"></div>
-                                    <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-2"></div>
-                                    <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
+                                    <div class="skeleton-shimmer skel-inst-media"></div>
+                                    <div class="skeleton-shimmer skel-bar skel-bar--inst-name"></div>
+                                    <div class="skeleton-shimmer skel-bar skel-bar--inst-title"></div>
+                                    <div class="skeleton-shimmer skel-bar skel-bar--inst-bio"></div>
+                                    <div class="skeleton-shimmer skel-bar skel-bar--inst-bio-short"></div>
+                                    <div class="skel-inst-socials"><span class="skeleton-shimmer"></span><span class="skeleton-shimmer"></span></div>
                                 </div>
                             </div>
                             <div class="skeleton-instructor-wrapper">
                                 <div class="famo-inst-skel" aria-hidden="true">
-                                    <div class="skeleton skeleton-pulse w-full" style="height:225px;"></div>
-                                    <div class="skeleton skeleton-pulse h-4 w-28 bg-gray-200 rounded mx-auto mt-2"></div>
-                                    <div class="skeleton skeleton-pulse h-3 w-20 bg-gray-100 rounded mx-auto mt-2"></div>
+                                    <div class="skeleton-shimmer skel-inst-media"></div>
+                                    <div class="skeleton-shimmer skel-bar skel-bar--inst-name"></div>
+                                    <div class="skeleton-shimmer skel-bar skel-bar--inst-title"></div>
+                                    <div class="skeleton-shimmer skel-bar skel-bar--inst-bio"></div>
+                                    <div class="skeleton-shimmer skel-bar skel-bar--inst-bio-short"></div>
+                                    <div class="skel-inst-socials"><span class="skeleton-shimmer"></span><span class="skeleton-shimmer"></span></div>
                                 </div>
                             </div>
                         </div>
@@ -313,52 +310,60 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                 <!-- Service 1 -->
-                <div
-                    class="bg-white rounded-2xl p-6 sm:p-8 shadow-xl border border-[#E2D9C6] hover-lift transition-all duration-300">
-                    <div
-                        class="w-20 h-20 bg-gradient-to-br from-[#E2D9C6] to-[#d4c9b2] rounded-full flex items-center justify-center mb-6 mx-auto">
-                        <i class="icon icon--xl text-[#445D84]" data-lucide="headset" aria-hidden="true"></i>
+                <article class="service-card hover-lift">
+                    <div class="service-media">
+                        <img src="assets/images/services/24support.webp"
+                            alt="ایلوستریشن پشتیبانی ۲۴ ساعته آموزشگاه فامو"
+                            width="800" height="500" loading="lazy" decoding="async"
+                            class="service-illustration">
                     </div>
-                    <h3 class="text-xl font-bold text-[#445D84] mb-4 text-center">پشتیبانی ۲۴ ساعته</h3>
-                    <p class="text-gray-600 text-center leading-relaxed">پاسخگویی به سوالات درسی دانش‌آموزان در تمامی
-                        ساعات شبانه‌روز توسط تیم پشتیبانی متخصص.</p>
-                </div>
+                    <div class="service-body">
+                        <h3 class="service-title">پشتیبانی ۲۴ ساعته</h3>
+                        <p class="service-desc">پاسخگویی به سوالات درسی دانش‌آموزان در تمامی ساعات شبانه‌روز توسط تیم پشتیبانی متخصص.</p>
+                    </div>
+                </article>
 
                 <!-- Service 2 -->
-                <div class="bg-white rounded-2xl p-8 shadow-xl border border-[#E2D9C6] hover-lift transition-all duration-500 animate-card-slide"
-                    style="animation-delay: 0.2s">
-                    <div
-                        class="w-20 h-20 bg-gradient-to-br from-[#E2D9C6] to-[#d4c9b2] rounded-full flex items-center justify-center mb-6 mx-auto">
-                        <i class="icon icon--xl text-[#445D84]" data-lucide="chart-column" aria-hidden="true"></i>
+                <article class="service-card hover-lift animate-card-slide" style="animation-delay: 0.2s">
+                    <div class="service-media">
+                        <img src="assets/images/services/weekly_exams.webp"
+                            alt="ایلوستریشن آزمون‌های هفتگی و تحلیل پیشرفت"
+                            width="800" height="500" loading="lazy" decoding="async"
+                            class="service-illustration">
                     </div>
-                    <h3 class="text-xl font-bold text-[#445D84] mb-4 text-center">آزمون‌های هفتگی</h3>
-                    <p class="text-gray-600 text-center leading-relaxed">برگزاری آزمون‌های استاندارد با تحلیل پیشرفت
-                        فردی هر دانش‌آموز و ارائه گزارش کامل.</p>
-                </div>
+                    <div class="service-body">
+                        <h3 class="service-title">آزمون‌های هفتگی</h3>
+                        <p class="service-desc">برگزاری آزمون‌های استاندارد با تحلیل پیشرفت فردی هر دانش‌آموز و ارائه گزارش کامل.</p>
+                    </div>
+                </article>
 
                 <!-- Service 3 -->
-                <div class="bg-white rounded-2xl p-8 shadow-xl border border-[#E2D9C6] hover-lift transition-all duration-500 animate-card-slide"
-                    style="animation-delay: 0.3s">
-                    <div
-                        class="w-20 h-20 bg-gradient-to-br from-[#E2D9C6] to-[#d4c9b2] rounded-full flex items-center justify-center mb-6 mx-auto">
-                        <i class="icon icon--xl text-[#445D84]" data-lucide="users" aria-hidden="true"></i>
+                <article class="service-card hover-lift animate-card-slide" style="animation-delay: 0.3s">
+                    <div class="service-media">
+                        <img src="assets/images/services/private_classes.webp"
+                            alt="ایلوستریشن کلاس‌های خصوصی و رفع اشکال"
+                            width="800" height="500" loading="lazy" decoding="async"
+                            class="service-illustration">
                     </div>
-                    <h3 class="text-xl font-bold text-[#445D84] mb-4 text-center">کلاس‌های خصوصی</h3>
-                    <p class="text-gray-600 text-center leading-relaxed">برگزاری جلسات خصوصی برای رفع اشکال تک‌تک دروس
-                        با هماهنگی قبلی و اساتید مجرب.</p>
-                </div>
+                    <div class="service-body">
+                        <h3 class="service-title">کلاس‌های خصوصی</h3>
+                        <p class="service-desc">برگزاری جلسات خصوصی برای رفع اشکال تک‌تک دروس با هماهنگی قبلی و اساتید مجرب.</p>
+                    </div>
+                </article>
 
                 <!-- Service 4 -->
-                <div class="bg-white rounded-2xl p-8 shadow-xl border border-[#E2D9C6] hover-lift transition-all duration-500 animate-card-slide"
-                    style="animation-delay: 0.4s">
-                    <div
-                        class="w-20 h-20 bg-gradient-to-br from-[#E2D9C6] to-[#d4c9b2] rounded-full flex items-center justify-center mb-6 mx-auto">
-                        <i class="icon icon--xl text-[#445D84]" data-lucide="book-open" aria-hidden="true"></i>
+                <article class="service-card hover-lift animate-card-slide" style="animation-delay: 0.4s">
+                    <div class="service-media">
+                        <img src="assets/images/services/weekly_plans.webp"
+                            alt="ایلوستریشن مشاوره تخصصی و برنامه‌ریزی تحصیلی"
+                            width="800" height="500" loading="lazy" decoding="async"
+                            class="service-illustration">
                     </div>
-                    <h3 class="text-xl font-bold text-[#445D84] mb-4 text-center">مشاوره تخصصی</h3>
-                    <p class="text-gray-600 text-center leading-relaxed">برنامه‌ریزی تحصیلی شخصی‌سازی شده توسط مشاوران
-                        خبره و رتبه‌های برتر کنکور.</p>
-                </div>
+                    <div class="service-body">
+                        <h3 class="service-title">مشاوره تخصصی</h3>
+                        <p class="service-desc">برنامه‌ریزی تحصیلی شخصی‌سازی شده توسط مشاوران خبره و رتبه‌های برتر کنکور.</p>
+                    </div>
+                </article>
             </div>
 
             <div

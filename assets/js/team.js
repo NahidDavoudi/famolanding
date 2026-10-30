@@ -11,6 +11,24 @@ function safeUrl(value) {
     return (/^https?:\/\//i.test(s) || s.startsWith('/')) ? s : '';
 }
 
+const UPLOADS_BASE = (window.APP_CONFIG && window.APP_CONFIG.uploadsUrl) || 'https://api.famoacademy.ir/uploads';
+
+function resolveImageUrl(value) {
+    if (!value) return '';
+    const src = String(value).trim();
+    if (!src) return '';
+    if (/^(https?:)?\/\//i.test(src) || src.startsWith('data:')) return src;
+    if (src.startsWith('/')) return src;
+    if (src.startsWith('uploads/') || src.startsWith('../') || src.startsWith('assets/')) return src;
+    return `${UPLOADS_BASE.replace(/\/$/, '')}/${src}`;
+}
+
+function personImageUrl(person) {
+    const raw = person.image_url || person.avatar_url || person.image || '';
+    const resolved = resolveImageUrl(raw);
+    return /^(javascript|vbscript):/i.test(resolved) ? '' : resolved;
+}
+
 // Mobile Menu Toggle - Global variables for menu elements
 let mobileMenuBtn = null;
 let mobileMenu = null;
@@ -101,54 +119,81 @@ function renderSocialLinks(links) {
     return items ? `<div class="inst-socials">${items}</div>` : '';
 }
 
-// کارت مشترک اساتید (یکسان با صفحه اصلی — main.js): آواتار بزرگ، بدون ظاهر کلیک‌پذیر
-function renderInstructorCard(instructor) {
-    const initial = instructor.initial_letter || instructor.name.charAt(0);
-    const bio = instructor.full_bio || instructor.description || '';
-    const avatarUrl = safeUrl(instructor.image_url);
+// کارت یکسان اعضای کادر (استاد و پشتیبان) — هم‌ساختار با صفحه اصلی
+function normalizeInstructor(instructor) {
+    return {
+        role: 'instructor',
+        roleLabel: 'استاد',
+        name: instructor.name || '',
+        title: instructor.title || 'استاد تخصصی',
+        description: instructor.full_bio || instructor.description || '',
+        image_url: instructor.image_url || instructor.avatar_url || '',
+        initial_letter: instructor.initial_letter || '',
+        social_links: instructor.social_links || [],
+        tag: '',
+    };
+}
+
+function normalizeSupporter(supporter) {
+    const fieldLabel = supporter.field
+        ? `رشته ${supporter.field}`
+        : (supporter.grade ? `پایه ${supporter.grade}` : 'تحصیلی');
+
+    return {
+        role: 'supporter',
+        roleLabel: 'پشتیبان',
+        name: supporter.name || '',
+        title: supporter.title || `پشتیبان تخصصی ${fieldLabel}`,
+        description: supporter.full_bio || supporter.description || supporter.bio ||
+            'پیگیری برنامه مطالعه، رفع اشکال درسی و همراهی مستمر دانش‌آموزان تا رسیدن به هدف.',
+        image_url: supporter.image_url || supporter.avatar_url || supporter.image || '',
+        initial_letter: supporter.initial_letter || '',
+        social_links: supporter.social_links || [],
+        tag: supporter.tag || supporter.badge_label || 'رفع اشکال و نظارت مستمر',
+    };
+}
+
+function personCardHtml(person) {
+    const role = person.role === 'supporter' ? 'supporter' : 'instructor';
+    const initial = person.initial_letter || (person.name ? person.name.trim().charAt(0) : '');
+    const avatarUrl = personImageUrl(person);
+    const socialsBlock = renderSocialLinks(person.social_links);
+    const footerBlock = socialsBlock || (person.tag
+        ? `<div class="inst-socials person-card__footer"><span class="person-tag">${esc(person.tag)}</span></div>`
+        : '');
 
     return `
-        <article class="inst-card">
-            ${avatarUrl
-                ? `<img class="inst-avatar" src="${esc(avatarUrl)}" alt="${esc(instructor.name)}" loading="lazy">`
-                : `<div class="inst-avatar inst-avatar-ph" aria-hidden="true">${esc(initial)}</div>`}
-            <h3 class="inst-name">${esc(instructor.name)}</h3>
-            <p class="inst-title">${esc(instructor.title)}</p>
-            ${bio ? `<p class="inst-bio">${esc(bio)}</p>` : ''}
-            ${renderSocialLinks(instructor.social_links)}
+        <article class="inst-card person-card person-card--${role}" data-person-role="${role}">
+            <div class="person-media">
+                ${avatarUrl
+                    ? `<img class="inst-avatar" src="${esc(avatarUrl)}" alt="${esc(person.name)}" width="640" height="450" loading="lazy" decoding="async">`
+                    : `<div class="inst-avatar inst-avatar-ph" aria-hidden="true">${esc(initial)}</div>`}
+                <span class="person-role-badge">${esc(person.roleLabel || '')}</span>
+            </div>
+            <h3 class="inst-name">${esc(person.name)}</h3>
+            <p class="inst-title">${esc(person.title)}</p>
+            ${person.description ? `<p class="inst-bio">${esc(person.description)}</p>` : ''}
+            ${footerBlock}
         </article>
     `;
 }
 
+function renderInstructorCard(instructor) {
+    return personCardHtml(normalizeInstructor(instructor));
+}
+
 function renderSupporterCard(supporter) {
-    const initial = supporter.name.charAt(0);
-    const fieldLabel = supporter.field ? `رشته ${supporter.field}` : `پایه ${supporter.grade}`;
-
-    const avatar = supporter.avatar_url
-        ? `<img src="${supporter.avatar_url}" alt="${supporter.name}" class="w-full h-full object-cover">`
-        : `<div class="w-full h-full bg-[#E2D9C6] text-[#445D84] text-2xl font-bold flex items-center justify-center">${initial}</div>`;
-
-    return `
-        <article class="bg-[#f9f7f3] rounded-2xl p-6 border border-[#E2D9C6] flex items-center gap-4">
-            <div class="w-16 h-16 rounded-full overflow-hidden shadow-md shrink-0">
-                ${avatar}
-            </div>
-            <div>
-                <h3 class="font-bold text-[#445D84] text-lg">${supporter.name}</h3>
-                <p class="text-xs text-gray-600">پشتیبان تخصصی ${fieldLabel}</p>
-                <span class="inline-block mt-2 text-xs bg-white px-2 py-1 rounded text-[#445D84] font-bold">رفع
-                    اشکال و نظارت مستمر</span>
-            </div>
-        </article>
-    `;
+    return personCardHtml(normalizeSupporter(supporter));
 }
 
 async function loadInstructors() {
     const container = document.getElementById('instructorsContainer');
     if (!container) return;
+    container.setAttribute('aria-busy', 'true');
 
     try {
         const result = await API.get('/public/instructors');
+        container.setAttribute('aria-busy', 'false');
 
         if (!result.data || result.data.length === 0) {
             container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">استادی ثبت نشده است</p>';
@@ -159,6 +204,7 @@ async function loadInstructors() {
         if (window.refreshLucideIcons) window.refreshLucideIcons(container);
     } catch (error) {
         console.error('Error loading instructors:', error);
+        container.setAttribute('aria-busy', 'false');
         container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">خطا در بارگذاری اساتید</p>';
     }
 }
@@ -166,9 +212,11 @@ async function loadInstructors() {
 async function loadSupporters() {
     const container = document.getElementById('supportersContainer');
     if (!container) return;
+    container.setAttribute('aria-busy', 'true');
 
     try {
         const result = await API.get('/public/supporters');
+        container.setAttribute('aria-busy', 'false');
 
         if (!result.data || result.data.length === 0) {
             container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">پشتیبانی ثبت نشده است</p>';
@@ -179,6 +227,7 @@ async function loadSupporters() {
         if (window.refreshLucideIcons) window.refreshLucideIcons(container);
     } catch (error) {
         console.error('Error loading supporters:', error);
+        container.setAttribute('aria-busy', 'false');
         container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">خطا در بارگذاری پشتیبانان</p>';
     }
 }

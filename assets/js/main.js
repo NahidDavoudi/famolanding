@@ -155,13 +155,17 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 });
 
 // Skeleton Loader Functions
+// (کلاس‌های show/hide هیچ‌وقت در CSS تعریف نشده بودند و این توابع عملاً بی‌اثر بودند؛
+// حالا از hidden واقعی + aria-busy استفاده می‌شود. در مسیرهای فعلی، innerHTML بلافاصله
+// جای اسکلتون‌ها را می‌گیرد؛ hidden فقط برای مسیرهایی است که جایگزینی انجام نمی‌شود.)
 function showSkeletons(containerId, skeletonClass) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
+    container.setAttribute('aria-busy', 'true');
     const skeletons = container.querySelectorAll(`.${skeletonClass}`);
     skeletons.forEach(skeleton => {
-        skeleton.classList.add('show');
+        skeleton.hidden = false;
     });
 }
 
@@ -169,10 +173,10 @@ function hideSkeletons(containerId, skeletonClass) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
+    container.setAttribute('aria-busy', 'false');
     const skeletons = container.querySelectorAll(`.${skeletonClass}`);
     skeletons.forEach(skeleton => {
-        skeleton.classList.add('hide');
-        skeleton.classList.remove('show');
+        skeleton.hidden = true;
     });
 }
 
@@ -240,6 +244,10 @@ async function loadCoursesFromAPI() {
         const container = document.getElementById('coursesContainer');
         if (!container) return;
 
+        container.setAttribute('aria-busy', 'false');
+        const loadingRoot = container.closest('.coursesSwiper');
+        if (loadingRoot) loadingRoot.classList.remove('coursesSwiper--loading');
+
         if (courses.length === 0) {
             const swiperRoot = container.closest('.coursesSwiper');
             if (swiperRoot) swiperRoot.classList.add('coursesSwiper--disabled');
@@ -284,6 +292,9 @@ async function loadCoursesFromAPI() {
         console.error('Error loading courses:', error);
         const container = document.getElementById('coursesContainer');
         if (container) {
+            container.setAttribute('aria-busy', 'false');
+            const swiperRoot = container.closest('.coursesSwiper');
+            if (swiperRoot) swiperRoot.classList.remove('coursesSwiper--loading');
             container.innerHTML = '<div class="famo-empty-message">خطا در بارگذاری دوره‌ها</div>';
         }
     }
@@ -313,27 +324,76 @@ function renderSocialLinks(links) {
     return items ? `<div class="inst-socials">${items}</div>` : '';
 }
 
-// markup مشترک کارت استاد (صفحه اصلی + pages/team.php): آواتار بزرگ، بدون ظاهر کلیک‌پذیر
-function instructorCardHtml(instructor) {
-    const initialLetter = instructor.initial_letter || (instructor.name ? instructor.name.charAt(0) : '');
-    const bio = instructor.description || '';
-    const avatarUrl = safeUrl(instructor.image_url);
-    const socialsBlock = renderSocialLinks(instructor.social_links);
+// کارت یکسان اعضای کادر (استاد و پشتیبان) در صفحه اصلی
+function personImageUrl(person) {
+    const raw = person.image_url || person.avatar_url || person.image || '';
+    const resolved = resolveImageUrl(raw);
+    return /^(javascript|vbscript):/i.test(resolved) ? '' : resolved;
+}
+
+function normalizeInstructor(instructor) {
+    return {
+        role: 'instructor',
+        roleLabel: 'استاد',
+        name: instructor.name || '',
+        title: instructor.title || 'استاد تخصصی',
+        description: instructor.description || instructor.full_bio || '',
+        image_url: instructor.image_url || instructor.avatar_url || '',
+        initial_letter: instructor.initial_letter || '',
+        social_links: instructor.social_links || [],
+        tag: '',
+    };
+}
+
+function normalizeSupporter(supporter) {
+    const fieldLabel = supporter.field
+        ? `رشته ${supporter.field}`
+        : (supporter.grade ? `پایه ${supporter.grade}` : 'تحصیلی');
+
+    return {
+        role: 'supporter',
+        roleLabel: 'پشتیبان',
+        name: supporter.name || '',
+        title: supporter.title || `پشتیبان تخصصی ${fieldLabel}`,
+        description: supporter.description || supporter.full_bio || supporter.bio ||
+            'پیگیری برنامه مطالعه، رفع اشکال درسی و همراهی مستمر دانش‌آموزان تا رسیدن به هدف.',
+        image_url: supporter.image_url || supporter.avatar_url || supporter.image || '',
+        initial_letter: supporter.initial_letter || '',
+        social_links: supporter.social_links || [],
+        tag: supporter.tag || supporter.badge_label || 'رفع اشکال و نظارت مستمر',
+    };
+}
+
+function personCardHtml(person) {
+    const role = person.role === 'supporter' ? 'supporter' : 'instructor';
+    const initialLetter = person.initial_letter || (person.name ? person.name.trim().charAt(0) : '');
+    const avatarUrl = personImageUrl(person);
+    const socialsBlock = renderSocialLinks(person.social_links);
+    const footerBlock = socialsBlock || (person.tag
+        ? `<div class="inst-socials person-card__footer"><span class="person-tag">${esc(person.tag)}</span></div>`
+        : '');
 
     return `
-        <article class="inst-card">
-            ${avatarUrl
-                ? `<img class="inst-avatar" src="${esc(avatarUrl)}" alt="${esc(instructor.name)}" loading="lazy">`
-                : `<div class="inst-avatar inst-avatar-ph" aria-hidden="true">${esc(initialLetter)}</div>`}
-            <h3 class="inst-name">${esc(instructor.name)}</h3>
-            <p class="inst-title">${esc(instructor.title)}</p>
-            ${bio ? `<p class="inst-bio">${esc(bio)}</p>` : ''}
-            ${socialsBlock}
+        <article class="inst-card person-card person-card--${role}" data-person-role="${role}">
+            <div class="person-media">
+                ${avatarUrl
+                    ? `<img class="inst-avatar" src="${esc(avatarUrl)}" alt="${esc(person.name)}" width="640" height="450" loading="lazy" decoding="async">`
+                    : `<div class="inst-avatar inst-avatar-ph" aria-hidden="true">${esc(initialLetter)}</div>`}
+                <span class="person-role-badge">${esc(person.roleLabel || '')}</span>
+            </div>
+            <h3 class="inst-name">${esc(person.name)}</h3>
+            <p class="inst-title">${esc(person.title)}</p>
+            ${person.description ? `<p class="inst-bio">${esc(person.description)}</p>` : ''}
+            ${footerBlock}
         </article>
     `;
 }
 
-// ==================== کاروسل سه‌بعدی اساتید — پورت inspiration/CurveCarousel.js (پالت فامو، بدون autoplay) ====================
+function instructorCardHtml(instructor) {
+    return personCardHtml(normalizeInstructor(instructor));
+}
+
+// ==================== کاروسل سه‌بعدی کادر آموزشی — پورت inspiration/CurveCarousel.js (پالت فامو، بدون autoplay) ====================
 // فیزیک فنری damped-harmonic + اسنپ همیشه به عدد صحیح + اینرسی با cap ±2
 // + blur/روشنایی/اشباع بر اساس فاصله از مرکز (عمق میدان).
 const CURVE_CFG = {
@@ -348,9 +408,9 @@ const CURVE_CFG = {
     stiffness: 170, damping: 24, mass: 1,
 };
 
-let instCarousel = null;
+let teamCarousel = null;
 
-class InstructorsCurveCarousel {
+class TeamCurveCarousel {
     constructor(root, opts = {}) {
         this.stage = root.querySelector('.curve-carousel__stage') || root;
         this.track = root.querySelector('.curve-carousel__track');
@@ -722,29 +782,51 @@ class InstructorsCurveCarousel {
     }
 }
 
-// Load instructors from API
-async function loadInstructorsFromAPI() {
+// Load instructors + supporters into one shared team carousel.
+async function loadTeamFromAPI() {
     showSkeletons('instructorsContainer', 'skeleton-instructor-wrapper');
 
-    try {
-        const result = await API.get('/public/instructors');
-        const list = result.data || [];
+    const container = document.getElementById('instructorsContainer');
+    if (!container) return;
 
-        const container = document.getElementById('instructorsContainer');
-        if (!container) return;
+    const root = container.closest('.curve-carousel');
+    const dotsEl = document.getElementById('instCarouselDots');
+    const prevBtn = document.getElementById('instCarouselPrev');
+    const nextBtn = document.getElementById('instCarouselNext');
+
+    try {
+        const [instructorsResult, supportersResult] = await Promise.allSettled([
+            API.get('/public/instructors'),
+            API.get('/public/supporters'),
+        ]);
+
+        if (instructorsResult.status === 'rejected') {
+            console.error('Error loading instructors:', instructorsResult.reason);
+        }
+        if (supportersResult.status === 'rejected') {
+            console.error('Error loading supporters:', supportersResult.reason);
+        }
+        if (instructorsResult.status === 'rejected' && supportersResult.status === 'rejected') {
+            throw instructorsResult.reason;
+        }
+
+        const instructors = instructorsResult.status === 'fulfilled' && Array.isArray(instructorsResult.value.data)
+            ? instructorsResult.value.data
+            : [];
+        const supporters = supportersResult.status === 'fulfilled' && Array.isArray(supportersResult.value.data)
+            ? supportersResult.value.data
+            : [];
+        const list = [
+            ...instructors.map(normalizeInstructor),
+            ...supporters.map(normalizeSupporter),
+        ];
 
         hideSkeletons('instructorsContainer', 'skeleton-instructor-wrapper');
         container.classList.remove('is-skeleton');
 
-        const root = container.closest('.curve-carousel');
-        const dotsEl = document.getElementById('instCarouselDots');
-        const prevBtn = document.getElementById('instCarouselPrev');
-        const nextBtn = document.getElementById('instCarouselNext');
-
-        // تعداد کمتر از ۳: گرید ساده (بدون کاروسل)
         if (list.length === 0) {
             if (root) root.classList.add('curve-carousel--off-mode');
-            container.innerHTML = '<div class="famo-empty-message">استادی یافت نشد</div>';
+            container.innerHTML = '<div class="famo-empty-message">عضوی از کادر فامو یافت نشد</div>';
             dotsEl && (dotsEl.hidden = true);
             prevBtn && (prevBtn.hidden = true);
             nextBtn && (nextBtn.hidden = true);
@@ -760,7 +842,7 @@ async function loadInstructorsFromAPI() {
         for (let j = 0; j < renderCount; j += 1) {
             const idx = j % total;
             cards.push(
-                `<div class="curve-carousel__card" data-virtual-idx="${j}" data-item-idx="${idx}">${instructorCardHtml(list[idx])}</div>`
+                `<div class="curve-carousel__card" data-virtual-idx="${j}" data-item-idx="${idx}" data-person-role="${esc(list[idx].role)}">${personCardHtml(list[idx])}</div>`
             );
         }
         container.innerHTML = cards.join('');
@@ -769,7 +851,7 @@ async function loadInstructorsFromAPI() {
         const useCarousel = total >= 3 && root;
         if (!useCarousel) {
             if (root) root.classList.add('curve-carousel--off-mode');
-            container.innerHTML = list.map(inst => `<div class="curve-carousel__card">${instructorCardHtml(inst)}</div>`).join('');
+            container.innerHTML = list.map(person => `<div class="curve-carousel__card" data-person-role="${esc(person.role)}">${personCardHtml(person)}</div>`).join('');
             if (window.refreshLucideIcons) window.refreshLucideIcons(container);
             dotsEl && (dotsEl.hidden = true);
             prevBtn && (prevBtn.hidden = true);
@@ -782,16 +864,16 @@ async function loadInstructorsFromAPI() {
         prevBtn && (prevBtn.hidden = false);
         nextBtn && (nextBtn.hidden = false);
 
-        if (instCarousel) { instCarousel.destroy(); instCarousel = null; }
+        if (teamCarousel) { teamCarousel.destroy(); teamCarousel = null; }
 
         // نقاط: طبق مرجع حداکثر ۱۲ تا
         if (dotsEl) {
             dotsEl.innerHTML = total > 1 && total <= 12
-                ? list.map((inst, i) => `<button type="button" class="curve-carousel__dot" data-curve-dot="${i}" aria-label="اسلاید ${i + 1}: ${esc(inst.name)}"></button>`).join('')
+                ? list.map((person, i) => `<button type="button" class="curve-carousel__dot" data-curve-dot="${i}" aria-label="اسلاید ${i + 1}: ${esc(person.roleLabel)} ${esc(person.name)}"></button>`).join('')
                 : '';
         }
 
-        instCarousel = new InstructorsCurveCarousel(root, {
+        teamCarousel = new TeamCurveCarousel(root, {
             total,
             onIndex: (idx) => {
                 if (!dotsEl) return;
@@ -803,33 +885,29 @@ async function loadInstructorsFromAPI() {
 
         prevBtn.disabled = false;
         nextBtn.disabled = false;
-        prevBtn && prevBtn.addEventListener('click', () => instCarousel.prev());
-        nextBtn && nextBtn.addEventListener('click', () => instCarousel.next());
+        prevBtn && prevBtn.addEventListener('click', () => teamCarousel.prev());
+        nextBtn && nextBtn.addEventListener('click', () => teamCarousel.next());
         dotsEl && dotsEl.addEventListener('click', (e) => {
             const dot = e.target.closest('[data-curve-dot]');
-            if (dot && instCarousel) {
+            if (dot && teamCarousel) {
                 const targetIdx = Number(dot.dataset.curveDot);
-                const currentMod = instCarousel.activeIdx;
-                const delta = instCarousel.wrapDiff(targetIdx - currentMod, instCarousel.total);
-                instCarousel.goTo(Math.round(instCarousel.targetPos) + delta);
+                const currentMod = teamCarousel.activeIdx;
+                const delta = teamCarousel.wrapDiff(targetIdx - currentMod, teamCarousel.total);
+                teamCarousel.goTo(Math.round(teamCarousel.targetPos) + delta);
             }
         });
     } catch (error) {
-        console.error('Error loading instructors:', error);
-        const container = document.getElementById('instructorsContainer');
-        if (container) {
-            hideSkeletons('instructorsContainer', 'skeleton-instructor-wrapper');
-            container.classList.remove('is-skeleton');
-            const root2 = container.closest('.curve-carousel');
-            root2 && root2.classList.add('curve-carousel--off-mode');
-            container.innerHTML = '<div class="famo-empty-message">خطا در بارگذاری اساتید</div>';
-        }
+        console.error('Error loading team members:', error);
+        hideSkeletons('instructorsContainer', 'skeleton-instructor-wrapper');
+        container.classList.remove('is-skeleton');
+        if (root) root.classList.add('curve-carousel--off-mode');
+        container.innerHTML = '<div class="famo-empty-message">خطا در بارگذاری کادر فامو</div>';
     }
 }
 // Load all data on page load
 onReady(() => {
     loadCoursesFromAPI();
-    loadInstructorsFromAPI();
+    loadTeamFromAPI();
 });
 
 // Stats Counter Animation with GSAP
@@ -853,9 +931,7 @@ function animateCounter(elementId, finalValue, suffix = '') {
     });
 }
 
-// مقادیر آمار: JS منبع اصلی است؛ هر دو عدد باید دقیقاً یکی باشند.
-// pending: عدد نهایی قبولی/استاد منتظر تأیید کارفرما (HTML فعلی: 500+ قبولی، 15 استاد؛ JS قدیمی: 200 و 8).
-// تا زمان تأیید، انیمیشن شمارنده اجرا نمی‌شود تا HTML هرگز به ۰ یا مقدار نادرست نرود.
+// مقادیر آمار (تأییدشده): باید دقیقاً با عددهای HTML هیرو یکی باشند (200 قبولی، 10 استاد).
 const STATS = { students: 200, teachers: 10 };
 
 // Intersection Observer for stats animation with GSAP
@@ -864,13 +940,15 @@ if (statsSection) {
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                // Animate stats with GSAP
-                gsap.from('#home .glass-effect', {
-                    opacity: 0,
-                    y: 30,
-                    duration: 0.8,
-                    ease: "power2.out"
-                });
+                // Animate stats card with GSAP (if loaded; counters must run regardless)
+                if (!prefersReducedMotion && typeof gsap !== 'undefined') {
+                    gsap.from('#home .hero-stats', {
+                        opacity: 0,
+                        y: 30,
+                        duration: 0.8,
+                        ease: "power2.out"
+                    });
+                }
 
                 setTimeout(() => {
                     animateCounter('years-counter', 7);
@@ -894,9 +972,9 @@ if (copyrightYear) {
 }
 
 // Add hover effects to service cards with GSAP
-const serviceCards = document.querySelectorAll('#services > div > div > div');
+const serviceCards = document.querySelectorAll('#services .service-card');
 serviceCards.forEach(card => {
-    const icon = card.querySelector('div.w-20');
+    const icon = card.querySelector('.service-illustration');
     if (icon) {
         card.addEventListener('mouseenter', function () {
             gsap.to(icon, {
