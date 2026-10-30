@@ -289,7 +289,7 @@
             <!-- تصویر -->
             <div class="relative">
                 <div class="rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
-                    <img src="assets/images/about_us.webp"
+                    <img src="assets/images/about_us-small.webp"
                          alt="محیط آموزشگاه فامو"
                          width="800" height="600"
                          loading="lazy"
