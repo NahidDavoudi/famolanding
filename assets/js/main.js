@@ -183,6 +183,15 @@ function hideSkeletons(containerId, skeletonClass) {
 // Swiper instance for the courses carousel (created once after data renders)
 let coursesSwiper = null;
 
+// ScrollTrigger موقعیت‌ها را یک‌بار موقع init اندازه می‌گیرد. بعد از لود API/عکس/فونت ارتفاع صفحه
+// عوض می‌شود و باید refresh شود، وگرنه انیمیشن‌ها دیر (یا خیلی دیرتر از دید کاربر) فعال می‌شوند.
+let scrollRefreshTimer = null;
+function scheduleScrollRefresh() {
+    if (typeof ScrollTrigger === 'undefined') return;
+    clearTimeout(scrollRefreshTimer);
+    scrollRefreshTimer = setTimeout(() => ScrollTrigger.refresh(), 120);
+}
+
 function renderCourseFeatureChip(text) {
     return `<span>${esc(text)}</span>`;
 }
@@ -360,7 +369,6 @@ function normalizeSupporter(supporter) {
         image_url: supporter.image_url || supporter.avatar_url || supporter.image || '',
         initial_letter: supporter.initial_letter || '',
         social_links: supporter.social_links || [],
-        tag: supporter.tag || supporter.badge_label || 'رفع اشکال و نظارت مستمر',
     };
 }
 
@@ -906,8 +914,7 @@ async function loadTeamFromAPI() {
 }
 // Load all data on page load
 onReady(() => {
-    loadCoursesFromAPI();
-    loadTeamFromAPI();
+    Promise.allSettled([loadCoursesFromAPI(), loadTeamFromAPI()]).then(scheduleScrollRefresh);
 });
 
 // Stats Counter Animation with GSAP
@@ -994,87 +1001,40 @@ serviceCards.forEach(card => {
     }
 });
 
-// ScrollTrigger animations for sections - Initialize when GSAP is ready
+// ScrollTrigger reveal animations
+// - به‌جای محو کردن کل سکشن (که روی موبایل خیلی بلند است) فقط کانتینر داخلش انیمیت می‌شود
+// - once: true و clearProps: بعد از اجرا هیچ transform/opacity باقی نمی‌ماند
+// - ScrollToPlugin لازم نیست؛ اسکرول نرم لینک‌ها در همین فایل با window.scrollTo انجام می‌شود
 function initScrollAnimations() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
-        return;
-    }
+    if (prefersReducedMotion) return;
+    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
 
-    if (gsap.registerPlugin) {
-        gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
-    }
+    gsap.registerPlugin(ScrollTrigger);
+    ScrollTrigger.config({ ignoreMobileResize: true });
 
-    // Animate sections on scroll
-    const sections = document.querySelectorAll('section[id]');
-    sections.forEach((section) => {
-        gsap.from(section, {
+    // #home حذف شده: هیرو بالای صفحه است و محو کردنش به LCP لطمه می‌زند
+    document.querySelectorAll('section[id]:not(#home)').forEach((section) => {
+        const target = section.querySelector(':scope > .container') || section;
+        gsap.from(target, {
             opacity: 0,
-            y: 50,
-            duration: 0.8,
-            ease: "power2.out",
+            y: 28,
+            duration: 0.7,
+            ease: 'power2.out',
+            clearProps: 'opacity,transform',
             scrollTrigger: {
                 trigger: section,
-                start: "top 80%",
-                end: "bottom 20%",
-                toggleActions: "play none none none"
-            }
+                start: 'top 90%',
+                once: true,
+            },
         });
     });
 
-    // Animate instructor cards on scroll (after they're loaded)
-
-    setTimeout(() => {
-        const instructorCardsAnimate = document.querySelectorAll('.inst-card');
-        instructorCardsAnimate.forEach((card, index) => {
-            gsap.from(card, {
-                opacity: 0,
-                scale: 0.8,
-                rotationY: -15,
-                duration: 0.6,
-                delay: index * 0.1,
-                ease: "power2.out",
-                scrollTrigger: {
-                    trigger: card,
-                    start: "top 85%",
-                    toggleActions: "play none none none"
-                }
-            });
-        });
-
-        // Animate swiper navigation buttons
-        const swiperButtons = document.querySelectorAll('.swiper-button-next, .swiper-button-prev');
-        swiperButtons.forEach(btn => {
-            const swiper = btn.closest('.swiper');
-            if (swiper) {
-                gsap.from(btn, {
-                    opacity: 0,
-                    scale: 0,
-                    duration: 0.5,
-                    ease: "back.out(1.7)",
-                    scrollTrigger: {
-                        trigger: swiper,
-                        start: "top 80%",
-                        toggleActions: "play none none none"
-                    }
-                });
-            }
-        });
-    }, 1000); // Wait for data to load
+    // هر تغییر ارتفاع صفحه (لود API، عکس‌های lazy، فونت) → refresh با debounce
+    if ('ResizeObserver' in window) {
+        new ResizeObserver(scheduleScrollRefresh).observe(document.body);
+    }
+    window.addEventListener('load', scheduleScrollRefresh);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(scheduleScrollRefresh);
 }
 
-// Initialize scroll animations when GSAP is ready
-onReady(() => {
-    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
-        initScrollAnimations();
-    } else {
-        const checkGSAP = setInterval(() => {
-            if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
-                clearInterval(checkGSAP);
-                initScrollAnimations();
-            }
-        }, 100);
-        setTimeout(() => clearInterval(checkGSAP), 5000);
-    }
-});
-
+onReady(initScrollAnimations);

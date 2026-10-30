@@ -149,7 +149,6 @@ function normalizeSupporter(supporter) {
         image_url: supporter.image_url || supporter.avatar_url || supporter.image || '',
         initial_letter: supporter.initial_letter || '',
         social_links: supporter.social_links || [],
-        tag: supporter.tag || supporter.badge_label || 'رفع اشکال و نظارت مستمر',
     };
 }
 
