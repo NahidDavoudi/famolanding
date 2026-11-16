@@ -18,7 +18,6 @@
 <section class="pt-28 sm:pt-32 pb-12 gradient-bg text-white text-center">
     <div class="container mx-auto px-4">
         <h1 class="text-3xl sm:text-4xl font-bold mb-4">کادر آموزشی و مشاوران فامو بابل</h1>
-        <!-- بنر یا پوستر با ارتفاع کنترل‌شده و گوشه‌های گرد -->
         <div class="relative w-full h-56 sm:h-72 md:h-96 rounded-2xl overflow-hidden shadow-2xl border border-white/20 mb-8">
             <img src="<?php echo $base; ?>assets/images/team.webp" alt="دوره‌های تخصصی کنکور و تیزهوشان بابل"
                 width="2752" height="1536" decoding="async" class="w-full h-full object-cover">
