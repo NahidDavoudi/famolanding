@@ -242,13 +242,6 @@
 <section id="about" class="relative py-20 px-4 bg-white overflow-hidden">
     <!-- تصویر پس‌زمینه -->
     <div class="absolute inset-0 z-0">
-        <!-- <img src="assets/images/about_us.webp"
-             alt="آموزشگاه فامو"
-             width="1920" height="1080"
-             loading="lazy"
-             decoding="async"
-             class="w-full h-full object-cover opacity-100"> -->
-        <!-- لایه نیمه‌شفاف برای خوانایی متن -->
         <div class="absolute inset-0 bg-white/85"></div>
     </div>
 
@@ -274,13 +267,6 @@
                     دانشگاه‌های معتبر، خدماتی جامع شامل برنامه‌ریزی شخصی‌سازی‌شده و رفع اشکال دقیق تمامی دروس را برای
                     مقاطع راهنمایی و دبیرستان فراهم می‌آورد.
                 </p>
-
-                <!-- <p>
-                    هدف ما ایجاد مسیری روشن و مطمئن برای دانش‌آموزان در جهت رسیدن به موفقیت تحصیلی و ورود به
-                    دانشگاه‌های برتر کشور است.
-                </p> -->
-
-                
             </div>
 
             <!-- تصویر -->
