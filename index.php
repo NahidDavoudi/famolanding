@@ -1,11 +1,17 @@
+<?php
+require_once __DIR__ . '/config.php';
+$base = '';
+$pageTitle = 'آموزشگاه فامو | مشاوره کنکور و تیزهوشان بابل';
+$metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی کنکور و تیزهوشان';
+?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= pageTitle %></title>
-    <meta name="description" content="<%= metaDescription %>">
-    <%- include('layouts/head-common') %>
+    <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></title>
+    <meta name="description" content="<?= htmlspecialchars($metaDescription, ENT_QUOTES, 'UTF-8') ?>">
+    <?php include __DIR__ . '/layouts/head-common.php'; ?>
     <!-- استایل کارت‌های دوره (طرح مشترک با pages/course.php): فاصله‌ها و رنگ‌ها از توکن‌های برند -->
     <style>
         #courses .coursesSwiper .swiper-slide {
@@ -15,7 +21,7 @@
 </head>
 <body class="font-family text-gray-800">
     <!-- Header -->
-    <%- include('layouts/header') %>
+    <?php include __DIR__ . '/layouts/header.php'; ?>
     <!-- Hero Section -->
     <section id="home" class="hero-section gradient-bg text-white px-4">
         <div class="container mx-auto max-w-6xl hero-inner">
@@ -53,7 +59,7 @@
 
             <!-- ۵) دکمه‌ها: هم‌اندازه -->
             <div class="hero-ctas">
-                <a href="<%= famoLoginUrl() + '/' %>"
+                <a href="<?= htmlspecialchars(famo_login_url() . '/', ENT_QUOTES, 'UTF-8') ?>"
                     class="hero-cta bg-gradient-to-r from-[#E2D9C6] to-[#d4c9b2] text-[#445D84] px-6 py-3 rounded-full font-bold hover:shadow-xl transition-all duration-300 hover:scale-105 shadow-lg min-h-[44px]">
                     <i class="icon ml-2" data-lucide="school" aria-hidden="true"></i>
                     رزرو نوبت
@@ -513,7 +519,7 @@
     </section>
 
     <!-- Footer -->
-    <%- include('layouts/footer') %>
+    <?php include __DIR__ . '/layouts/footer.php'; ?>
 
     <!-- Scripts -->
     <script type="module" src="assets/js/main.js"></script>

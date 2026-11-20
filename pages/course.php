@@ -1,3 +1,8 @@
+<?php
+require_once __DIR__ . '/../config.php';
+$base = '../';
+$baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
+?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -12,7 +17,7 @@
     <!-- Open Graph for Social Sharing -->
     <meta property="og:title" content="دوره‌های تخصصی کنکور و تیزهوشان | آموزشگاه فامو بابل">
     <meta property="og:description" content="برنامه‌ریزی، آموزش مفهومی و آزمون‌های تخصصی کنکور و تیزهوشان در بابل.">
-    <meta property="og:image" content="<%= famoAsset('images/logo.png', base + '../shared/images/logo.png') %>">
+    <meta property="og:image" content="<?= htmlspecialchars(famo_asset('images/logo.png', $base . '../shared/images/logo.png'), ENT_QUOTES, 'UTF-8') ?>">
 
     <!-- Course Schema Markup -->
     <script type="application/ld+json" id="courseSchema">
@@ -24,7 +29,7 @@
     }
     </script>
 
-    <%- include('../layouts/head-common') %>
+    <?php include __DIR__ . '/../layouts/head-common.php'; ?>
 
     <!-- استایل کارت‌های دوره: تصویر در بالا، نام و قیمت زیر آن، چیدمان گرید در لپ‌تاپ -->
     <style>
@@ -289,7 +294,7 @@
 <body class="font-family text-gray-800 bg-[#f9f7f3]">
 
 <!-- Header -->
-    <%- include('../layouts/header') %>
+<?php include __DIR__ . '/../layouts/header.php'; ?>
 
 <!-- Page Title Banner -->
 <section class="pt-28 sm:pt-32 pb-12 gradient-bg text-white text-center">
@@ -298,7 +303,7 @@
 
         <!-- بنر یا پوستر با ارتفاع کنترل‌شده و گوشه‌های گرد -->
         <div class="relative w-full h-56 sm:h-72 md:h-96 rounded-2xl overflow-hidden shadow-2xl border border-white/20 mb-8">
-            <img src="<%= base %>assets/images/courses_banner.webp" alt="دوره‌های تخصصی کنکور و تیزهوشان بابل"
+            <img src="<?= $baseEsc ?>assets/images/courses_banner.webp" alt="دوره‌های تخصصی کنکور و تیزهوشان بابل"
                 width="2752" height="1536" decoding="async" class="w-full h-full object-cover">
         </div>
 
@@ -338,9 +343,8 @@
 </section>
 
 <!-- Footer -->
-    <%- include('../layouts/footer') %>
+<?php include __DIR__ . '/../layouts/footer.php'; ?>
 
-
-<script type="module" src="<%= base %>assets/js/courses.js"></script>
+<script type="module" src="<?= $baseEsc ?>assets/js/courses.js"></script>
 </body>
 </html>

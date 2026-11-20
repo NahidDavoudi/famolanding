@@ -1,0 +1,2 @@
+RewriteEngine On
+RewriteRule ^r/([A-Za-z0-9_-]{32,64})/?$ r.php?token=$1 [L,QSA]

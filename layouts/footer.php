@@ -1,3 +1,7 @@
+<?php
+$base = $base ?? '';
+$baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
+?>
 <!-- Footer -->
 <footer class="gradient-bg text-white pt-12 pb-6 px-4">
     <div class="container mx-auto max-w-6xl">
@@ -6,7 +10,7 @@
             <div>
                 <div class="flex items-center gap-4 mb-6">
                     <div class="bg-[#445D84] w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                        <img src="<%= famoAsset('images/logo.png', base + '../shared/images/logo.png') %>" alt="لوگوی آموزشگاه فامو" width="40" height="40" loading="lazy" decoding="async" class="w-10 h-10 object-contain">
+                        <img src="<?= htmlspecialchars(famo_asset('images/logo.png', $base . '../shared/images/logo.png'), ENT_QUOTES, 'UTF-8') ?>" alt="لوگوی آموزشگاه فامو" width="40" height="40" loading="lazy" decoding="async" class="w-10 h-10 object-contain">
                     </div>
                     <div>
                         <h3 class="text-2xl font-bold">آموزشگاه <span class="text-[#E2D9C6]">فامو</span></h3>
@@ -40,27 +44,27 @@
             <div>
                 <h4 class="text-xl font-bold mb-6 text-[#E2D9C6]">دسترسی سریع</h4>
                 <ul class="space-y-3">
-                    <li><a href="<%= base %>#home"
+                    <li><a href="<?= $baseEsc ?>#home"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
                         خانه
                     </a></li>
-                    <li><a href="<%= base %>pages/course.php"
+                    <li><a href="<?= $baseEsc ?>pages/course.php"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
                         دوره‌ها
                     </a></li>
-                    <li><a href="<%= base %>pages/team.php"
+                    <li><a href="<?= $baseEsc ?>pages/team.php"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
                         اساتید
                     </a></li>
-                    <li><a href="<%= base %>#services"
+                    <li><a href="<?= $baseEsc ?>#services"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
                         خدمات ویژه
                     </a></li>
-                    <li><a href="<%= base %>#faq-contact"
+                    <li><a href="<?= $baseEsc ?>#faq-contact"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
                         سوالات و تماس

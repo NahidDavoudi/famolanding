@@ -1,3 +1,8 @@
+<?php
+require_once __DIR__ . '/../config.php';
+$base = '../';
+$baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
+?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -6,19 +11,19 @@
     <title>اساتید | آموزشگاه فامو بابل</title>
     <meta name="description"
         content="معرفی اساتید برجسته کنکور، رتبه‌های برتر المپیاد و تخصص مشاوران و پشتیبانان آموزشی موسسه فامو در بابل.">
-    <%- include('../layouts/head-common') %>
+    <?php include __DIR__ . '/../layouts/head-common.php'; ?>
 </head>
 
 <body class="font-family text-gray-800 bg-[#f9f7f3]">
 
 <!-- Header -->
-    <%- include('../layouts/header') %>
+<?php include __DIR__ . '/../layouts/header.php'; ?>
 
 <section class="pt-28 sm:pt-32 pb-12 gradient-bg text-white text-center">
     <div class="container mx-auto px-4">
         <h1 class="text-3xl sm:text-4xl font-bold mb-4">کادر آموزشی و مشاوران فامو بابل</h1>
         <div class="relative w-full h-56 sm:h-72 md:h-96 rounded-2xl overflow-hidden shadow-2xl border border-white/20 mb-8">
-            <img src="<%= base %>assets/images/team.webp" alt="دوره‌های تخصصی کنکور و تیزهوشان بابل"
+            <img src="<?= $baseEsc ?>assets/images/team.webp" alt="دوره‌های تخصصی کنکور و تیزهوشان بابل"
                 width="2752" height="1536" decoding="async" class="w-full h-full object-cover">
         </div>
         <p class="text-white/80 max-w-2xl mx-auto">همراهی اساتید مجرب و پشتیبانان رتبه برتر کنکور در تمامی مراحل
@@ -97,8 +102,8 @@
     </div>
 </section>
 <!-- footer -->
-    <%- include('../layouts/footer') %>
+<?php include __DIR__ . '/../layouts/footer.php'; ?>
 
-<script type="module" src="<%= base %>assets/js/team.js"></script>
+<script type="module" src="<?= $baseEsc ?>assets/js/team.js"></script>
 </body>
 </html>
