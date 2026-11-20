@@ -1,0 +1,55 @@
+<!-- Shared head: included by every page inside its own <head>. Requires base. -->
+<meta name="color-scheme" content="light">
+<%- famoConfigScript() %>
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "EducationalOrganization",
+    "name": "آموزشگاه فامو",
+    "alternateName": "Famo Academy",
+    "description": "آموزشگاه فامو نهاد آموزشی پیشرو در بابل با هفت سال سابقه در مشاوره تخصصی، آموزش مفهومی و آمادگی کنکور و تیزهوشان برای مقاطع راهنمایی و دبیرستان.",
+    "url": <%- JSON.stringify(famoPublicUrl()) %>,
+    "logo": "<%= famoAsset('images/logo.png', base + '../shared/images/logo.png') %>",
+    "image": "<%= famoAsset('images/logo.png', base + '../shared/images/logo.png') %>",
+    "email": "info@famoacademy.ir",
+    "telephone": "+98-11-32221234",
+    "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "بابل",
+        "addressRegion": "مازندران",
+        "addressCountry": "IR",
+        "streetAddress": "میدان باغ فردوس، جنب بیمارستان بابل کلینیک، مدرسه بهارستان"
+    },
+    "founder": {
+        "@type": "Person",
+        "name": "دکتر محمد موسی زاده موسوی"
+    },
+    "areaServed": {
+        "@type": "City",
+        "name": "بابل"
+    }
+}
+</script>
+
+<script src="<%= famoAsset('js/libs/gsap.min.js', base + '../shared/js/libs/gsap.min.js') %>"></script>
+<script src="<%= famoAsset('js/libs/ScrollTrigger.min.js', base + '../shared/js/libs/ScrollTrigger.min.js') %>"></script>
+<script src="<%= famoAsset('js/libs/ScrollToPlugin.min.js', base + '../shared/js/libs/ScrollToPlugin.min.js') %>"></script>
+<script src="<%= famoAsset('js/libs/swiper-bundle.min.js', base + '../shared/js/libs/swiper-bundle.min.js') %>"></script>
+<script src="<%= famoAsset('js/libs/lucide.min.js', base + '../shared/js/libs/lucide.min.js') %>"></script>
+<script src="<%= famoAsset('js/lucide-adapter.js', base + '../shared/js/lucide-adapter.js') %>"></script>
+<script src="<%= base %>assets/js/animation.js"></script>
+
+<!-- Font Vazir -->
+<link rel="stylesheet" href="<%= famoAsset('css/tokens.css', base + '../shared/css/tokens.css') %>">
+<link rel="stylesheet" href="<%= famoAsset('css/output.css', base + '../shared/css/output.css') %>">
+<link rel="stylesheet" href="<%= base %>assets/css/icons.css">
+<link rel="stylesheet" href="<%= famoAsset('css/libs/swiper-bundle.min.css', base + '../shared/css/libs/swiper-bundle.min.css') %>">
+<link rel="stylesheet" href="<%= base %>assets/css/style.css">
+<link rel="stylesheet" href="<%= famoAsset('css/fonts.css', base + '../shared/css/fonts.css') %>">
+
+<!-- Favicon Multi-size -->
+<link rel="icon" type="image/png" sizes="16x16" href="<%= famoAsset('images/favicon-16.png', base + '../shared/images/favicon-16.png') %>">
+<link rel="icon" type="image/png" sizes="32x32" href="<%= famoAsset('images/favicon-32.png', base + '../shared/images/favicon-32.png') %>">
+<link rel="icon" type="image/png" sizes="96x96" href="<%= famoAsset('images/favicon-96.png', base + '../shared/images/favicon-96.png') %>">

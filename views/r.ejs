@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+    <meta name="color-scheme" content="light">
+    <title>کارنامه آزمون | آموزشگاه فامو</title>
+    <link rel="stylesheet" href="<%= famoAsset('css/tokens.css', '/assets/css/tokens.css') %>">
+    <link rel="stylesheet" href="<%= famoAsset('css/fonts.css', '/assets/css/fonts.css') %>">
+    <link rel="icon" type="image/png" sizes="32x32" href="<%= famoAsset('images/favicon-32.png', '/favicon.ico') %>">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f9f7f3;
+            color: var(--ds-color-foreground, #1f2937);
+            font-family: Vazirmatn, var(--ds-font-sans, system-ui, -apple-system, sans-serif);
+            line-height: 1.6;
+        }
+        .exam-header {
+            background-color: var(--ds-color-primary, #445d84);
+            color: #ffffff;
+            padding: 1rem;
+            box-shadow: 0 4px 12px rgba(17, 29, 42, 0.14);
+        }
+        .exam-header-inner {
+            max-width: 48rem;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+        }
+        .exam-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .exam-logo {
+            width: 2.5rem;
+            height: 2.5rem;
+            object-fit: contain;
+            border-radius: 9999px;
+            background-color: rgba(255, 255, 255, 0.12);
+            padding: 0.25rem;
+            flex-shrink: 0;
+        }
+        .exam-brand-title {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .exam-brand-sub {
+            font-size: 0.75rem;
+            color: var(--ds-color-border, #e2d9c6);
+        }
+        .exam-print-btn {
+            background-color: var(--ds-color-border, #e2d9c6);
+            color: var(--ds-color-primary, #445d84);
+            border: none;
+            font-family: inherit;
+            font-size: 0.8125rem;
+            font-weight: 700;
+            padding: 0.5rem 0.875rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: opacity 0.15s ease;
+        }
+        .exam-print-btn:hover {
+            opacity: 0.9;
+        }
+        .exam-main {
+            flex: 1 1 auto;
+            width: 100%;
+            max-width: 48rem;
+            margin: 0 auto;
+            padding: 1.5rem 1rem;
+        }
+        .exam-card {
+            background-color: var(--ds-color-surface, #ffffff);
+            border: 1px solid var(--ds-color-border, #e2d9c6);
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px rgba(17, 29, 42, 0.06);
+        }
+        .exam-state-card {
+            padding: 1.75rem 1.5rem;
+            text-align: center;
+        }
+        .exam-state-title {
+            margin: 0 0 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--ds-color-primary, #445d84);
+        }
+        .exam-state-desc {
+            margin: 0;
+            color: var(--ds-color-neutral-600, #4b5563);
+            font-size: 0.9375rem;
+            line-height: 1.75;
+        }
+        .exam-summary {
+            padding: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+        .exam-summary-inner {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .exam-student-name {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--ds-color-primary, #445d84);
+        }
+        .exam-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.625rem;
+            font-size: 0.8125rem;
+            color: var(--ds-color-neutral-600, #4b5563);
+        }
+        .exam-badge {
+            background-color: #f9f7f3;
+            border: 1px solid var(--ds-color-border, #e2d9c6);
+            padding: 0.25rem 0.625rem;
+            border-radius: 0.5rem;
+        }
+        .exam-avg-box {
+            background-color: var(--ds-color-primary, #445d84);
+            color: #ffffff;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1.25rem;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .exam-avg-label {
+            font-size: 0.75rem;
+            color: var(--ds-color-border, #e2d9c6);
+        }
+        .exam-avg-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 0.125rem;
+        }
+        .exam-mobile-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        .exam-subject-card {
+            padding: 1rem;
+        }
+        .exam-subject-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .exam-subject-title {
+            font-weight: 700;
+            color: var(--ds-color-primary, #445d84);
+        }
+        .exam-subject-chapter {
+            font-size: 0.75rem;
+            color: var(--ds-color-muted-foreground, #6b7280);
+            margin-top: 0.125rem;
+        }
+        .exam-subject-pct {
+            background-color: #f9f7f3;
+            color: var(--ds-color-primary, #445d84);
+            border: 1px solid var(--ds-color-border, #e2d9c6);
+            font-weight: 700;
+            font-size: 0.875rem;
+            padding: 0.25rem 0.625rem;
+            border-radius: 0.5rem;
+            white-space: nowrap;
+        }
+        .exam-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.5rem;
+            text-align: center;
+            font-size: 0.75rem;
+        }
+        .exam-stat-cell {
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.25rem;
+        }
+        .exam-stat-cell--total { background-color: #f9fafb; color: #374151; }
+        .exam-stat-cell--correct { background-color: #ecfdf5; color: #047857; }
+        .exam-stat-cell--wrong { background-color: #fff1f2; color: #be123c; }
+        .exam-stat-cell--skipped { background-color: #fffbeb; color: #b45309; }
+        .exam-stat-num {
+            font-weight: 700;
+            margin-top: 0.125rem;
+        }
+        .exam-table-wrap {
+            display: none;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        .exam-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            text-align: right;
+        }
+        .exam-table thead {
+            background-color: #f9f7f3;
+            color: var(--ds-color-primary, #445d84);
+            border-bottom: 1px solid var(--ds-color-border, #e2d9c6);
+        }
+        .exam-table th, .exam-table td {
+            padding: 0.875rem 0.75rem;
+        }
+        .exam-table th:first-child, .exam-table td:first-child,
+        .exam-table th:last-child, .exam-table td:last-child {
+            padding-inline: 1rem;
+        }
+        .exam-table tbody tr + tr {
+            border-top: 1px solid #f3f4f6;
+        }
+        .exam-text-center { text-align: center; }
+        .exam-col-subject { font-weight: 700; color: #1f2937; }
+        .exam-col-correct { color: #047857; font-weight: 600; }
+        .exam-col-wrong { color: #be123c; font-weight: 600; }
+        .exam-col-skipped { color: #b45309; font-weight: 600; }
+        .exam-col-pct { font-weight: 700; color: var(--ds-color-primary, #445d84); }
+        .exam-comments {
+            padding: 1.25rem;
+        }
+        .exam-comments-heading {
+            margin: 0 0 1rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--ds-color-primary, #445d84);
+        }
+        .exam-comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .exam-comment-item {
+            background-color: #f9f7f3;
+            border: 1px solid var(--ds-color-border, #e2d9c6);
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
+        .exam-comment-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.75rem;
+        }
+        .exam-comment-author {
+            font-weight: 700;
+            color: var(--ds-color-primary, #445d84);
+        }
+        .exam-comment-role {
+            background-color: #ffffff;
+            border: 1px solid var(--ds-color-border, #e2d9c6);
+            color: var(--ds-color-neutral-600, #4b5563);
+            padding: 0.125rem 0.5rem;
+            border-radius: 0.375rem;
+        }
+        .exam-comment-body {
+            margin: 0;
+            font-size: 0.875rem;
+            color: #374151;
+            line-height: 1.7;
+        }
+        .exam-footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--ds-color-muted-foreground, #6b7280);
+            padding: 1.25rem 1rem;
+        }
+        @media (min-width: 640px) {
+            .exam-brand-title { font-size: 1.125rem; }
+            .exam-print-btn { font-size: 0.875rem; }
+            .exam-main { padding: 2rem 1rem; }
+            .exam-summary { padding: 1.5rem; }
+            .exam-summary-inner {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .exam-student-name { font-size: 1.5rem; }
+            .exam-badges { font-size: 0.875rem; }
+            .exam-comments { padding: 1.5rem; }
+            .exam-state-card { padding: 2rem; }
+        }
+        @media (min-width: 768px) {
+            .exam-mobile-list { display: none; }
+            .exam-table-wrap { display: block; }
+        }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #ffffff; }
+            .exam-header {
+                box-shadow: none;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .exam-card { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <header class="exam-header">
+        <div class="exam-header-inner">
+            <div class="exam-brand">
+                <img src="<%= famoAsset('images/logo.png', '/assets/images/logo.png') %>" alt="آموزشگاه فامو" width="40" height="40" class="exam-logo">
+                <div>
+                    <div class="exam-brand-title">آموزشگاه فامو</div>
+                    <div class="exam-brand-sub">گزارش اختصاصی نتیجه آزمون</div>
+                </div>
+            </div>
+            <% if (result !== null) { %>
+                <button type="button" onclick="window.print()" class="no-print exam-print-btn">
+                    چاپ کارنامه
+                </button>
+            <% } %>
+        </div>
+    </header>
+
+    <main class="exam-main">
+        <% if (errorState === 'not_found') { %>
+            <div class="exam-card exam-state-card">
+                <h1 class="exam-state-title">لینک کارنامه در دسترس نیست</h1>
+                <p class="exam-state-desc">
+                    این لینک نامعتبر است، منقضی شده یا توسط پشتیبان غیرفعال گردیده است.
+                    در صورت نیاز، برای دریافت لینک جدید با واحد پشتیبانی آموزشگاه فامو تماس بگیرید.
+                </p>
+            </div>
+        <% } else if (errorState === 'rate_limited') { %>
+            <div class="exam-card exam-state-card">
+                <h1 class="exam-state-title">تعداد درخواستها بیش از حد مجاز است</h1>
+                <p class="exam-state-desc">لطفاً حدود یک دقیقه صبر کرده و دوباره صفحه را بارگذاری کنید.</p>
+            </div>
+        <% } else if (errorState === 'unavailable') { %>
+            <div class="exam-card exam-state-card">
+                <h1 class="exam-state-title">سرویس موقتاً در دسترس نیست</h1>
+                <p class="exam-state-desc">دریافت اطلاعات کارنامه با اختلال موقت مواجه شد. لطفاً دقایقی دیگر دوباره تلاش کنید.</p>
+            </div>
+        <% } else if (result !== null) { %>
+            <!-- Student & Exam Summary -->
+            <section class="exam-card exam-summary">
+                <div class="exam-summary-inner">
+                    <div>
+                        <h1 class="exam-student-name"><%= result.student_name %></h1>
+                        <div class="exam-badges">
+                            <% if (result.grade !== null) { %>
+                                <span class="exam-badge">پایه <%= faDigits(String(result.grade)) %></span>
+                            <% } %>
+                            <% if (result.field !== null) { %>
+                                <span class="exam-badge">رشته <%= result.field %></span>
+                            <% } %>
+                            <span class="exam-badge">
+                                تاریخ آزمون: <%= faDigits(gregorianToJalaliStr(result.exam_date)) %>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="exam-avg-box">
+                        <div class="exam-avg-label">میانگین درصد کل</div>
+                        <div class="exam-avg-value" dir="ltr"><%= faDigits(result.avg_percentage.toFixed(1)) %>%</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Subjects Mobile Cards -->
+            <section class="exam-mobile-list">
+                <% for (const subj of result.subjects) { %>
+                    <div class="exam-card exam-subject-card">
+                        <div class="exam-subject-top">
+                            <div>
+                                <div class="exam-subject-title"><%= subj.subject %></div>
+                                <% if (subj.chapter !== null) { %>
+                                    <div class="exam-subject-chapter"><%= subj.chapter %></div>
+                                <% } %>
+                            </div>
+                            <span class="exam-subject-pct" dir="ltr">
+                                <%= faDigits(subj.percentage.toFixed(1)) %>%
+                            </span>
+                        </div>
+                        <div class="exam-stats-grid">
+                            <div class="exam-stat-cell exam-stat-cell--total"><div>کل</div><div class="exam-stat-num"><%= faDigits(String(subj.total_q)) %></div></div>
+                            <div class="exam-stat-cell exam-stat-cell--correct"><div>صحیح</div><div class="exam-stat-num"><%= faDigits(String(subj.correct)) %></div></div>
+                            <div class="exam-stat-cell exam-stat-cell--wrong"><div>غلط</div><div class="exam-stat-num"><%= faDigits(String(subj.wrong)) %></div></div>
+                            <div class="exam-stat-cell exam-stat-cell--skipped"><div>نزده</div><div class="exam-stat-num"><%= faDigits(String(subj.skipped)) %></div></div>
+                        </div>
+                    </div>
+                <% } %>
+            </section>
+
+            <!-- Subjects Desktop Table -->
+            <section class="exam-card exam-table-wrap">
+                <table class="exam-table">
+                    <thead>
+                        <tr>
+                            <th>درس / مبحث</th>
+                            <th class="exam-text-center">تعداد سوال</th>
+                            <th class="exam-text-center">صحیح</th>
+                            <th class="exam-text-center">غلط</th>
+                            <th class="exam-text-center">نزده</th>
+                            <th class="exam-text-center">درصد</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for (const subj of result.subjects) { %>
+                            <tr>
+                                <td>
+                                    <div class="exam-col-subject"><%= subj.subject %></div>
+                                    <% if (subj.chapter !== null) { %>
+                                        <div class="exam-subject-chapter"><%= subj.chapter %></div>
+                                    <% } %>
+                                </td>
+                                <td class="exam-text-center"><%= faDigits(String(subj.total_q)) %></td>
+                                <td class="exam-text-center exam-col-correct"><%= faDigits(String(subj.correct)) %></td>
+                                <td class="exam-text-center exam-col-wrong"><%= faDigits(String(subj.wrong)) %></td>
+                                <td class="exam-text-center exam-col-skipped"><%= faDigits(String(subj.skipped)) %></td>
+                                <td class="exam-text-center exam-col-pct" dir="ltr"><%= faDigits(subj.percentage.toFixed(1)) %>%</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </section>
+
+            <!-- Comments -->
+            <% if (result.comments.length > 0) { %>
+                <section class="exam-card exam-comments">
+                    <h2 class="exam-comments-heading">تحلیل و توضیحات دبیر و پشتیبان</h2>
+                    <div class="exam-comments-list">
+                        <% for (const comment of result.comments) { %>
+                            <article class="exam-comment-item">
+                                <div class="exam-comment-meta">
+                                    <span class="exam-comment-author"><%= comment.author_name %></span>
+                                    <span class="exam-comment-role"><%= comment.author_role %></span>
+                                </div>
+                                <p class="exam-comment-body"><%- nl2brEscaped(comment.body) %></p>
+                            </article>
+                        <% } %>
+                    </div>
+                </section>
+            <% } %>
+        <% } %>
+    </main>
+
+    <footer class="exam-footer">
+        آموزشگاه فامو — مشاوره تخصصی کنکور و تیزهوشان
+    </footer>
+</body>
+</html>
