@@ -59,6 +59,21 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
                         اساتید
                     </a></li>
+                    <li><a href="<?= $baseEsc ?>pages/admissions.php"
+                            class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
+                        <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
+                        قبولی‌های سال‌های قبل
+                    </a></li>
+                    <li><a href="<?= $baseEsc ?>pages/testimonials.php"
+                            class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
+                        <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
+                        نظرات شاگردان
+                    </a></li>
+                    <li><a href="<?= $baseEsc ?>pages/blog.php"
+                            class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
+                        <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
+                        وبلاگ
+                    </a></li>
                     <li><a href="<?= $baseEsc ?>#services"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>

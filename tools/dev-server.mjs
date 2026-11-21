@@ -317,6 +317,16 @@ const server = http.createServer(async (req, res) => {
     res.end(renderPhpPreviewFile('pages/team.php', '../'));
     return;
   }
+  if (pathname === '/pages/admissions.php' || pathname === '/admissions') {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(renderPhpPreviewFile('pages/admissions.php', '../'));
+    return;
+  }
+  if (pathname === '/pages/testimonials.php' || pathname === '/testimonials') {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(renderPhpPreviewFile('pages/testimonials.php', '../'));
+    return;
+  }
   if (pathname === '/pages/blog.php' || pathname === '/blog') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(renderPhpPreviewFile('pages/blog.php', '../'));

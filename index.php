@@ -239,6 +239,64 @@ $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی
         </div>
     </section>
 
+    <!-- Admissions & Testimonials Highlights -->
+    <section id="achievements-testimonials" class="py-16 px-4 bg-white">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-10">
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3 sm:mb-4">
+                    افتخارات و صدای همراهان فامو
+                </h2>
+                <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+                    نتایج درخشان سال‌های گذشته و دیدگاه دانش‌آموزان و خانواده‌ها درباره مسیر همراهی با آموزشگاه فامو
+                </p>
+            </div>
+
+            <div class="famo-highlights-grid">
+                <article class="famo-highlight-card hover-lift">
+                    <div>
+                        <div class="famo-highlight-head">
+                            <span class="famo-highlight-icon" aria-hidden="true">
+                                <i class="icon" data-lucide="award" aria-hidden="true"></i>
+                            </span>
+                            <h3 class="famo-highlight-title">قبولی‌های سال‌های قبل</h3>
+                        </div>
+                        <p class="famo-highlight-desc">
+                            آشنایی با رتبه‌های برتر و پذیرفته‌شدگان کنکور سراسری، تیزهوشان، نمونه دولتی و المپیادهای علمی آموزشگاه فامو به تفکیک سال.
+                        </p>
+                    </div>
+                    <div>
+                        <a href="pages/admissions.php"
+                            class="inline-flex items-center bg-[#445D84] text-white px-6 py-3 rounded-full font-bold hover:bg-[#344868] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#445D84] focus-visible:ring-offset-2">
+                            مشاهده قبولی‌ها
+                            <i class="icon icon--sm mr-2" data-lucide="chevron-left" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </article>
+
+                <article class="famo-highlight-card hover-lift">
+                    <div>
+                        <div class="famo-highlight-head">
+                            <span class="famo-highlight-icon" aria-hidden="true">
+                                <i class="icon" data-lucide="message-circle" aria-hidden="true"></i>
+                            </span>
+                            <h3 class="famo-highlight-title">نظرات شاگردان و اولیا</h3>
+                        </div>
+                        <p class="famo-highlight-desc">
+                            تجربه واقعی دانش‌آموزان، فارغ‌التحصیلان و اولیا از کلاس‌ها، آزمون‌های هفتگی و مشاوره فامو را بخوانید یا نظر خود را ثبت کنید.
+                        </p>
+                    </div>
+                    <div>
+                        <a href="pages/testimonials.php"
+                            class="inline-flex items-center bg-[#445D84] text-white px-6 py-3 rounded-full font-bold hover:bg-[#344868] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#445D84] focus-visible:ring-offset-2">
+                            مشاهده و ثبت نظر
+                            <i class="icon icon--sm mr-2" data-lucide="chevron-left" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
     <!-- About Section -->
 <section id="about" class="relative py-20 px-4 bg-white overflow-hidden">
     <!-- تصویر پس‌زمینه -->

@@ -23,59 +23,59 @@ $loginUrlEsc = htmlspecialchars(famo_login_url() . '/', ENT_QUOTES, 'UTF-8');
 
             <!-- Desktop Navigation -->
             <nav class="hidden lg:block">
-                <ul class="flex items-center space-x-4 xl:space-x-6 space-x-reverse">
+                <ul class="famo-desktop-nav">
                     <li>
                         <a href="<?= $baseEsc ?>#home"
-                            class="relative text-white hover:text-[#E2D9C6] transition-all duration-300 font-medium text-sm xl:text-base py-2 px-3 rounded-lg hover:bg-white/10 group flex items-center">
+                            class="relative text-white hover:text-[#E2D9C6] transition-all duration-300 font-medium text-sm py-2 px-2 xl:px-3 rounded-lg hover:bg-white/10 group flex items-center">
                             <i class="icon icon--sm ml-1 opacity-70 group-hover:opacity-100" data-lucide="house" aria-hidden="true"></i>
                             خانه
                         </a>
                     </li>
                     <li>
-                        <a href="<?= $baseEsc ?>#about"
-                            class="relative text-white hover:text-[#E2D9C6] transition-all duration-300 font-medium text-sm xl:text-base py-2 px-3 rounded-lg hover:bg-white/10 group flex items-center">
-                            <i class="icon icon--sm ml-1 opacity-70 group-hover:opacity-100" data-lucide="circle-help" aria-hidden="true"></i>
-                            درباره ما
-                        </a>
-                    </li>
-                    <li>
                         <a href="<?= $baseEsc ?>pages/course.php"
-                            class="relative text-white hover:text-[#E2D9C6] transition-all duration-300 font-medium text-sm xl:text-base py-2 px-3 rounded-lg hover:bg-white/10 group flex items-center">
+                            class="relative text-white hover:text-[#E2D9C6] transition-all duration-300 font-medium text-sm py-2 px-2 xl:px-3 rounded-lg hover:bg-white/10 group flex items-center">
                             <i class="icon icon--sm ml-1 opacity-70 group-hover:opacity-100" data-lucide="book-open" aria-hidden="true"></i>
                             دوره‌ها
                         </a>
                     </li>
                     <li>
                         <a href="<?= $baseEsc ?>pages/team.php"
-                            class="relative text-white hover:text-[#E2D9C6] transition-all duration-300 font-medium text-sm xl:text-base py-2 px-3 rounded-lg hover:bg-white/10 group flex items-center">
+                            class="relative text-white hover:text-[#E2D9C6] transition-all duration-300 font-medium text-sm py-2 px-2 xl:px-3 rounded-lg hover:bg-white/10 group flex items-center">
                             <i class="icon icon--sm ml-1 opacity-70 group-hover:opacity-100" data-lucide="school" aria-hidden="true"></i>
                             اساتید
                         </a>
                     </li>
                     <li>
+                        <a href="<?= $baseEsc ?>pages/admissions.php"
+                            class="relative text-white hover:text-[#E2D9C6] transition-all duration-300 font-medium text-sm py-2 px-2 xl:px-3 rounded-lg hover:bg-white/10 group flex items-center">
+                            <i class="icon icon--sm ml-1 opacity-70 group-hover:opacity-100" data-lucide="award" aria-hidden="true"></i>
+                            قبولی‌ها
+                        </a>
+                    </li>
+                    <li>
+                        <a href="<?= $baseEsc ?>pages/testimonials.php"
+                            class="relative text-white hover:text-[#E2D9C6] transition-all duration-300 font-medium text-sm py-2 px-2 xl:px-3 rounded-lg hover:bg-white/10 group flex items-center">
+                            <i class="icon icon--sm ml-1 opacity-70 group-hover:opacity-100" data-lucide="message-circle" aria-hidden="true"></i>
+                            نظرات
+                        </a>
+                    </li>
+                    <li>
                         <a href="<?= $baseEsc ?>pages/blog.php"
-                            class="relative text-white hover:text-[#E2D9C6] transition-all duration-300 font-medium text-sm xl:text-base py-2 px-3 rounded-lg hover:bg-white/10 group flex items-center">
+                            class="relative text-white hover:text-[#E2D9C6] transition-all duration-300 font-medium text-sm py-2 px-2 xl:px-3 rounded-lg hover:bg-white/10 group flex items-center">
                             <i class="icon icon--sm ml-1 opacity-70 group-hover:opacity-100" data-lucide="clipboard-list" aria-hidden="true"></i>
                             وبلاگ
                         </a>
                     </li>
                     <li>
-                        <a href="<?= $baseEsc ?>#services"
-                            class="relative text-white hover:text-[#E2D9C6] transition-all duration-300 font-medium text-sm xl:text-base py-2 px-3 rounded-lg hover:bg-white/10 group flex items-center">
-                            <i class="icon icon--sm ml-1 opacity-70 group-hover:opacity-100" data-lucide="star" aria-hidden="true"></i>
-                            خدمات ویژه
-                        </a>
-                    </li>
-                    <li>
                         <a href="<?= $baseEsc ?>#faq-contact"
-                            class="relative text-white hover:text-[#E2D9C6] transition-all duration-300 font-medium text-sm xl:text-base py-2 px-3 rounded-lg hover:bg-white/10 group flex items-center">
+                            class="relative text-white hover:text-[#E2D9C6] transition-all duration-300 font-medium text-sm py-2 px-2 xl:px-3 rounded-lg hover:bg-white/10 group flex items-center">
                             <i class="icon icon--sm ml-1 opacity-70 group-hover:opacity-100" data-lucide="circle-help" aria-hidden="true"></i>
-                            سوالات و تماس
+                            تماس
                         </a>
                     </li>
                     <li>
                         <a href="<?= $loginUrlEsc ?>"
-                            class="bg-gradient-to-r from-[#E2D9C6] to-[#d4c9b2] text-[#445D84] px-5 xl:px-6 py-2.5 rounded-full font-bold hover:shadow-lg hover:shadow-[#E2D9C6]/30 transition-all duration-300 text-sm xl:text-base hover:scale-105 flex items-center gap-2">
+                            class="bg-gradient-to-r from-[#E2D9C6] to-[#d4c9b2] text-[#445D84] px-4 xl:px-5 py-2.5 rounded-full font-bold hover:shadow-lg hover:shadow-[#E2D9C6]/30 transition-all duration-300 text-sm hover:scale-105 flex items-center gap-2">
                             <i class="icon icon--sm" data-lucide="user-plus" aria-hidden="true"></i>
                             ثبت نام
                         </a>
@@ -103,6 +103,10 @@ $loginUrlEsc = htmlspecialchars(famo_login_url() . '/', ENT_QUOTES, 'UTF-8');
                         class="block text-white hover:text-[#E2D9C6] transition duration-300 font-medium py-3 hover:bg-white/10 px-3 rounded-lg">دوره‌ها</a></li>
                 <li><a href="<?= $baseEsc ?>pages/team.php"
                         class="block text-white hover:text-[#E2D9C6] transition duration-300 font-medium py-3 hover:bg-white/10 px-3 rounded-lg">اساتید</a></li>
+                <li><a href="<?= $baseEsc ?>pages/admissions.php"
+                        class="block text-white hover:text-[#E2D9C6] transition duration-300 font-medium py-3 hover:bg-white/10 px-3 rounded-lg">قبولی‌های سال‌های قبل</a></li>
+                <li><a href="<?= $baseEsc ?>pages/testimonials.php"
+                        class="block text-white hover:text-[#E2D9C6] transition duration-300 font-medium py-3 hover:bg-white/10 px-3 rounded-lg">نظرات شاگردان</a></li>
                 <li><a href="<?= $baseEsc ?>pages/blog.php"
                         class="block text-white hover:text-[#E2D9C6] transition duration-300 font-medium py-3 hover:bg-white/10 px-3 rounded-lg">وبلاگ</a></li>
                 <li><a href="<?= $baseEsc ?>#services"
