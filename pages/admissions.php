@@ -2,6 +2,13 @@
 require_once __DIR__ . '/../config.php';
 $base = '../';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
+$page_libs = [
+    'gsap'           => false,
+    'scroll_trigger' => false,
+    'scroll_to'      => false,
+    'swiper'         => false,
+    'animation'      => false,
+];
 ?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -106,6 +113,6 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
 <!-- Footer -->
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
 
-<script type="module" src="<?= $baseEsc ?>assets/js/admissions.js"></script>
+<script type="module" src="<?= htmlspecialchars(famo_local_asset('assets/js/admissions.js', $base), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>

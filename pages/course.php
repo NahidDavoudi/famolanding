@@ -2,6 +2,13 @@
 require_once __DIR__ . '/../config.php';
 $base = '../';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
+$page_libs = [
+    'gsap'           => false,
+    'scroll_trigger' => false,
+    'scroll_to'      => false,
+    'swiper'         => false,
+    'animation'      => false,
+];
 ?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -229,18 +236,19 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
             justify-content: center;
             gap: 6px;
             background: #445D84;
-            color: #ffffff;
+            color: #fff;
             font-size: 13px;
             font-weight: 700;
-            padding: 9px 16px;
+            padding: 8px 14px;
             border-radius: 10px;
             text-decoration: none;
             white-space: nowrap;
-            transition: background .25s ease;
+            transition: background-color .18s ease, transform .18s ease;
         }
 
         #courses .course-cta:hover {
             background: #344868;
+            transform: translateY(-1px);
         }
 
         #courses .course-cta:focus-visible {
@@ -304,7 +312,7 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
         <!-- بنر یا پوستر با ارتفاع کنترل‌شده و گوشه‌های گرد -->
         <div class="relative w-full h-56 sm:h-72 md:h-96 rounded-2xl overflow-hidden shadow-2xl border border-white/20 mb-8">
             <img src="<?= $baseEsc ?>assets/images/courses_banner.webp" alt="دوره‌های تخصصی کنکور و تیزهوشان بابل"
-                width="2752" height="1536" decoding="async" class="w-full h-full object-cover">
+                width="2752" height="1536" decoding="async" fetchpriority="high" class="w-full h-full object-cover">
         </div>
 
         <p class="text-white/90 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">برنامه‌ریزی، کادر مجرب، آزمون‌های استاندارد
@@ -345,6 +353,6 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
 <!-- Footer -->
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
 
-<script type="module" src="<?= $baseEsc ?>assets/js/courses.js"></script>
+<script type="module" src="<?= htmlspecialchars(famo_local_asset('assets/js/courses.js', $base), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>

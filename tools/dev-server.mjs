@@ -47,8 +47,31 @@ function famoAssetBase() {
   return famoEnv('ASSET_URL', 'https://assets.famoacademy.ir').replace(/\/+$/, '');
 }
 
+function famoAssetVersion() {
+  return famoEnv('ASSET_VERSION', '').trim();
+}
+
+function famoAppendVersion(url, version) {
+  if (!version) return url;
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}v=${encodeURIComponent(version)}`;
+}
+
 function famoAsset(assetPath) {
-  return `${famoAssetBase()}/${String(assetPath).replace(/^\/+/, '')}`;
+  const url = `${famoAssetBase()}/${String(assetPath).replace(/^\/+/, '')}`;
+  return famoAppendVersion(url, famoAssetVersion());
+}
+
+function famoLocalAsset(relPath, base = '') {
+  const cleanRel = String(relPath).replace(/^\/+/, '');
+  const fullPath = path.join(ROOT_DIR, cleanRel);
+  const url = `${base}${cleanRel}`;
+  try {
+    const stat = fs.statSync(fullPath);
+    return famoAppendVersion(url, String(Math.floor(stat.mtimeMs / 1000)));
+  } catch {
+    return url;
+  }
 }
 
 function famoApiUrl() {
@@ -100,9 +123,47 @@ const MIME_TYPES = {
   '.woff2': 'font/woff2',
 };
 
+function parsePageLibsFromPreamble(preamble) {
+  const libs = {
+    gsap: true,
+    scroll_trigger: true,
+    scroll_to: true,
+    swiper: true,
+    lucide: true,
+    animation: true,
+  };
+  const m = preamble.match(/\$page_libs\s*=\s*\[([\s\S]*?)\];/);
+  if (!m) return libs;
+  const entryRegex = /'([a-z_]+)'\s*=>\s*(true|false)/g;
+  let em;
+  while ((em = entryRegex.exec(m[1])) !== null) {
+    libs[em[1]] = em[2] === 'true';
+  }
+  return libs;
+}
+
+function evalLibsConditionals(html, libs) {
+  let out = html;
+  let prev;
+  // Evaluate innermost <?php if (!empty($libs['key'])): ?> ... <?php endif; ?> blocks first
+  const innerIf = /<\?php\s+if\s*\(!empty\(\$libs\['([a-z_]+)'\]\)\):\s*\?>([\s\S]*?)<\?php\s+endif;\s*\?>/g;
+  // Use a non-greedy parser that only matches blocks without nested <?php if
+  const leafIf = /<\?php\s+if\s*\(!empty\(\$libs\['([a-z_]+)'\]\)\):\s*\?>((?:(?!<\?php\s+if\b)[\s\S])*?)<\?php\s+endif;\s*\?>/g;
+  do {
+    prev = out;
+    out = out.replace(leafIf, (_m, key, body) => (libs[key] ? body : ''));
+  } while (out !== prev);
+  void innerIf;
+  return out;
+}
+
 function renderPhpPreviewFile(relPath, base, vars = {}) {
   const fullPath = path.join(ROOT_DIR, relPath);
   let content = fs.readFileSync(fullPath, 'utf8');
+
+  // Parse $page_libs from leading PHP preamble before stripping it
+  const preambleMatch = content.match(/^<\?php([\s\S]*?)\?>\s*/m);
+  const libs = parsePageLibsFromPreamble(preambleMatch ? preambleMatch[1] : '');
 
   // Strip leading PHP preamble
   content = content.replace(/^<\?php[\s\S]*?\?>\s*/m, '');
@@ -116,11 +177,20 @@ function renderPhpPreviewFile(relPath, base, vars = {}) {
     return inc;
   });
 
+  // Evaluate $libs conditionals from head-common.php
+  content = evalLibsConditionals(content, libs);
+
   const loginUrl = famoEnv('LOGIN_URL', '').replace(/\/+$/, '') + '/';
 
   // Evaluate standard echo expressions used across the PHP pages for preview
   return content
     .replace(/<\?=\s*famo_config_script\(\)\s*\?>/g, famoConfigScript())
+    .replace(/<\?=\s*\$fontRegularWoff2\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Regular.subset.woff2')))
+    .replace(/<\?=\s*\$fontRegularTtf\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Regular.ttf')))
+    .replace(/<\?=\s*\$fontMediumWoff2\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Medium.subset.woff2')))
+    .replace(/<\?=\s*\$fontMediumTtf\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Medium.ttf')))
+    .replace(/<\?=\s*\$fontBoldWoff2\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Bold.subset.woff2')))
+    .replace(/<\?=\s*\$fontBoldTtf\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Bold.ttf')))
     .replace(/<\?=\s*htmlspecialchars\(\$pageTitle[^)]+\)\s*\?>/g, vars.pageTitle || 'آموزشگاه فامو')
     .replace(/<\?=\s*htmlspecialchars\(\$metaDescription[^)]+\)\s*\?>/g, vars.metaDescription || '')
     .replace(/<\?=\s*htmlspecialchars\(\$base,\s*ENT_QUOTES,\s*'UTF-8'\)\s*\?>/g, base)
@@ -128,7 +198,8 @@ function renderPhpPreviewFile(relPath, base, vars = {}) {
     .replace(/<\?=\s*\$loginUrlEsc\s*\?>/g, loginUrl)
     .replace(/<\?=\s*htmlspecialchars\(famo_login_url\(\)\s*\.\s*'\/'[^)]+\)\s*\?>/g, loginUrl)
     .replace(/<\?=\s*json_encode\(famo_public_url\(\)[^)]+\)\s*\?>/g, JSON.stringify(famoEnv('PUBLIC_URL', '').replace(/\/+$/, '')))
-    .replace(/<\?=\s*htmlspecialchars\(famo_asset\('([^']+)'[^)]+\),\s*ENT_QUOTES,\s*'UTF-8'\)\s*\?>/g, (_m, p) => famoAsset(p));
+    .replace(/<\?=\s*htmlspecialchars\(famo_local_asset\('([^']+)',\s*\$base\),\s*ENT_QUOTES,\s*'UTF-8'\)\s*\?>/g, (_m, p) => escapeHtml(famoLocalAsset(p, base)))
+    .replace(/<\?=\s*htmlspecialchars\(famo_asset\('([^']+)'[^)]+\),\s*ENT_QUOTES,\s*'UTF-8'\)\s*\?>/g, (_m, p) => escapeHtml(famoAsset(p)));
 }
 
 function escapeHtml(val) {

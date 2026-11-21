@@ -2,6 +2,13 @@
 require_once __DIR__ . '/../config.php';
 $base = '../';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
+$page_libs = [
+    'gsap'           => false,
+    'scroll_trigger' => false,
+    'scroll_to'      => false,
+    'swiper'         => false,
+    'animation'      => false,
+];
 ?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -23,8 +30,8 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
     <div class="container mx-auto px-4">
         <h1 class="text-3xl sm:text-4xl font-bold mb-4">کادر آموزشی و مشاوران فامو بابل</h1>
         <div class="relative w-full h-56 sm:h-72 md:h-96 rounded-2xl overflow-hidden shadow-2xl border border-white/20 mb-8">
-            <img src="<?= $baseEsc ?>assets/images/team.webp" alt="دوره‌های تخصصی کنکور و تیزهوشان بابل"
-                width="2752" height="1536" decoding="async" class="w-full h-full object-cover">
+            <img src="<?= $baseEsc ?>assets/images/team.webp" alt="کادر آموزشی، اساتید و مشاوران آموزشگاه فامو بابل"
+                width="1200" height="670" decoding="async" fetchpriority="high" class="w-full h-full object-cover">
         </div>
         <p class="text-white/80 max-w-2xl mx-auto">همراهی اساتید مجرب و پشتیبانان رتبه برتر کنکور در تمامی مراحل
             تحصیلی</p>
@@ -104,6 +111,6 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
 <!-- footer -->
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
 
-<script type="module" src="<?= $baseEsc ?>assets/js/team.js"></script>
+<script type="module" src="<?= htmlspecialchars(famo_local_asset('assets/js/team.js', $base), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 </html>

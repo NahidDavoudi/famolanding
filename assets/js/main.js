@@ -984,19 +984,23 @@ serviceCards.forEach(card => {
     const icon = card.querySelector('.service-illustration');
     if (icon) {
         card.addEventListener('mouseenter', function () {
-            gsap.to(icon, {
-                scale: 1.1,
-                duration: 0.3,
-                ease: "power2.out"
-            });
+            if (typeof gsap !== 'undefined') {
+                gsap.to(icon, {
+                    scale: 1.1,
+                    duration: 0.3,
+                    ease: "power2.out"
+                });
+            }
         });
 
         card.addEventListener('mouseleave', function () {
-            gsap.to(icon, {
-                scale: 1,
-                duration: 0.3,
-                ease: "power2.out"
-            });
+            if (typeof gsap !== 'undefined') {
+                gsap.to(icon, {
+                    scale: 1,
+                    duration: 0.3,
+                    ease: "power2.out"
+                });
+            }
         });
     }
 });

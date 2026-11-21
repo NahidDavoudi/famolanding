@@ -132,7 +132,7 @@ function renderCourseCard(course) {
         <!-- تصویر دوره (بدون overlay) -->
         <div class="course-image-wrapper" style="background: linear-gradient(135deg, ${gradientFrom}, ${gradientTo});">
             ${imageUrl
-                ? `<img src="${esc(imageUrl)}" alt="${esc(course.name)}" loading="lazy" class="course-image">`
+                ? `<img src="${esc(imageUrl)}" alt="${esc(course.name)}" loading="lazy" decoding="async" class="course-image">`
                 : `<div class="course-image-fallback">${svgIcon(`icon-${faToSvgName(course.icon)}`, 'icon--3xl text-white/90')}</div>`}
             ${badgeBlock}
         </div>

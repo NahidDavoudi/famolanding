@@ -74,14 +74,40 @@ function famo_is_dev(): bool
     return famo_app_mode() === 'development';
 }
 
+function famo_asset_version(): string
+{
+    return trim(famo_env('ASSET_VERSION', ''));
+}
+
+function famo_append_version(string $url, string $version): string
+{
+    if ($version === '') {
+        return $url;
+    }
+    $sep = str_contains($url, '?') ? '&' : '?';
+    return $url . $sep . 'v=' . rawurlencode($version);
+}
+
 function famo_asset(string $assetPath, string $fallback): string
 {
     $defaultBase = famo_is_dev() ? '' : 'https://assets.famoacademy.ir';
     $base = rtrim(famo_env('ASSET_URL', $defaultBase), '/');
-    if ($base === '') {
-        return $fallback;
+    $url = $base === '' ? $fallback : $base . '/' . ltrim($assetPath, '/');
+    return famo_append_version($url, famo_asset_version());
+}
+
+function famo_local_asset(string $relativePath, string $base = ''): string
+{
+    $cleanPath = ltrim($relativePath, '/');
+    $url = $base . $cleanPath;
+    $fsPath = __DIR__ . '/' . $cleanPath;
+    if (is_file($fsPath)) {
+        $mtime = filemtime($fsPath);
+        if ($mtime !== false) {
+            return famo_append_version($url, (string) $mtime);
+        }
     }
-    return $base . '/' . ltrim($assetPath, '/');
+    return $url;
 }
 
 function famo_asset_base(): string

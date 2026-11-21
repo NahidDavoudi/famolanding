@@ -3,6 +3,9 @@ require_once __DIR__ . '/config.php';
 $base = '';
 $pageTitle = 'آموزشگاه فامو | مشاوره کنکور و تیزهوشان بابل';
 $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی کنکور و تیزهوشان';
+$page_libs = [
+    'scroll_to' => false,
+];
 ?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -27,7 +30,7 @@ $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی
         <div class="container mx-auto max-w-6xl hero-inner">
             <!-- ۱) تصویر هیرو: تمام‌عرض، بدون overlay -->
             <div class="hero-media">
-                <img src="assets/images/poster_hero.webp" alt="محیط آموزشی آموزشگاه فامو" width="2817" height="1585" decoding="async" fetchpriority="high" class="hero-media-img">
+                <img src="assets/images/poster_hero.webp" alt="محیط آموزشی آموزشگاه فامو" width="2816" height="1584" decoding="async" fetchpriority="high" class="hero-media-img">
             </div>
 
             <!-- ۲) تیتر -->
@@ -39,7 +42,7 @@ $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی
             <!-- ۳) توضیح کوتاه -->
             <p class="hero-desc">اساتید مجرب و مشاوران حرفه‌ای، همراه دانش‌آموزان تا قبولی.</p>
 
-            <!-- ۴) کارت آمار: خارج از تصویر، روی پس‌زمینه روشن -->
+            <!-- ۴) کارت آمار: شیشه مایع Liquid Glass -->
             <div class="hero-stats">
                 <div class="grid grid-cols-3 text-center hero-stats-grid">
                     <div class="hero-stat">
@@ -57,15 +60,15 @@ $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی
                 </div>
             </div>
 
-            <!-- ۵) دکمه‌ها: هم‌اندازه -->
+            <!-- ۵) دکمه‌ها -->
             <div class="hero-ctas">
                 <a href="<?= htmlspecialchars(famo_login_url() . '/', ENT_QUOTES, 'UTF-8') ?>"
-                    class="hero-cta bg-gradient-to-r from-[#E2D9C6] to-[#d4c9b2] text-[#445D84] px-6 py-3 rounded-full font-bold hover:shadow-xl transition-all duration-300 hover:scale-105 shadow-lg min-h-[44px]">
+                    class="hero-cta bg-[#E2D9C6] text-[#445D84] font-bold px-8 py-3 rounded-full hover:bg-white transition duration-300 shadow-lg hover:shadow-xl">
                     <i class="icon ml-2" data-lucide="school" aria-hidden="true"></i>
                     رزرو نوبت
                 </a>
                 <a href="#courses"
-                    class="hero-cta bg-transparent border-2 border-[#E2D9C6] text-[#E2D9C6] px-6 py-3 rounded-full font-bold hover:bg-[#E2D9C6] hover:text-[#445D84] transition-all duration-300 min-h-[44px]">
+                    class="hero-cta border-2 border-[#E2D9C6] text-[#E2D9C6] font-bold px-8 py-3 rounded-full hover:bg-[#E2D9C6] hover:text-[#445D84] transition duration-300">
                     <i class="icon ml-2" data-lucide="book-open" aria-hidden="true"></i>
                     مشاهده دوره‌ها
                 </a>
@@ -155,9 +158,9 @@ $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی
 
             <div class="text-center mt-10">
                 <a href="pages/course.php"
-                    class="inline-flex items-center bg-[#445D84] text-white px-6 py-3 rounded-full font-bold hover:bg-[#344868] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#445D84] focus-visible:ring-offset-2">
+                    class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-8 py-3 rounded-full hover:bg-[#344868] transition duration-300 shadow-lg hover:shadow-xl">
                     مشاهده همه دوره‌ها و جزئیات کامل
-                    <i class="icon icon--sm mr-2" data-lucide="chevron-left" aria-hidden="true"></i>
+                    <i class="icon icon--sm mr-1" data-lucide="chevron-left" aria-hidden="true"></i>
                 </a>
             </div>
         </div>
@@ -231,9 +234,9 @@ $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی
 
             <div class="text-center mt-10">
                 <a href="pages/team.php"
-                    class="inline-flex items-center bg-[#445D84] text-white px-6 py-3 rounded-full font-bold hover:bg-[#344868] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#445D84] focus-visible:ring-offset-2">
+                    class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-8 py-3 rounded-full hover:bg-[#344868] transition duration-300 shadow-lg hover:shadow-xl">
                     مشاهده کادر آموزشگاه فامو
-                    <i class="icon icon--sm mr-2" data-lucide="chevron-left" aria-hidden="true"></i>
+                    <i class="icon icon--sm mr-1" data-lucide="chevron-left" aria-hidden="true"></i>
                 </a>
             </div>
         </div>
@@ -266,9 +269,9 @@ $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی
                     </div>
                     <div>
                         <a href="pages/admissions.php"
-                            class="inline-flex items-center bg-[#445D84] text-white px-6 py-3 rounded-full font-bold hover:bg-[#344868] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#445D84] focus-visible:ring-offset-2">
+                            class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-6 py-2.5 rounded-full hover:bg-[#344868] transition duration-300 shadow-md">
                             مشاهده قبولی‌ها
-                            <i class="icon icon--sm mr-2" data-lucide="chevron-left" aria-hidden="true"></i>
+                            <i class="icon icon--sm mr-1" data-lucide="chevron-left" aria-hidden="true"></i>
                         </a>
                     </div>
                 </article>
@@ -287,9 +290,9 @@ $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی
                     </div>
                     <div>
                         <a href="pages/testimonials.php"
-                            class="inline-flex items-center bg-[#445D84] text-white px-6 py-3 rounded-full font-bold hover:bg-[#344868] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#445D84] focus-visible:ring-offset-2">
+                            class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-6 py-2.5 rounded-full hover:bg-[#344868] transition duration-300 shadow-md">
                             مشاهده و ثبت نظر
-                            <i class="icon icon--sm mr-2" data-lucide="chevron-left" aria-hidden="true"></i>
+                            <i class="icon icon--sm mr-1" data-lucide="chevron-left" aria-hidden="true"></i>
                         </a>
                     </div>
                 </article>
@@ -333,7 +336,7 @@ $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی
                 <div class="rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
                     <img src="assets/images/about_us-small.webp"
                          alt="محیط آموزشگاه فامو"
-                         width="800" height="600"
+                         width="1200" height="896"
                          loading="lazy"
                          decoding="async"
                          class="w-full h-auto object-cover">
@@ -359,7 +362,7 @@ $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی
                     <div class="service-media">
                         <img src="assets/images/services/24support.webp"
                             alt="ایلوستریشن پشتیبانی ۲۴ ساعته آموزشگاه فامو"
-                            width="800" height="500" loading="lazy" decoding="async"
+                            width="1200" height="1200" loading="lazy" decoding="async"
                             class="service-illustration">
                     </div>
                     <div class="service-body">
@@ -373,7 +376,7 @@ $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی
                     <div class="service-media">
                         <img src="assets/images/services/weekly_exams.webp"
                             alt="ایلوستریشن آزمون‌های هفتگی و تحلیل پیشرفت"
-                            width="800" height="500" loading="lazy" decoding="async"
+                            width="1200" height="1200" loading="lazy" decoding="async"
                             class="service-illustration">
                     </div>
                     <div class="service-body">
@@ -387,7 +390,7 @@ $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی
                     <div class="service-media">
                         <img src="assets/images/services/private_classes.webp"
                             alt="ایلوستریشن کلاس‌های خصوصی و رفع اشکال"
-                            width="800" height="500" loading="lazy" decoding="async"
+                            width="1200" height="1200" loading="lazy" decoding="async"
                             class="service-illustration">
                     </div>
                     <div class="service-body">
@@ -401,7 +404,7 @@ $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی
                     <div class="service-media">
                         <img src="assets/images/services/weekly_plans.webp"
                             alt="ایلوستریشن مشاوره تخصصی و برنامه‌ریزی تحصیلی"
-                            width="800" height="500" loading="lazy" decoding="async"
+                            width="1200" height="1200" loading="lazy" decoding="async"
                             class="service-illustration">
                     </div>
                     <div class="service-body">
@@ -412,12 +415,12 @@ $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی
             </div>
 
             <div
-                class="mt-16 bg-gradient-to-r from-[#445D84] to-[#5a779e] rounded-2xl p-8 text-center text-white shadow-xl">
+                class="mt-16 gradient-bg rounded-3xl p-8 text-center text-white shadow-2xl">
                 <h3 class="text-2xl font-bold mb-4">همین امروز شروع کنید!</h3>
                 <p class="mb-6 max-w-2xl mx-auto">برای دریافت مشاوره رایگان و آگاهی از شرایط ویژه ثبت‌نام، با ما در تماس
                     باشید.</p>
                 <a href="#faq-contact"
-                    class="bg-white text-[#445D84] px-8 py-3 rounded-full font-bold hover:shadow-lg transition-all duration-300 hover:scale-105 inline-flex items-center">
+                    class="inline-flex items-center bg-[#E2D9C6] text-[#445D84] font-bold px-8 py-3 rounded-full hover:bg-white transition duration-300 shadow-lg">
                     <i class="icon ml-2" data-lucide="phone" aria-hidden="true"></i>
                     تماس با ما
                 </a>
@@ -580,7 +583,7 @@ $metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی
     <?php include __DIR__ . '/layouts/footer.php'; ?>
 
     <!-- Scripts -->
-    <script type="module" src="assets/js/main.js"></script>
+    <script type="module" src="<?= htmlspecialchars(famo_local_asset('assets/js/main.js', $base), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
 
 </html>

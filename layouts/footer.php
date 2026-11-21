@@ -10,7 +10,10 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
             <div>
                 <div class="flex items-center gap-4 mb-6">
                     <div class="bg-[#445D84] w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                        <img src="<?= htmlspecialchars(famo_asset('images/logo.png', $base . '../shared/images/logo.png'), ENT_QUOTES, 'UTF-8') ?>" alt="لوگوی آموزشگاه فامو" width="40" height="40" loading="lazy" decoding="async" class="w-10 h-10 object-contain">
+                        <picture>
+                            <source srcset="<?= htmlspecialchars(famo_asset('images/logo.webp', $base . '../shared/images/logo.webp'), ENT_QUOTES, 'UTF-8') ?>" type="image/webp">
+                            <img src="<?= htmlspecialchars(famo_asset('images/logo.png', $base . '../shared/images/logo.png'), ENT_QUOTES, 'UTF-8') ?>" alt="لوگوی آموزشگاه فامو" width="40" height="40" loading="lazy" decoding="async" class="w-10 h-10 object-contain">
+                        </picture>
                     </div>
                     <div>
                         <h3 class="text-2xl font-bold">آموزشگاه <span class="text-[#E2D9C6]">فامو</span></h3>
@@ -23,17 +26,17 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
                 </p>
                 <div class="flex gap-4">
                     <a href="https://t.me/famoacademy"
-                        class="bg-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/20 transition duration-300 hover:scale-110 shrink-0"
+                        class="bg-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#E2D9C6] hover:text-[#445D84] transition duration-300 shrink-0"
                         aria-label="فامو در تلگرام">
                         <i class="icon" data-lucide="send" aria-hidden="true"></i>
                     </a>
                     <a href="#"
-                        class="bg-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/20 transition duration-300 hover:scale-110 shrink-0"
+                        class="bg-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#E2D9C6] hover:text-[#445D84] transition duration-300 shrink-0"
                         aria-label="فامو در اینستاگرام">
                         <i class="icon" data-lucide="instagram" aria-hidden="true"></i>
                     </a>
                     <a href="https://wa.me/989014402300"
-                        class="bg-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/20 transition duration-300 hover:scale-110 shrink-0"
+                        class="bg-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#E2D9C6] hover:text-[#445D84] transition duration-300 shrink-0"
                         aria-label="فامو در واتساپ">
                         <i class="icon" data-lucide="message-circle" aria-hidden="true"></i>
                     </a>
@@ -97,8 +100,8 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
                     </div>
                     <div class="mt-4 text-center">
                         <a href="https://maps.google.com/?q=بابل، میدان باغ فردوس" target="_blank"
-                            class="inline-flex items-center bg-white/20 text-white px-4 py-2 rounded-lg hover:bg-white/30 transition duration-300">
-                            <i class="icon icon--sm ml-2" data-lucide="external-link" aria-hidden="true"></i>
+                            class="inline-flex items-center bg-[#E2D9C6] text-[#445D84] text-sm font-bold px-4 py-2 rounded-full hover:bg-white transition duration-300">
+                            <i class="icon icon--sm ml-1" data-lucide="external-link" aria-hidden="true"></i>
                             مشاهده در نقشه
                         </a>
                     </div>

@@ -233,8 +233,51 @@ http_response_code($statusCode);
     <meta name="referrer" content="no-referrer">
     <meta name="color-scheme" content="light">
     <title>کارنامه آزمون | آموزشگاه فامو</title>
-    <link rel="stylesheet" href="<?= famo_e(famo_asset('css/tokens.css', '/assets/css/tokens.css')) ?>">
-    <link rel="stylesheet" href="<?= famo_e(famo_asset('css/fonts.css', '/assets/css/fonts.css')) ?>">
+<?php
+$rFontRegularWoff2 = famo_e(famo_asset('fonts/Vazirmatn-Regular.subset.woff2', '../shared/fonts/Vazirmatn-Regular.subset.woff2'));
+$rFontRegularTtf   = famo_e(famo_asset('fonts/Vazirmatn-Regular.ttf', '../shared/fonts/Vazirmatn-Regular.ttf'));
+$rFontMediumWoff2  = famo_e(famo_asset('fonts/Vazirmatn-Medium.subset.woff2', '../shared/fonts/Vazirmatn-Medium.subset.woff2'));
+$rFontMediumTtf    = famo_e(famo_asset('fonts/Vazirmatn-Medium.ttf', '../shared/fonts/Vazirmatn-Medium.ttf'));
+$rFontBoldWoff2    = famo_e(famo_asset('fonts/Vazirmatn-Bold.subset.woff2', '../shared/fonts/Vazirmatn-Bold.subset.woff2'));
+$rFontBoldTtf      = famo_e(famo_asset('fonts/Vazirmatn-Bold.ttf', '../shared/fonts/Vazirmatn-Bold.ttf'));
+?>
+    <link rel="preload" as="font" type="font/woff2" href="<?= $rFontRegularWoff2 ?>" crossorigin>
+    <link rel="preload" as="font" type="font/woff2" href="<?= $rFontBoldWoff2 ?>" crossorigin>
+    <style>
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: url('<?= $rFontRegularWoff2 ?>') format('woff2'),
+                 url('<?= $rFontRegularTtf ?>') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: url('<?= $rFontMediumWoff2 ?>') format('woff2'),
+                 url('<?= $rFontMediumTtf ?>') format('truetype');
+            font-weight: 500;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Vazirmatn';
+            src: url('<?= $rFontBoldWoff2 ?>') format('woff2'),
+                 url('<?= $rFontBoldTtf ?>') format('truetype');
+            font-weight: 700;
+            font-style: normal;
+            font-display: swap;
+        }
+        @font-face {
+            font-family: 'Vazirmatn Fallback';
+            src: local('Tahoma'), local('Segoe UI'), local('Arial');
+            size-adjust: 102%;
+            ascent-override: 98%;
+            descent-override: 32%;
+            line-gap-override: 0%;
+        }
+    </style>
+    <link rel="stylesheet" href="<?= famo_e(famo_asset('css/tokens.css', '../shared/css/tokens.css')) ?>">
     <link rel="icon" type="image/png" sizes="32x32" href="<?= famo_e(famo_asset('images/favicon-32.png', '/favicon.ico')) ?>">
     <style>
         *, *::before, *::after {
@@ -250,7 +293,7 @@ http_response_code($statusCode);
             flex-direction: column;
             background-color: #f9f7f3;
             color: var(--ds-color-foreground, #1f2937);
-            font-family: Vazirmatn, var(--ds-font-sans, system-ui, -apple-system, sans-serif);
+            font-family: 'Vazirmatn', 'Vazirmatn Fallback', var(--ds-font-sans, system-ui, -apple-system, sans-serif);
             line-height: 1.6;
         }
         .exam-header {
@@ -551,7 +594,10 @@ http_response_code($statusCode);
     <header class="exam-header">
         <div class="exam-header-inner">
             <div class="exam-brand">
-                <img src="<?= famo_e(famo_asset('images/logo.png', '/assets/images/logo.png')) ?>" alt="آموزشگاه فامو" width="40" height="40" class="exam-logo">
+                <picture>
+                    <source srcset="<?= famo_e(famo_asset('images/logo.webp', '../shared/images/logo.webp')) ?>" type="image/webp">
+                    <img src="<?= famo_e(famo_asset('images/logo.png', '../shared/images/logo.png')) ?>" alt="آموزشگاه فامو" width="40" height="40" decoding="async" class="exam-logo">
+                </picture>
                 <div>
                     <div class="exam-brand-title">آموزشگاه فامو</div>
                     <div class="exam-brand-sub">گزارش اختصاصی نتیجه آزمون</div>
