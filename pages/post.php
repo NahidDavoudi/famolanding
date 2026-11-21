@@ -2,6 +2,69 @@
 require_once __DIR__ . '/../config.php';
 $base = '../';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
+$siteUrl = famo_public_site_url();
+
+$slug = isset($_GET['slug']) && is_string($_GET['slug']) ? trim($_GET['slug']) : '';
+$pageTitle = 'مقالات وبلاگ | آموزشگاه فامو بابل';
+$metaDescription = 'مطالب آموزشی، مشاوره‌ای و روش مطالعه کنکور و تیزهوشان در وبلاگ آموزشگاه فامو بابل.';
+$canonicalPath = $slug !== '' ? 'pages/post.php?slug=' . rawurlencode($slug) : 'pages/blog.php';
+$ogType = 'article';
+$webPageType = 'WebPage';
+$breadcrumbs = [
+    ['name' => 'خانه', 'url' => famo_canonical_url('')],
+    ['name' => 'وبلاگ و مقالات', 'url' => famo_canonical_url('pages/blog.php')],
+];
+$extraSchemas = [];
+
+if ($slug === '') {
+    http_response_code(404);
+    $robots = 'noindex, follow';
+} else {
+    $postApiRes = famo_internal_api_get('/public/blog/posts/' . rawurlencode($slug), 2);
+    if ($postApiRes['status'] === 404) {
+        http_response_code(404);
+        $robots = 'noindex, follow';
+        $pageTitle = 'مقاله یافت نشد | وبلاگ آموزشگاه فامو';
+    } elseif (is_array($postApiRes['json']['data']['post'] ?? null)) {
+        $ssrPost = $postApiRes['json']['data']['post'];
+        $postTitle = trim((string) ($ssrPost['title'] ?? ''));
+        if ($postTitle !== '') {
+            $pageTitle = $postTitle . ' | وبلاگ آموزشگاه فامو';
+            $breadcrumbs[] = ['name' => $postTitle, 'url' => famo_canonical_url($canonicalPath)];
+        }
+        $postDesc = trim((string) ($ssrPost['meta_description'] ?? $ssrPost['excerpt'] ?? ''));
+        if ($postDesc !== '') {
+            $metaDescription = $postDesc;
+        }
+        $postCover = trim((string) ($ssrPost['cover_image'] ?? ''));
+        if ($postCover !== '') {
+            $ogImage = $postCover;
+            $ogImageAlt = $postTitle !== '' ? $postTitle : $pageTitle;
+        }
+        $postCanonical = famo_canonical_url($canonicalPath);
+        $blogPosting = [
+            '@type'            => 'BlogPosting',
+            '@id'              => $postCanonical . '#article',
+            'headline'         => $postTitle !== '' ? $postTitle : $pageTitle,
+            'description'      => $metaDescription,
+            'image'            => $postCover !== '' ? $postCover : ($siteUrl . '/assets/images/poster_hero.webp'),
+            'inLanguage'       => 'fa-IR',
+            'author'           => ['@id' => $siteUrl . '/#organization'],
+            'publisher'        => ['@id' => $siteUrl . '/#organization'],
+            'mainEntityOfPage' => ['@id' => $postCanonical . '#webpage'],
+        ];
+        if (!empty($ssrPost['published_at'])) {
+            $blogPosting['datePublished'] = (string) $ssrPost['published_at'];
+        }
+        if (!empty($ssrPost['updated_at'])) {
+            $blogPosting['dateModified'] = (string) $ssrPost['updated_at'];
+        } elseif (!empty($ssrPost['published_at'])) {
+            $blogPosting['dateModified'] = (string) $ssrPost['published_at'];
+        }
+        $extraSchemas[] = $blogPosting;
+    }
+}
+
 $page_libs = [
     'gsap'           => false,
     'scroll_trigger' => false,
@@ -16,18 +79,6 @@ $page_libs = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مقالات وبلاگ | آموزشگاه فامو</title>
-    <meta name="description" content="مطالب آموزشی وبلاگ آموزشگاه فامو بابل">
-    <meta name="robots" content="index, follow">
-
-    <!-- Open Graph -->
-    <meta property="og:title" content="مقالات وبلاگ | آموزشگاه فامو">
-    <meta property="og:description" content="مطالب آموزشی وبلاگ آموزشگاه فامو بابل">
-    <meta property="og:image" content="<?= htmlspecialchars(famo_asset('images/logo.png', $base . '../shared/images/logo.png'), ENT_QUOTES, 'UTF-8') ?>">
-
-    <!-- Structured Data - updated dynamically per post by blog.js -->
-    <script type="application/ld+json" id="blogPostingSchema"></script>
-
     <?php include __DIR__ . '/../layouts/head-common.php'; ?>
 </head>
 
@@ -36,6 +87,7 @@ $page_libs = [
     <!-- Header -->
 <?php include __DIR__ . '/../layouts/header.php'; ?>
 
+    <main id="main-content" class="flex-1">
     <!-- Article Container -->
     <section class="pt-28 sm:pt-32 pb-16 px-4">
         <div class="container mx-auto max-w-4xl">
@@ -57,6 +109,7 @@ $page_libs = [
             </div>
         </div>
     </section>
+    </main>
 
 <!-- Footer -->
 <?php include __DIR__ . '/../layouts/footer.php'; ?>

@@ -2,6 +2,14 @@
 require_once __DIR__ . '/../config.php';
 $base = '../';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
+$pageTitle = 'قبولی‌های سال‌های قبل کنکور و تیزهوشان | آموزشگاه فامو بابل';
+$metaDescription = 'فهرست قبولی‌ها و رتبه‌های برتر کنکور سراسری، تیزهوشان، نمونه دولتی و المپیادهای علمی آموزشگاه فامو بابل به تفکیک سال شمسی و رشته.';
+$canonicalPath = 'pages/admissions.php';
+$webPageType = 'CollectionPage';
+$breadcrumbs = [
+    ['name' => 'خانه', 'url' => famo_canonical_url('')],
+    ['name' => 'قبولی‌های سال‌های قبل', 'url' => famo_canonical_url('pages/admissions.php')],
+];
 $page_libs = [
     'gsap'           => false,
     'scroll_trigger' => false,
@@ -15,9 +23,6 @@ $page_libs = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>قبولی‌های سال‌های قبل | آموزشگاه فامو بابل</title>
-    <meta name="description"
-        content="فهرست قبولی‌ها و رتبه‌های برتر کنکور سراسری، تیزهوشان، نمونه دولتی و المپیاد آموزشگاه فامو بابل به تفکیک سال شمسی.">
     <?php include __DIR__ . '/../layouts/head-common.php'; ?>
 </head>
 
@@ -26,7 +31,7 @@ $page_libs = [
 <!-- Header -->
 <?php include __DIR__ . '/../layouts/header.php'; ?>
 
-<main>
+<main id="main-content">
     <!-- Hero Banner -->
     <section class="pt-28 sm:pt-32 pb-12 gradient-bg text-white text-center">
         <div class="container mx-auto max-w-6xl px-4">

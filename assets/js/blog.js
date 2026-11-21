@@ -2,10 +2,10 @@
 import { formatJalaliLong } from './jalali.js';
 const { default: API, onReady } = await import(`${window.APP_CONFIG.assetUrl}/js/api.js`);
 
-const SITE_URL = window.APP_CONFIG && window.APP_CONFIG.publicUrl;
+const SITE_URL = ((window.APP_CONFIG && window.APP_CONFIG.publicUrl) || window.location.origin).replace(/\/+$/, '');
 
 // Asset base is injected from this panel's ASSET_URL.
-const ASSET_BASE = window.APP_CONFIG && window.APP_CONFIG.assetUrl;
+const ASSET_BASE = (window.APP_CONFIG && window.APP_CONFIG.assetUrl) || '';
 const asset = (path) => `${ASSET_BASE.replace(/\/$/, '')}/${String(path).replace(/^\//, '')}`;
 
 // Categories loaded from API
@@ -296,7 +296,7 @@ function renderPost(post) {
            </div>`;
 
     container.innerHTML = `
-        <nav class="text-sm text-gray-500 mb-6 flex flex-wrap items-center gap-2">
+        <nav aria-label="مسیر صفحه" class="text-sm text-gray-500 mb-6 flex flex-wrap items-center gap-2">
             <a href="../index.php" class="hover:text-[#445D84] transition flex items-center gap-1">${svgIcon('icon-home', 'icon--sm')} خانه</a>
             <span class="text-[#E2D9C6]">/</span>
             <a href="blog.php" class="hover:text-[#445D84] transition">وبلاگ</a>
@@ -330,8 +330,9 @@ function renderPost(post) {
                     </a>
                     <div class="flex items-center gap-2 text-sm text-gray-500">
                         <span>اشتراک‌گذاری:</span>
-                        <a href="${SITE_URL}/pages/${postPath(post.slug)}"
-                            class="bg-[#E2D9C6] text-[#445D84] w-9 h-9 rounded-full flex items-center justify-center hover:scale-110 transition" aria-label="تلگرام">
+                        <a href="https://t.me/share/url?url=${encodeURIComponent(`${SITE_URL}/pages/${postPath(post.slug)}`)}&text=${encodeURIComponent(post.title || '')}"
+                            target="_blank" rel="noopener noreferrer"
+                            class="bg-[#E2D9C6] text-[#445D84] w-9 h-9 rounded-full flex items-center justify-center hover:scale-110 transition" aria-label="اشتراک‌گذاری در تلگرام">
                             ${svgIcon('icon-telegram', 'icon--sm')}
                         </a>
                     </div>
@@ -351,7 +352,7 @@ function renderPost(post) {
 function updatePostSEO(post) {
     const title = `${post.title} | وبلاگ آموزشگاه فامو`;
     const desc = post.meta_description || post.excerpt || '';
-    const ogImage = post.cover_image || asset('images/logo.png');
+    const ogImage = post.cover_image || `${SITE_URL}/assets/images/poster_hero.webp`;
     const canonical = `${SITE_URL}/pages/${postPath(post.slug)}`;
 
     document.title = title;
@@ -361,26 +362,37 @@ function updatePostSEO(post) {
         if (el) el.setAttribute(attr, value);
     };
     setMeta('meta[name="description"]', 'content', desc);
+    setMeta('link[rel="canonical"]', 'href', canonical);
+    setMeta('meta[property="og:type"]', 'content', 'article');
     setMeta('meta[property="og:title"]', 'content', title);
     setMeta('meta[property="og:description"]', 'content', desc);
     setMeta('meta[property="og:image"]', 'content', ogImage);
+    setMeta('meta[property="og:image:alt"]', 'content', post.title || title);
     setMeta('meta[property="og:url"]', 'content', canonical);
+    setMeta('meta[name="twitter:title"]', 'content', title);
+    setMeta('meta[name="twitter:description"]', 'content', desc);
+    setMeta('meta[name="twitter:image"]', 'content', ogImage);
+    setMeta('meta[name="twitter:image:alt"]', 'content', post.title || title);
 
-    // JSON-LD BlogPosting
+    // JSON-LD BlogPosting (syncs client-side when SSR did not hydrate)
     const schema = {
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
+        '@id': `${canonical}#article`,
         headline: post.title,
         description: desc,
         image: ogImage,
+        inLanguage: 'fa-IR',
         datePublished: post.published_at,
-        author: { '@type': 'Organization', name: 'آموزشگاه فامو' },
+        dateModified: post.updated_at || post.published_at,
+        author: { '@id': `${SITE_URL}/#organization` },
         publisher: {
-            '@type': 'Organization',
+            '@type': 'EducationalOrganization',
+            '@id': `${SITE_URL}/#organization`,
             name: 'آموزشگاه فامو',
             logo: { '@type': 'ImageObject', url: asset('images/logo.png') },
         },
-        mainEntityOfPage: canonical,
+        mainEntityOfPage: { '@type': 'WebPage', '@id': `${canonical}#webpage` },
     };
     let tag = document.getElementById('blogPostingSchema');
     if (!tag) {

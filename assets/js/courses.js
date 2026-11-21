@@ -162,10 +162,51 @@ function updateCourseSchema(courses) {
     const schemaTag = document.getElementById('courseSchema');
     if (!schemaTag) return;
     try {
-        const schema = JSON.parse(schemaTag.textContent);
-        schema.itemListElement = courses.map((course, index) => ({
-            '@type': 'ListItem', position: index + 1, name: course.name
-        }));
+        const siteUrl = ((window.APP_CONFIG && window.APP_CONFIG.publicUrl) || window.location.origin).replace(/\/+$/, '');
+        const pageUrl = `${siteUrl}/pages/course.php`;
+        const schema = {
+            '@context': 'https://schema.org',
+            '@type': 'ItemList',
+            '@id': `${pageUrl}#courses`,
+            name: 'دوره‌های آموزشی فامو بابل',
+            itemListElement: courses.map((course, index) => {
+                const courseItem = {
+                    '@type': 'Course',
+                    name: course.name,
+                    description: course.full_description || course.description || 'دوره آموزشی تخصصی آموزشگاه فامو بابل',
+                    url: `${pageUrl}#course-${encodeURIComponent(String(course.id ?? index + 1))}`,
+                    inLanguage: 'fa-IR',
+                    provider: {
+                        '@type': 'EducationalOrganization',
+                        '@id': `${siteUrl}/#organization`,
+                        name: 'آموزشگاه فامو',
+                        url: `${siteUrl}/`,
+                    },
+                    hasCourseInstance: {
+                        '@type': 'CourseInstance',
+                        courseMode: 'onsite',
+                        location: {
+                            '@type': 'Place',
+                            name: 'آموزشگاه فامو بابل',
+                            address: {
+                                '@type': 'PostalAddress',
+                                addressLocality: 'بابل',
+                                addressRegion: 'مازندران',
+                                addressCountry: 'IR',
+                            },
+                        },
+                    },
+                };
+                if (course.target_grades) {
+                    courseItem.educationalLevel = String(course.target_grades);
+                }
+                return {
+                    '@type': 'ListItem',
+                    position: index + 1,
+                    item: courseItem,
+                };
+            }),
+        };
         schemaTag.textContent = JSON.stringify(schema);
     } catch (error) {
         console.error('Error updating course schema:', error);

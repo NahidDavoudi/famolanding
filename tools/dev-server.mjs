@@ -157,13 +157,158 @@ function evalLibsConditionals(html, libs) {
   return out;
 }
 
+function famoPublicSiteUrl() {
+  const url = famoEnv('PUBLIC_URL', '').replace(/\/+$/, '');
+  return url || 'https://famoacademy.ir';
+}
+
+function famoCanonicalUrl(relPath = '') {
+  const siteUrl = famoPublicSiteUrl();
+  const clean = String(relPath).replace(/^\/+/, '');
+  return clean === '' ? `${siteUrl}/` : `${siteUrl}/${clean}`;
+}
+
+function parsePhpStringVar(preamble, varName) {
+  const m = preamble.match(new RegExp(`\\$${varName}\\s*=\\s*'((?:\\\\'|[^'])*)'\\s*;`));
+  return m ? m[1].replace(/\\'/g, "'") : '';
+}
+
+function buildPreviewGraph(relPath, seo) {
+  const siteUrl = famoPublicSiteUrl();
+  const orgId = `${siteUrl}/#organization`;
+  const websiteId = `${siteUrl}/#website`;
+  const webpageId = `${seo.canonical}#webpage`;
+  const breadcrumbId = `${seo.canonical}#breadcrumb`;
+
+  const org = {
+    '@type': ['EducationalOrganization', 'Organization'],
+    '@id': orgId,
+    name: 'آموزشگاه فامو',
+    alternateName: 'Famo Academy',
+    url: `${siteUrl}/`,
+    logo: { '@type': 'ImageObject', url: famoAsset('images/logo.png') },
+    image: seo.ogImage,
+    email: 'info@famoacademy.ir',
+    telephone: '+98-901-440-2300',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'بابل',
+      addressRegion: 'مازندران',
+      addressCountry: 'IR',
+      streetAddress: 'میدان باغ فردوس، جنب بیمارستان بابل کلینیک، مدرسه بهارستان',
+    },
+    sameAs: ['https://t.me/famoacademy'],
+  };
+
+  const website = {
+    '@type': 'WebSite',
+    '@id': websiteId,
+    url: `${siteUrl}/`,
+    name: 'آموزشگاه فامو',
+    inLanguage: 'fa-IR',
+    publisher: { '@id': orgId },
+  };
+
+  const crumbs = [{ '@type': 'ListItem', position: 1, name: 'خانه', item: famoCanonicalUrl('') }];
+  const pageLabels = {
+    'pages/course.php': 'دوره‌های تخصصی',
+    'pages/team.php': 'اساتید و مشاوران',
+    'pages/admissions.php': 'قبولی‌های سال‌های قبل',
+    'pages/testimonials.php': 'نظرات شاگردان و اولیا',
+    'pages/blog.php': 'وبلاگ و مقالات',
+    'pages/post.php': 'وبلاگ و مقالات',
+  };
+  if (pageLabels[relPath]) {
+    crumbs.push({
+      '@type': 'ListItem',
+      position: 2,
+      name: pageLabels[relPath],
+      item: relPath === 'pages/post.php' ? famoCanonicalUrl('pages/blog.php') : seo.canonical,
+    });
+  }
+
+  const webpage = {
+    '@type': seo.webPageType,
+    '@id': webpageId,
+    url: seo.canonical,
+    name: seo.title,
+    description: seo.description,
+    inLanguage: 'fa-IR',
+    isPartOf: { '@id': websiteId },
+    about: { '@id': orgId },
+    breadcrumb: { '@id': breadcrumbId },
+  };
+
+  const graph = [
+    org,
+    website,
+    webpage,
+    { '@type': 'BreadcrumbList', '@id': breadcrumbId, itemListElement: crumbs },
+  ];
+
+  if (relPath === 'index.php') {
+    graph.push({
+      '@type': 'FAQPage',
+      '@id': `${seo.canonical}#faq`,
+      inLanguage: 'fa-IR',
+      mainEntity: [
+        { '@type': 'Question', name: 'آیا دوره‌ها به صورت حضوری برگزار می‌شوند؟', acceptedAnswer: { '@type': 'Answer', text: 'بله، تمامی دوره‌های آموزشگاه فامو در حال حاضر به صورت حضوری در محل آموزشگاه واقع در بابل، میدان باغ فردوس برگزار می‌شوند.' } },
+      ],
+    });
+  }
+
+  return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph });
+}
+
+function buildPreviewCourseSchema() {
+  const siteUrl = famoPublicSiteUrl();
+  const pageUrl = famoCanonicalUrl('pages/course.php');
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    '@id': `${pageUrl}#courses`,
+    name: 'دوره‌های آموزشی فامو بابل',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        item: {
+          '@type': 'Course',
+          name: 'دوره‌های تخصصی کنکور تجربی، ریاضی و انسانی',
+          description: 'آموزش مفهومی، تست‌زنی هدفمند و برنامه‌ریزی شخصی‌سازی‌شده در بابل.',
+          url: pageUrl,
+          inLanguage: 'fa-IR',
+          provider: { '@type': 'EducationalOrganization', '@id': `${siteUrl}/#organization`, name: 'آموزشگاه فامو', url: `${siteUrl}/` },
+        },
+      },
+    ],
+  });
+}
+
 function renderPhpPreviewFile(relPath, base, vars = {}) {
   const fullPath = path.join(ROOT_DIR, relPath);
   let content = fs.readFileSync(fullPath, 'utf8');
 
-  // Parse $page_libs from leading PHP preamble before stripping it
+  // Parse $page_libs and SEO variables from leading PHP preamble before stripping it
   const preambleMatch = content.match(/^<\?php([\s\S]*?)\?>\s*/m);
-  const libs = parsePageLibsFromPreamble(preambleMatch ? preambleMatch[1] : '');
+  const preamble = preambleMatch ? preambleMatch[1] : '';
+  const libs = parsePageLibsFromPreamble(preamble);
+
+  const siteUrl = famoPublicSiteUrl();
+  const seo = {
+    title: parsePhpStringVar(preamble, 'pageTitle') || vars.pageTitle || 'آموزشگاه فامو | مشاوره تخصصی کنکور و تیزهوشان بابل',
+    description: parsePhpStringVar(preamble, 'metaDescription') || vars.metaDescription || 'آموزشگاه فامو بابل؛ مشاوره تخصصی کنکور و تیزهوشان.',
+    canonical: famoCanonicalUrl(parsePhpStringVar(preamble, 'canonicalPath') || (relPath === 'index.php' ? '' : relPath)),
+    robots: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+    ogType: parsePhpStringVar(preamble, 'ogType') || 'website',
+    ogImage: relPath === 'pages/course.php'
+      ? `${siteUrl}/assets/images/courses_banner.webp`
+      : relPath === 'pages/team.php'
+        ? `${siteUrl}/assets/images/team.webp`
+        : `${siteUrl}/assets/images/poster_hero.webp`,
+    ogImageAlt: parsePhpStringVar(preamble, 'ogImageAlt') || parsePhpStringVar(preamble, 'pageTitle') || 'آموزشگاه فامو',
+    webPageType: parsePhpStringVar(preamble, 'webPageType') || 'WebPage',
+  };
 
   // Strip leading PHP preamble
   content = content.replace(/^<\?php[\s\S]*?\?>\s*/m, '');
@@ -185,14 +330,24 @@ function renderPhpPreviewFile(relPath, base, vars = {}) {
   // Evaluate standard echo expressions used across the PHP pages for preview
   return content
     .replace(/<\?=\s*famo_config_script\(\)\s*\?>/g, famoConfigScript())
+    .replace(/<\?=\s*\$jsonLdGraph\s*\?>/g, buildPreviewGraph(relPath, seo))
+    .replace(/<\?=\s*\$courseSchemaJson\s*\?>/g, buildPreviewCourseSchema())
+    .replace(/<\?=\s*\$base\s*===\s*''\s*\?\s*'\.\/'\s*:\s*\$baseEsc\s*\?>/g, base === '' ? './' : base)
+    .replace(/<\?=\s*htmlspecialchars\(\$seoTitle[^)]+\)\s*\?>/g, escapeHtml(seo.title))
+    .replace(/<\?=\s*htmlspecialchars\(\$seoDescription[^)]+\)\s*\?>/g, escapeHtml(seo.description))
+    .replace(/<\?=\s*htmlspecialchars\(\$seoCanonical[^)]+\)\s*\?>/g, escapeHtml(seo.canonical))
+    .replace(/<\?=\s*htmlspecialchars\(\$seoRobots[^)]+\)\s*\?>/g, escapeHtml(seo.robots))
+    .replace(/<\?=\s*htmlspecialchars\(\$seoOgType[^)]+\)\s*\?>/g, escapeHtml(seo.ogType))
+    .replace(/<\?=\s*htmlspecialchars\(\$seoOgImage[^)]+\)\s*\?>/g, escapeHtml(seo.ogImage))
+    .replace(/<\?=\s*htmlspecialchars\(\$seoOgImageAlt[^)]+\)\s*\?>/g, escapeHtml(seo.ogImageAlt))
     .replace(/<\?=\s*\$fontRegularWoff2\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Regular.subset.woff2')))
     .replace(/<\?=\s*\$fontRegularTtf\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Regular.ttf')))
     .replace(/<\?=\s*\$fontMediumWoff2\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Medium.subset.woff2')))
     .replace(/<\?=\s*\$fontMediumTtf\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Medium.ttf')))
     .replace(/<\?=\s*\$fontBoldWoff2\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Bold.subset.woff2')))
     .replace(/<\?=\s*\$fontBoldTtf\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Bold.ttf')))
-    .replace(/<\?=\s*htmlspecialchars\(\$pageTitle[^)]+\)\s*\?>/g, vars.pageTitle || 'آموزشگاه فامو')
-    .replace(/<\?=\s*htmlspecialchars\(\$metaDescription[^)]+\)\s*\?>/g, vars.metaDescription || '')
+    .replace(/<\?=\s*htmlspecialchars\(\$pageTitle[^)]+\)\s*\?>/g, escapeHtml(seo.title))
+    .replace(/<\?=\s*htmlspecialchars\(\$metaDescription[^)]+\)\s*\?>/g, escapeHtml(seo.description))
     .replace(/<\?=\s*htmlspecialchars\(\$base,\s*ENT_QUOTES,\s*'UTF-8'\)\s*\?>/g, base)
     .replace(/<\?=\s*\$baseEsc\s*\?>/g, base)
     .replace(/<\?=\s*\$loginUrlEsc\s*\?>/g, loginUrl)

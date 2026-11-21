@@ -2,6 +2,15 @@
 require_once __DIR__ . '/../config.php';
 $base = '../';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
+$categoryParam = isset($_GET['category']) && is_string($_GET['category']) ? trim($_GET['category']) : '';
+$pageTitle = 'وبلاگ و مقالات آموزشی کنکور و تیزهوشان | آموزشگاه فامو بابل';
+$metaDescription = 'مقالات تخصصی روش مطالعه، برنامه‌ریزی کنکور سراسری، مدیریت استرس آزمون و راهنمای موفقیت در تیزهوشان از مشاوران و اساتید آموزشگاه فامو بابل.';
+$canonicalPath = $categoryParam !== '' ? 'pages/blog.php?category=' . rawurlencode($categoryParam) : 'pages/blog.php';
+$webPageType = 'Blog';
+$breadcrumbs = [
+    ['name' => 'خانه', 'url' => famo_canonical_url('')],
+    ['name' => 'وبلاگ و مقالات', 'url' => famo_canonical_url('pages/blog.php')],
+];
 $page_libs = [
     'gsap'           => false,
     'scroll_trigger' => false,
@@ -15,25 +24,26 @@ $page_libs = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>وبلاگ | آموزشگاه فامو بابل</title>
-    <meta name="description" content="مطالب آموزشی وبلاگ آموزشگاه فامو بابل">
     <?php include __DIR__ . '/../layouts/head-common.php'; ?>
 </head>
 <body class="font-family text-gray-800" data-page="blog-index">
 
 <!-- Header -->
 <?php include __DIR__ . '/../layouts/header.php'; ?>
+
+<main id="main-content">
 <!-- Blog Index -->
 <section class="pt-28 sm:pt-32 pb-12 gradient-bg text-white text-center">
-    <h1 class="text-3xl sm:text-4xl font-bold mb-4 text-white">وبلاگ ها و مقالات آموزشگاه فامو</h1>
-    <div class="pt-10 lg:pt-20 container mx-auto px-4">
-        <p class="text-white/80 max-w-2xl mx-auto text-base sm:text-lg">برنامه‌ریزی، کادر مجرب، آزمون‌های استاندارد
-            و تحلیل پیشرفت فردی برای تضمین موفقیت تحصیلی</p>
+    <div class="container mx-auto px-4">
+        <h1 class="text-3xl sm:text-4xl font-bold mb-4 text-white">مقالات و راهنمای کنکور آموزشگاه فامو</h1>
+        <p class="text-white/85 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">
+            مقالات تخصصی روش مطالعه، برنامه‌ریزی کنکور، مدیریت استرس آزمون و راهنمای موفقیت در تیزهوشان
+        </p>
     </div>
 </section>
 
 <!-- Category Badges -->
-<section class="py-8 px-4">
+<section class="py-8 px-4" aria-label="دسته‌بندی مقالات">
     <div class="container mx-auto max-w-6xl">
         <div id="categoryFilters" class="flex flex-wrap justify-center gap-2"></div>
     </div>
@@ -63,7 +73,9 @@ $page_libs = [
             <div class="md:w-1/3 w-full h-40 bg-gray-100 rounded-xl"></div>
         </div>
     </div>
+    <nav id="pagination" aria-label="صفحه‌بندی مقالات" class="container mx-auto max-w-6xl mt-10"></nav>
 </section>
+</main>
 
 <!-- Footer -->
 <?php include __DIR__ . '/../layouts/footer.php'; ?>

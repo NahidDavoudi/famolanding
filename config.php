@@ -132,6 +132,80 @@ function famo_public_url(): string
     return rtrim(famo_env('PUBLIC_URL', ''), '/');
 }
 
+function famo_public_site_url(): string
+{
+    $url = famo_public_url();
+    return $url !== '' ? $url : 'https://famoacademy.ir';
+}
+
+function famo_canonical_url(string $path = ''): string
+{
+    $siteUrl = famo_public_site_url();
+    $cleanPath = ltrim($path, '/');
+    return $cleanPath === '' ? $siteUrl . '/' : $siteUrl . '/' . $cleanPath;
+}
+
+/**
+ * Lightweight, fail-soft server-side GET against INTERNAL_API_URL for SSR SEO metadata & JSON-LD.
+ * Never throws; returns ['status' => int, 'json' => ?array].
+ */
+function famo_internal_api_get(string $endpoint, int $timeoutSeconds = 2): array
+{
+    $url = famo_internal_api_url() . '/' . ltrim($endpoint, '/');
+    $status = 0;
+    $body = '';
+
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        if ($ch !== false) {
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => false,
+                CURLOPT_CONNECTTIMEOUT => min(1, $timeoutSeconds),
+                CURLOPT_TIMEOUT        => $timeoutSeconds,
+                CURLOPT_HTTPHEADER     => ['Accept: application/json'],
+            ]);
+            $res = curl_exec($ch);
+            if (is_string($res)) {
+                $body = $res;
+            }
+            $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+            curl_close($ch);
+        }
+    } else {
+        $ctx = stream_context_create([
+            'http' => [
+                'method'          => 'GET',
+                'header'          => "Accept: application/json\r\n",
+                'timeout'         => $timeoutSeconds,
+                'follow_location' => 0,
+                'ignore_errors'   => true,
+            ],
+        ]);
+        $res = @file_get_contents($url, false, $ctx);
+        if (is_string($res)) {
+            $body = $res;
+        }
+        if (isset($http_response_header) && is_array($http_response_header)) {
+            foreach ($http_response_header as $hdr) {
+                if (preg_match('#^HTTP/\S+\s+(\d{3})#', $hdr, $m) === 1) {
+                    $status = (int) $m[1];
+                }
+            }
+        }
+    }
+
+    if ($status !== 200 || $body === '') {
+        return ['status' => $status, 'json' => null];
+    }
+
+    $decoded = json_decode($body, true);
+    return [
+        'status' => $status,
+        'json'   => is_array($decoded) ? $decoded : null,
+    ];
+}
+
 function famo_admin_url(): string
 {
     return rtrim(famo_env('ADMIN_URL', ''), '/');

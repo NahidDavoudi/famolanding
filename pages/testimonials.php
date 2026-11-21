@@ -2,6 +2,34 @@
 require_once __DIR__ . '/../config.php';
 $base = '../';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
+$pageTitle = 'نظرات شاگردان و اولیا | آموزشگاه فامو بابل';
+$metaDescription = 'نظرات تأییدشده دانش‌آموزان، فارغ‌التحصیلان و اولیا درباره کلاس‌ها، مشاوره تخصصی و آزمون‌های آموزشگاه فامو بابل و فرم ثبت نظر جدید.';
+$canonicalPath = 'pages/testimonials.php';
+$webPageType = 'CollectionPage';
+$breadcrumbs = [
+    ['name' => 'خانه', 'url' => famo_canonical_url('')],
+    ['name' => 'نظرات شاگردان و اولیا', 'url' => famo_canonical_url('pages/testimonials.php')],
+];
+
+// Fail-soft SSR AggregateRating enrichment for Organization when approved ratings exist
+$testiApiRes = famo_internal_api_get('/public/testimonials?per_page=1', 2);
+$testiSummary = is_array($testiApiRes['json']['summary'] ?? null) ? $testiApiRes['json']['summary'] : null;
+if ($testiSummary !== null) {
+    $totalApproved = (int) ($testiSummary['total_approved'] ?? 0);
+    $avgRating = (float) ($testiSummary['average_rating'] ?? 0);
+    if ($totalApproved > 0 && $avgRating > 0) {
+        $organizationExtra = [
+            'aggregateRating' => [
+                '@type'       => 'AggregateRating',
+                'ratingValue' => round($avgRating, 2),
+                'reviewCount' => $totalApproved,
+                'bestRating'  => 5,
+                'worstRating' => 1,
+            ],
+        ];
+    }
+}
+
 $page_libs = [
     'gsap'           => false,
     'scroll_trigger' => false,
@@ -15,9 +43,6 @@ $page_libs = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظرات شاگردان و اولیا | آموزشگاه فامو بابل</title>
-    <meta name="description"
-        content="نظرات تأییدشده دانش‌آموزان، فارغ‌التحصیلان و اولیا درباره کلاس‌ها، مشاوره و آزمون‌های آموزشگاه فامو بابل و فرم ثبت نظر جدید.">
     <?php include __DIR__ . '/../layouts/head-common.php'; ?>
 </head>
 
@@ -26,7 +51,7 @@ $page_libs = [
 <!-- Header -->
 <?php include __DIR__ . '/../layouts/header.php'; ?>
 
-<main>
+<main id="main-content">
     <!-- Hero Banner -->
     <section class="pt-28 sm:pt-32 pb-12 gradient-bg text-white text-center">
         <div class="container mx-auto max-w-6xl px-4">

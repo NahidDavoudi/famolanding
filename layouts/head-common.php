@@ -12,6 +12,174 @@ $defaultLibs = [
 ];
 $libs = array_merge($defaultLibs, is_array($page_libs ?? null) ? $page_libs : []);
 
+// Unified SEO metadata defaults (overridden per page before including head-common.php)
+$siteUrl = famo_public_site_url();
+$seoTitle = isset($pageTitle) && is_string($pageTitle) && trim($pageTitle) !== ''
+    ? trim($pageTitle)
+    : 'آموزشگاه فامو | مشاوره تخصصی کنکور و تیزهوشان بابل';
+$seoDescription = isset($metaDescription) && is_string($metaDescription) && trim($metaDescription) !== ''
+    ? trim($metaDescription)
+    : 'آموزشگاه فامو بابل؛ مشاوره تخصصی کنکور سراسری و تیزهوشان، آزمون‌های هفتگی، آموزش مفهومی و پشتیبانی ۲۴ ساعته با اساتید و رتبه‌های برتر.';
+$seoCanonical = isset($canonicalUrl) && is_string($canonicalUrl) && trim($canonicalUrl) !== ''
+    ? trim($canonicalUrl)
+    : famo_canonical_url(isset($canonicalPath) && is_string($canonicalPath) ? $canonicalPath : '');
+$seoRobots = isset($robots) && is_string($robots) && trim($robots) !== ''
+    ? trim($robots)
+    : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
+$seoOgType = isset($ogType) && is_string($ogType) && trim($ogType) !== ''
+    ? trim($ogType)
+    : 'website';
+$seoOgImage = isset($ogImage) && is_string($ogImage) && trim($ogImage) !== ''
+    ? trim($ogImage)
+    : $siteUrl . '/assets/images/poster_hero.webp';
+$seoOgImageAlt = isset($ogImageAlt) && is_string($ogImageAlt) && trim($ogImageAlt) !== ''
+    ? trim($ogImageAlt)
+    : $seoTitle;
+$seoPageType = isset($webPageType) && is_string($webPageType) && trim($webPageType) !== ''
+    ? trim($webPageType)
+    : 'WebPage';
+
+$logoAssetUrl = famo_asset('images/logo.png', $base . '../shared/images/logo.png');
+
+// Build connected Schema.org @graph (Organization + WebSite + WebPage + BreadcrumbList + page-specific entities)
+$orgId = $siteUrl . '/#organization';
+$websiteId = $siteUrl . '/#website';
+$webpageId = $seoCanonical . '#webpage';
+$breadcrumbId = $seoCanonical . '#breadcrumb';
+
+$organizationSchema = [
+    '@type'         => ['EducationalOrganization', 'Organization'],
+    '@id'           => $orgId,
+    'name'          => 'آموزشگاه فامو',
+    'alternateName' => 'Famo Academy',
+    'description'   => 'آموزشگاه فامو نهاد آموزشی پیشرو در بابل با هفت سال سابقه در مشاوره تخصصی، آموزش مفهومی و آمادگی کنکور و تیزهوشان برای مقاطع راهنمایی و دبیرستان.',
+    'url'           => $siteUrl . '/',
+    'logo'          => [
+        '@type' => 'ImageObject',
+        'url'   => $logoAssetUrl,
+    ],
+    'image'         => $seoOgImage,
+    'email'         => 'info@famoacademy.ir',
+    'telephone'     => '+98-901-440-2300',
+    'contactPoint'  => [
+        [
+            '@type'             => 'ContactPoint',
+            'telephone'         => '+98-901-440-2300',
+            'contactType'       => 'customer service',
+            'areaServed'        => 'IR',
+            'availableLanguage' => 'fa',
+        ],
+        [
+            '@type'             => 'ContactPoint',
+            'telephone'         => '+98-999-904-1429',
+            'contactType'       => 'customer service',
+            'areaServed'        => 'IR',
+            'availableLanguage' => 'fa',
+        ],
+        [
+            '@type'             => 'ContactPoint',
+            'telephone'         => '+98-990-681-7387',
+            'contactType'       => 'customer service',
+            'areaServed'        => 'IR',
+            'availableLanguage' => 'fa',
+        ],
+    ],
+    'address'       => [
+        '@type'           => 'PostalAddress',
+        'addressLocality' => 'بابل',
+        'addressRegion'   => 'مازندران',
+        'addressCountry'  => 'IR',
+        'streetAddress'   => 'میدان باغ فردوس، جنب بیمارستان بابل کلینیک، مدرسه بهارستان',
+    ],
+    'founder'       => [
+        '@type' => 'Person',
+        'name'  => 'دکتر محمد موسی زاده موسوی',
+    ],
+    'areaServed'    => [
+        '@type' => 'City',
+        'name'  => 'بابل',
+    ],
+    'sameAs'        => [
+        'https://t.me/famoacademy',
+    ],
+];
+
+if (isset($organizationExtra) && is_array($organizationExtra)) {
+    $organizationSchema = array_merge($organizationSchema, $organizationExtra);
+}
+
+$websiteSchema = [
+    '@type'      => 'WebSite',
+    '@id'        => $websiteId,
+    'url'        => $siteUrl . '/',
+    'name'       => 'آموزشگاه فامو',
+    'inLanguage' => 'fa-IR',
+    'publisher'  => ['@id' => $orgId],
+];
+
+$webPageSchema = [
+    '@type'       => $seoPageType,
+    '@id'         => $webpageId,
+    'url'         => $seoCanonical,
+    'name'        => $seoTitle,
+    'description' => $seoDescription,
+    'inLanguage'  => 'fa-IR',
+    'isPartOf'    => ['@id' => $websiteId],
+    'about'       => ['@id' => $orgId],
+];
+
+$graph = [$organizationSchema, $websiteSchema];
+
+$breadcrumbItems = [];
+if (isset($breadcrumbs) && is_array($breadcrumbs) && count($breadcrumbs) > 0) {
+    $pos = 1;
+    foreach ($breadcrumbs as $crumb) {
+        if (!is_array($crumb) || empty($crumb['name'])) {
+            continue;
+        }
+        $item = [
+            '@type'    => 'ListItem',
+            'position' => $pos++,
+            'name'     => (string) $crumb['name'],
+        ];
+        if (!empty($crumb['url'])) {
+            $item['item'] = (string) $crumb['url'];
+        }
+        $breadcrumbItems[] = $item;
+    }
+}
+
+if (count($breadcrumbItems) > 0) {
+    $webPageSchema['breadcrumb'] = ['@id' => $breadcrumbId];
+    $graph[] = $webPageSchema;
+    $graph[] = [
+        '@type'           => 'BreadcrumbList',
+        '@id'             => $breadcrumbId,
+        'itemListElement' => $breadcrumbItems,
+    ];
+} else {
+    $graph[] = $webPageSchema;
+}
+
+if (isset($extraSchemas) && is_array($extraSchemas)) {
+    foreach ($extraSchemas as $schemaEntity) {
+        if (is_array($schemaEntity) && !empty($schemaEntity)) {
+            $graph[] = $schemaEntity;
+        }
+    }
+}
+
+$jsonLdGraph = json_encode(
+    [
+        '@context' => 'https://schema.org',
+        '@graph'   => $graph,
+    ],
+    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+);
+if ($jsonLdGraph === false) {
+    $jsonLdGraph = '{}';
+}
+
 $fontRegularWoff2 = htmlspecialchars(famo_asset('fonts/Vazirmatn-Regular.subset.woff2', $base . '../shared/fonts/Vazirmatn-Regular.subset.woff2'), ENT_QUOTES, 'UTF-8');
 $fontRegularTtf   = htmlspecialchars(famo_asset('fonts/Vazirmatn-Regular.ttf', $base . '../shared/fonts/Vazirmatn-Regular.ttf'), ENT_QUOTES, 'UTF-8');
 $fontMediumWoff2  = htmlspecialchars(famo_asset('fonts/Vazirmatn-Medium.subset.woff2', $base . '../shared/fonts/Vazirmatn-Medium.subset.woff2'), ENT_QUOTES, 'UTF-8');
@@ -19,8 +187,30 @@ $fontMediumTtf    = htmlspecialchars(famo_asset('fonts/Vazirmatn-Medium.ttf', $b
 $fontBoldWoff2    = htmlspecialchars(famo_asset('fonts/Vazirmatn-Bold.subset.woff2', $base . '../shared/fonts/Vazirmatn-Bold.subset.woff2'), ENT_QUOTES, 'UTF-8');
 $fontBoldTtf      = htmlspecialchars(famo_asset('fonts/Vazirmatn-Bold.ttf', $base . '../shared/fonts/Vazirmatn-Bold.ttf'), ENT_QUOTES, 'UTF-8');
 ?>
-<!-- Shared head: included by every page inside its own <head>. Requires $base. Optional $page_libs opt-out array. -->
+<!-- Shared head: included by every page inside its own <head>. Requires $base. Optional SEO vars & $page_libs opt-out array. -->
+<title><?= htmlspecialchars($seoTitle, ENT_QUOTES, 'UTF-8') ?></title>
+<meta name="description" content="<?= htmlspecialchars($seoDescription, ENT_QUOTES, 'UTF-8') ?>">
+<meta name="robots" content="<?= htmlspecialchars($seoRobots, ENT_QUOTES, 'UTF-8') ?>">
 <meta name="color-scheme" content="light">
+<meta name="theme-color" content="#445D84">
+<link rel="canonical" href="<?= htmlspecialchars($seoCanonical, ENT_QUOTES, 'UTF-8') ?>">
+
+<!-- Open Graph / Social Sharing -->
+<meta property="og:locale" content="fa_IR">
+<meta property="og:site_name" content="آموزشگاه فامو">
+<meta property="og:type" content="<?= htmlspecialchars($seoOgType, ENT_QUOTES, 'UTF-8') ?>">
+<meta property="og:title" content="<?= htmlspecialchars($seoTitle, ENT_QUOTES, 'UTF-8') ?>">
+<meta property="og:description" content="<?= htmlspecialchars($seoDescription, ENT_QUOTES, 'UTF-8') ?>">
+<meta property="og:url" content="<?= htmlspecialchars($seoCanonical, ENT_QUOTES, 'UTF-8') ?>">
+<meta property="og:image" content="<?= htmlspecialchars($seoOgImage, ENT_QUOTES, 'UTF-8') ?>">
+<meta property="og:image:alt" content="<?= htmlspecialchars($seoOgImageAlt, ENT_QUOTES, 'UTF-8') ?>">
+
+<!-- Twitter / X Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="<?= htmlspecialchars($seoTitle, ENT_QUOTES, 'UTF-8') ?>">
+<meta name="twitter:description" content="<?= htmlspecialchars($seoDescription, ENT_QUOTES, 'UTF-8') ?>">
+<meta name="twitter:image" content="<?= htmlspecialchars($seoOgImage, ENT_QUOTES, 'UTF-8') ?>">
+<meta name="twitter:image:alt" content="<?= htmlspecialchars($seoOgImageAlt, ENT_QUOTES, 'UTF-8') ?>">
 
 <!-- Font Preload (Regular & Bold WOFF2 subset) -->
 <link rel="preload" as="font" type="font/woff2" href="<?= $fontRegularWoff2 ?>" crossorigin>
@@ -74,36 +264,8 @@ $fontBoldTtf      = htmlspecialchars(famo_asset('fonts/Vazirmatn-Bold.ttf', $bas
 <!-- Runtime config must remain inline before deferred scripts -->
 <?= famo_config_script() ?>
 
-<!-- Structured Data -->
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "EducationalOrganization",
-    "name": "آموزشگاه فامو",
-    "alternateName": "Famo Academy",
-    "description": "آموزشگاه فامو نهاد آموزشی پیشرو در بابل با هفت سال سابقه در مشاوره تخصصی، آموزش مفهومی و آمادگی کنکور و تیزهوشان برای مقاطع راهنمایی و دبیرستان.",
-    "url": <?= json_encode(famo_public_url(), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>,
-    "logo": "<?= htmlspecialchars(famo_asset('images/logo.png', $base . '../shared/images/logo.png'), ENT_QUOTES, 'UTF-8') ?>",
-    "image": "<?= htmlspecialchars(famo_asset('images/logo.png', $base . '../shared/images/logo.png'), ENT_QUOTES, 'UTF-8') ?>",
-    "email": "info@famoacademy.ir",
-    "telephone": "+98-11-32221234",
-    "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "بابل",
-        "addressRegion": "مازندران",
-        "addressCountry": "IR",
-        "streetAddress": "میدان باغ فردوس، جنب بیمارستان بابل کلینیک، مدرسه بهارستان"
-    },
-    "founder": {
-        "@type": "Person",
-        "name": "دکتر محمد موسی زاده موسوی"
-    },
-    "areaServed": {
-        "@type": "City",
-        "name": "بابل"
-    }
-}
-</script>
+<!-- Structured Data (@graph: Organization, WebSite, WebPage, BreadcrumbList, page entities) -->
+<script type="application/ld+json"><?= $jsonLdGraph ?></script>
 
 <!-- Deferred Scripts (order preserved; gated by $page_libs) -->
 <?php if (!empty($libs['gsap'])): ?>

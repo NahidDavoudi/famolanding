@@ -1,8 +1,55 @@
 <?php
 require_once __DIR__ . '/config.php';
 $base = '';
-$pageTitle = 'آموزشگاه فامو | مشاوره کنکور و تیزهوشان بابل';
-$metaDescription = 'آموزشگاه فامو بابل - مشاوره تخصصی کنکور و تیزهوشان';
+$pageTitle = 'آموزشگاه فامو | مشاوره تخصصی کنکور و تیزهوشان بابل';
+$metaDescription = 'آموزشگاه فامو بابل؛ مشاوره تخصصی کنکور سراسری و تیزهوشان، کلاس‌های مفهومی، آزمون‌های هفتگی و پشتیبانی ۲۴ ساعته با اساتید و رتبه‌های برتر.';
+$canonicalPath = '';
+$ogImage = famo_public_site_url() . '/assets/images/poster_hero.webp';
+$ogImageAlt = 'محیط آموزشی آموزشگاه فامو بابل';
+$breadcrumbs = [
+    ['name' => 'خانه', 'url' => famo_canonical_url('')],
+];
+$extraSchemas = [
+    [
+        '@type'      => 'FAQPage',
+        '@id'        => famo_canonical_url('') . '#faq',
+        'inLanguage' => 'fa-IR',
+        'mainEntity' => [
+            [
+                '@type'          => 'Question',
+                'name'           => 'آیا دوره‌ها به صورت حضوری برگزار می‌شوند؟',
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text'  => 'بله، تمامی دوره‌های آموزشگاه فامو در حال حاضر به صورت حضوری در محل آموزشگاه واقع در بابل، میدان باغ فردوس برگزار می‌شوند. کلاس‌ها در محیطی استاندارد و مجهز به امکانات آموزشی روز برگزار می‌گردد.',
+                ],
+            ],
+            [
+                '@type'          => 'Question',
+                'name'           => 'هزینه دوره‌ها چقدر است و آیا امکان پرداخت اقساطی وجود دارد؟',
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text'  => 'برای اطلاع از شرایط پرداخت اقساطی و تخفیف‌های ویژه، لطفا با شماره تماس آموزشگاه در ارتباط باشید. امکان پرداخت قسطی نیز برای دانش‌آموزان فراهم است.',
+                ],
+            ],
+            [
+                '@type'          => 'Question',
+                'name'           => 'پشتیبانی درسی به چه صورت است؟',
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text'  => 'پشتیبانان ما که از رتبه‌های برتر کنکور سال‌های گذشته هستند، به صورت ۲۴ ساعته از طریق پیام‌رسان‌ها آماده پاسخگویی به سوالات درسی و مشاوره‌ای شما هستند. همچنین جلسات رفع اشکال هفتگی نیز برگزار می‌شود.',
+                ],
+            ],
+            [
+                '@type'          => 'Question',
+                'name'           => 'چگونه می‌توانم برای مشاوره رایگان ثبت‌نام کنم؟',
+                'acceptedAnswer' => [
+                    '@type' => 'Answer',
+                    'text'  => 'شما می‌توانید با مراجعه به صفحه ثبت‌نام و پر کردن فرم مربوطه، درخواست خود را برای جلسه مشاوره رایگان ثبت کنید. همکاران ما در اسرع وقت با شما تماس خواهند گرفت تا زمان مناسبی را با شما هماهنگ کنند.',
+                ],
+            ],
+        ],
+    ],
+];
 $page_libs = [
     'scroll_to' => false,
 ];
@@ -12,8 +59,6 @@ $page_libs = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8') ?></title>
-    <meta name="description" content="<?= htmlspecialchars($metaDescription, ENT_QUOTES, 'UTF-8') ?>">
     <?php include __DIR__ . '/layouts/head-common.php'; ?>
     <!-- استایل کارت‌های دوره (طرح مشترک با pages/course.php): فاصله‌ها و رنگ‌ها از توکن‌های برند -->
     <style>
@@ -25,6 +70,7 @@ $page_libs = [
 <body class="font-family text-gray-800">
     <!-- Header -->
     <?php include __DIR__ . '/layouts/header.php'; ?>
+    <main id="main-content">
     <!-- Hero Section -->
     <section id="home" class="hero-section gradient-bg text-white px-4">
         <div class="container mx-auto max-w-6xl hero-inner">
@@ -518,7 +564,7 @@ $page_libs = [
 
                     <div
                         class="bg-gradient-to-br from-white to-[#f9f7f3] rounded-2xl shadow-xl border border-[#E2D9C6] p-2 hover-lift">
-                        <div class="space-y-1">
+                        <address class="not-italic space-y-1">
                             <!-- Address -->
                             <div
                                 class="flex items-start space-x-4 space-x-reverse hover:bg-white/50 p-3 rounded-lg transition duration-300 gap-4">
@@ -527,7 +573,7 @@ $page_libs = [
                                     <i class="icon" data-lucide="map-pin" aria-hidden="true"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-lg text-[#445D84] mb-1">آدرس آموزشگاه</h4>
+                                    <h3 class="font-bold text-lg text-[#445D84] mb-1">آدرس آموزشگاه</h3>
                                     <p class="text-gray-600">بابل، میدان باغ فردوس</p>
                                 </div>
                             </div>
@@ -540,10 +586,10 @@ $page_libs = [
                                     <i class="icon" data-lucide="phone" aria-hidden="true"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-lg text-[#445D84] mb-1">شماره تماس</h4>
-                                    <p class="text-gray-600">0901-440-2300</p>
-                                    <p class="text-gray-600">0999-904-1429</p>
-                                    <p class="text-gray-600">0990-681-7387</p>
+                                    <h3 class="font-bold text-lg text-[#445D84] mb-1">شماره تماس</h3>
+                                    <p class="text-gray-600"><a href="tel:+989014402300" dir="ltr" class="hover:text-[#445D84] transition">0901-440-2300</a></p>
+                                    <p class="text-gray-600"><a href="tel:+989999041429" dir="ltr" class="hover:text-[#445D84] transition">0999-904-1429</a></p>
+                                    <p class="text-gray-600"><a href="tel:+989906817387" dir="ltr" class="hover:text-[#445D84] transition">0990-681-7387</a></p>
                                 </div>
                             </div>
 
@@ -555,8 +601,8 @@ $page_libs = [
                                     <i class="icon" data-lucide="mail" aria-hidden="true"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-lg text-[#445D84] mb-1">ایمیل</h4>
-                                    <p class="text-gray-600">info@famoacademy.ir</p>
+                                    <h3 class="font-bold text-lg text-[#445D84] mb-1">ایمیل</h3>
+                                    <p class="text-gray-600"><a href="mailto:info@famoacademy.ir" class="hover:text-[#445D84] transition">info@famoacademy.ir</a></p>
                                 </div>
                             </div>
 
@@ -568,16 +614,17 @@ $page_libs = [
                                     <i class="icon" data-lucide="send" aria-hidden="true"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-lg text-[#445D84] mb-1">تلگرام</h4>
-                                    <p class="text-black">famoacademy@</p>
+                                    <h3 class="font-bold text-lg text-[#445D84] mb-1">تلگرام</h3>
+                                    <p class="text-black"><a href="https://t.me/famoacademy" target="_blank" rel="noopener noreferrer" dir="ltr" class="hover:text-[#445D84] transition">@famoacademy</a></p>
                                 </div>
                             </div>
-                        </div>
+                        </address>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+    </main>
 
     <!-- Footer -->
     <?php include __DIR__ . '/layouts/footer.php'; ?>

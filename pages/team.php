@@ -2,6 +2,16 @@
 require_once __DIR__ . '/../config.php';
 $base = '../';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
+$pageTitle = 'اساتید و مشاوران کنکور و تیزهوشان بابل | آموزشگاه فامو';
+$metaDescription = 'معرفی اساتید برجسته کنکور، مدال‌آوران المپیاد، مشاوران تخصصی و تیم پشتیبانی ۲۴ ساعته آموزشگاه فامو بابل برای همراهی تا قبولی.';
+$canonicalPath = 'pages/team.php';
+$webPageType = 'AboutPage';
+$ogImage = famo_public_site_url() . '/assets/images/team.webp';
+$ogImageAlt = 'کادر آموزشی، اساتید و مشاوران آموزشگاه فامو بابل';
+$breadcrumbs = [
+    ['name' => 'خانه', 'url' => famo_canonical_url('')],
+    ['name' => 'اساتید و مشاوران', 'url' => famo_canonical_url('pages/team.php')],
+];
 $page_libs = [
     'gsap'           => false,
     'scroll_trigger' => false,
@@ -15,9 +25,6 @@ $page_libs = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اساتید | آموزشگاه فامو بابل</title>
-    <meta name="description"
-        content="معرفی اساتید برجسته کنکور، رتبه‌های برتر المپیاد و تخصص مشاوران و پشتیبانان آموزشی موسسه فامو در بابل.">
     <?php include __DIR__ . '/../layouts/head-common.php'; ?>
 </head>
 
@@ -25,6 +32,8 @@ $page_libs = [
 
 <!-- Header -->
 <?php include __DIR__ . '/../layouts/header.php'; ?>
+
+<main id="main-content">
 
 <section class="pt-28 sm:pt-32 pb-12 gradient-bg text-white text-center">
     <div class="container mx-auto px-4">
@@ -108,6 +117,7 @@ $page_libs = [
         </div>
     </div>
 </section>
+</main>
 <!-- footer -->
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
 

@@ -16,7 +16,7 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
                         </picture>
                     </div>
                     <div>
-                        <h3 class="text-2xl font-bold">آموزشگاه <span class="text-[#E2D9C6]">فامو</span></h3>
+                        <p class="text-2xl font-bold">آموزشگاه <span class="text-[#E2D9C6]">فامو</span></p>
                         <p class="text-white/80 text-sm mt-1">مشاوره تخصصی کنکور و تیزهوشان</p>
                     </div>
                 </div>
@@ -44,8 +44,8 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
             </div>
 
             <!-- Quick Links -->
-            <div>
-                <h4 class="text-xl font-bold mb-6 text-[#E2D9C6]">دسترسی سریع</h4>
+            <nav aria-label="دسترسی سریع">
+                <h2 class="text-xl font-bold mb-6 text-[#E2D9C6]">دسترسی سریع</h2>
                 <ul class="space-y-3">
                     <li><a href="<?= $baseEsc ?>#home"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
@@ -88,18 +88,18 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
                         سوالات و تماس
                     </a></li>
                 </ul>
-            </div>
+            </nav>
 
             <!-- Map Section -->
             <div>
-                <h4 class="text-xl font-bold mb-6 text-[#E2D9C6]">موقعیت آموزشگاه</h4>
+                <h2 class="text-xl font-bold mb-6 text-[#E2D9C6]">موقعیت آموزشگاه</h2>
                 <div class="bg-white/10 rounded-xl overflow-hidden border border-white/20 p-4">
                     <div class="h-48 bg-gradient-to-r from-[#E2D9C6] to-[#d4c9b2] rounded-lg flex flex-col items-center justify-center text-[#445D84]">
                         <i class="icon icon--3xl mb-3" data-lucide="map-pin" aria-hidden="true"></i>
                         <p class="font-bold text-center">بابل، میدان باغ فردوس</p>
                     </div>
                     <div class="mt-4 text-center">
-                        <a href="https://maps.google.com/?q=بابل، میدان باغ فردوس" target="_blank"
+                        <a href="https://maps.google.com/?q=بابل، میدان باغ فردوس" target="_blank" rel="noopener noreferrer"
                             class="inline-flex items-center bg-[#E2D9C6] text-[#445D84] text-sm font-bold px-4 py-2 rounded-full hover:bg-white transition duration-300">
                             <i class="icon icon--sm ml-1" data-lucide="external-link" aria-hidden="true"></i>
                             مشاهده در نقشه
@@ -117,7 +117,7 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
             </div>
             <p class="mt-4 text-sm">
                 طراحی و توسعه توسط
-                <a href="https://mhdavoudi.ir" target="_blank" rel="noopener"
+                <a href="https://mhdavoudi.ir" target="_blank" rel="noopener noreferrer"
                     class="inline-flex items-center gap-1.5 text-[#E2D9C6] underline hover:text-white transition duration-300 font-medium" id="nahid">
                     محمد حسین داودی
                 </a>

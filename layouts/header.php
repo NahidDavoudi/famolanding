@@ -11,18 +11,18 @@ $loginUrlEsc = htmlspecialchars(famo_login_url() . '/', ENT_QUOTES, 'UTF-8');
             <!-- Logo -->
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-full flex items-center justify-center shrink-0">
-                    <a href="<?= $baseEsc ?>index.php">
+                    <a href="<?= $base === '' ? './' : $baseEsc ?>" aria-label="صفحه اصلی آموزشگاه فامو">
                         <img src="<?= htmlspecialchars(famo_asset('images/logo.webp', $base . '../shared/images/logo.webp'), ENT_QUOTES, 'UTF-8') ?>" alt="لوگوی آموزشگاه فامو" width="48" height="48" decoding="async" class="w-12 h-12 object-contain">
                     </a>
                 </div>
                 <div>
-                    <h1 class="text-white text-xl font-bold">گروه آموزشی <span class="text-[#E2D9C6]">فامو</span></h1>
+                    <a href="<?= $base === '' ? './' : $baseEsc ?>" class="block text-white text-xl font-bold leading-tight">گروه آموزشی <span class="text-[#E2D9C6]">فامو</span></a>
                     <p class="text-white/80 text-sm">مشاوره تخصصی کنکور و تیزهوشان</p>
                 </div>
             </div>
 
             <!-- Desktop Navigation -->
-            <nav class="hidden lg:block">
+            <nav class="hidden lg:block" aria-label="منوی اصلی">
                 <ul class="famo-desktop-nav">
                     <li>
                         <a href="<?= $baseEsc ?>#home"
@@ -92,7 +92,7 @@ $loginUrlEsc = htmlspecialchars(famo_login_url() . '/', ENT_QUOTES, 'UTF-8');
         </div>
 
         <!-- Mobile Navigation -->
-        <div id="mobileMenu" class="hidden lg:hidden mt-4 pt-4 border-t border-white/20 animate-fade-in-up">
+        <nav id="mobileMenu" aria-label="منوی موبایل" class="hidden lg:hidden mt-4 pt-4 border-t border-white/20 animate-fade-in-up">
             <ul class="flex flex-col space-y-2">
                 <li><a href="<?= $baseEsc ?>#home"
                         class="block text-white font-medium py-3 px-2 rounded hover:bg-white/10 transition duration-300">خانه</a></li>
@@ -119,6 +119,6 @@ $loginUrlEsc = htmlspecialchars(famo_login_url() . '/', ENT_QUOTES, 'UTF-8');
                         class="block bg-[#E2D9C6] text-[#445D84] font-bold text-center py-3 rounded-lg hover:bg-white transition duration-300">ثبت
                     نام</a></li>
             </ul>
-        </div>
+        </nav>
     </div>
 </header>

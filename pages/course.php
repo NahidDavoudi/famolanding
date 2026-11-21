@@ -2,6 +2,119 @@
 require_once __DIR__ . '/../config.php';
 $base = '../';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
+$siteUrl = famo_public_site_url();
+$coursePageUrl = famo_canonical_url('pages/course.php');
+$orgRef = [
+    '@type' => 'EducationalOrganization',
+    '@id'   => $siteUrl . '/#organization',
+    'name'  => 'آموزشگاه فامو',
+    'url'   => $siteUrl . '/',
+];
+
+$pageTitle = 'دوره‌های تخصصی کنکور و تیزهوشان بابل | آموزشگاه فامو';
+$metaDescription = 'دوره‌های جامع آمادگی کنکور تجربی، ریاضی، انسانی و آزمون‌های تیزهوشان در بابل؛ کلاس‌های مفهومی و تست‌زنی با اساتید مدال‌آور المپیاد و رتبه‌های برتر.';
+$canonicalPath = 'pages/course.php';
+$webPageType = 'CollectionPage';
+$ogImage = $siteUrl . '/assets/images/courses_banner.webp';
+$ogImageAlt = 'دوره‌های تخصصی کنکور و تیزهوشان آموزشگاه فامو بابل';
+$breadcrumbs = [
+    ['name' => 'خانه', 'url' => famo_canonical_url('')],
+    ['name' => 'دوره‌های تخصصی', 'url' => $coursePageUrl],
+];
+
+// Server-side Course JSON-LD hydration (fail-soft with core course fallback when API is unreachable)
+$courseApiRes = famo_internal_api_get('/public/courses', 2);
+$rawCourses = is_array($courseApiRes['json']['data'] ?? null) ? $courseApiRes['json']['data'] : [];
+$courseListItems = [];
+
+if (count($rawCourses) > 0) {
+    $pos = 1;
+    foreach ($rawCourses as $c) {
+        if (!is_array($c) || empty($c['name'])) {
+            continue;
+        }
+        $cId = isset($c['id']) ? (string) $c['id'] : (string) $pos;
+        $cDesc = trim((string) ($c['full_description'] ?? $c['description'] ?? 'دوره آموزشی تخصصی آموزشگاه فامو بابل'));
+        $courseEntity = [
+            '@type'             => 'Course',
+            'name'              => (string) $c['name'],
+            'description'       => $cDesc,
+            'url'               => $coursePageUrl . '#course-' . rawurlencode($cId),
+            'inLanguage'        => 'fa-IR',
+            'provider'          => $orgRef,
+            'hasCourseInstance' => [
+                '@type'      => 'CourseInstance',
+                'courseMode' => 'onsite',
+                'location'   => [
+                    '@type'   => 'Place',
+                    'name'    => 'آموزشگاه فامو بابل',
+                    'address' => [
+                        '@type'           => 'PostalAddress',
+                        'addressLocality' => 'بابل',
+                        'addressRegion'   => 'مازندران',
+                        'addressCountry'  => 'IR',
+                    ],
+                ],
+            ],
+        ];
+        if (!empty($c['target_grades'])) {
+            $courseEntity['educationalLevel'] = (string) $c['target_grades'];
+        }
+        $courseListItems[] = [
+            '@type'    => 'ListItem',
+            'position' => $pos++,
+            'item'     => $courseEntity,
+        ];
+    }
+} else {
+    $fallbackCourses = [
+        [
+            'name'        => 'دوره‌های تخصصی کنکور تجربی، ریاضی و انسانی',
+            'description' => 'آموزش مفهومی، تست‌زنی هدفمند، برنامه‌ریزی شخصی‌سازی‌شده و آزمون‌های استاندارد ویژه داوطلبان کنکور سراسری در بابل.',
+            'level'       => 'دوره دوم متوسطه (دهم، یازدهم، دوازدهم)',
+        ],
+        [
+            'name'        => 'دوره‌های آمادگی آزمون تیزهوشان و نمونه دولتی',
+            'description' => 'تقویت هوش، استعداد تحلیلی و دروس تخصصی متوسطه اول برای قبولی در مدارس تیزهوشان و نمونه دولتی.',
+            'level'       => 'دوره اول متوسطه',
+        ],
+        [
+            'name'        => 'مشاوره تخصصی و برنامه‌ریزی فردی با پشتیبانی ۲۴ ساعته',
+            'description' => 'برنامه‌ریزی هفتگی منطبق بر شرایط هر دانش‌آموز همراه با تحلیل کارنامه آزمون‌ها و رفع اشکال پیوسته.',
+            'level'       => 'متوسطه اول و دوم',
+        ],
+    ];
+    foreach ($fallbackCourses as $idx => $fc) {
+        $courseListItems[] = [
+            '@type'    => 'ListItem',
+            'position' => $idx + 1,
+            'item'     => [
+                '@type'            => 'Course',
+                'name'             => $fc['name'],
+                'description'      => $fc['description'],
+                'url'              => $coursePageUrl,
+                'inLanguage'       => 'fa-IR',
+                'educationalLevel' => $fc['level'],
+                'provider'         => $orgRef,
+            ],
+        ];
+    }
+}
+
+$courseSchemaJson = json_encode(
+    [
+        '@context'        => 'https://schema.org',
+        '@type'           => 'ItemList',
+        '@id'             => $coursePageUrl . '#courses',
+        'name'            => 'دوره‌های آموزشی فامو بابل',
+        'itemListElement' => $courseListItems,
+    ],
+    JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+);
+if ($courseSchemaJson === false) {
+    $courseSchemaJson = '{}';
+}
+
 $page_libs = [
     'gsap'           => false,
     'scroll_trigger' => false,
@@ -15,28 +128,9 @@ $page_libs = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دوره‌های تخصصی کنکور و تیزهوشان بابل | آموزشگاه فامو</title>
-    <meta name="description"
-        content="دوره‌های جامع آمادهگی کنکور تجربی، ریاضی، انسانی و آزمون‌های تیزهوشان در بابل. کلاس‌های مفهومی و تست‌زنی با اساتید مدال‌آور المپیاد و رتبه‌های برتر.">
-    <meta name="keywords"
-        content="کلاس کنکور بابل, دوره تیزهوشان بابل, کنکور تجربی بابل, مشاوره کنکور ریاضی, آموزشگاه کنکور فامو">
-
-    <!-- Open Graph for Social Sharing -->
-    <meta property="og:title" content="دوره‌های تخصصی کنکور و تیزهوشان | آموزشگاه فامو بابل">
-    <meta property="og:description" content="برنامه‌ریزی، آموزش مفهومی و آزمون‌های تخصصی کنکور و تیزهوشان در بابل.">
-    <meta property="og:image" content="<?= htmlspecialchars(famo_asset('images/logo.png', $base . '../shared/images/logo.png'), ENT_QUOTES, 'UTF-8') ?>">
-
-    <!-- Course Schema Markup -->
-    <script type="application/ld+json" id="courseSchema">
-    {
-      "@context": "https://schema.org",
-      "@type": "ItemList",
-      "name": "دوره‌های آموزشی فامو بابل",
-      "itemListElement": []
-    }
-    </script>
-
     <?php include __DIR__ . '/../layouts/head-common.php'; ?>
+    <!-- Course ItemList Schema Markup (SSR hydrated + kept in sync by courses.js) -->
+    <script type="application/ld+json" id="courseSchema"><?= $courseSchemaJson ?></script>
 
     <!-- استایل کارت‌های دوره: تصویر در بالا، نام و قیمت زیر آن، چیدمان گرید در لپ‌تاپ -->
     <style>
@@ -304,6 +398,7 @@ $page_libs = [
 <!-- Header -->
 <?php include __DIR__ . '/../layouts/header.php'; ?>
 
+<main id="main-content">
 <!-- Page Title Banner -->
 <section class="pt-28 sm:pt-32 pb-12 gradient-bg text-white text-center">
     <div class="container mx-auto px-4 max-w-5xl">
@@ -349,6 +444,7 @@ $page_libs = [
         </div>
     </div>
 </section>
+</main>
 
 <!-- Footer -->
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
