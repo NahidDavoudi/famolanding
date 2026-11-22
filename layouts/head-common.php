@@ -16,10 +16,10 @@ $libs = array_merge($defaultLibs, is_array($page_libs ?? null) ? $page_libs : []
 $siteUrl = famo_public_site_url();
 $seoTitle = isset($pageTitle) && is_string($pageTitle) && trim($pageTitle) !== ''
     ? trim($pageTitle)
-    : 'آموزشگاه فامو | مشاوره تخصصی کنکور و تیزهوشان بابل';
+    : 'آموزشگاه فامو بابل | آموزش خصوصی و هوشمند';
 $seoDescription = isset($metaDescription) && is_string($metaDescription) && trim($metaDescription) !== ''
     ? trim($metaDescription)
-    : 'آموزشگاه فامو بابل؛ مشاوره تخصصی کنکور سراسری و تیزهوشان، آزمون‌های هفتگی، آموزش مفهومی و پشتیبانی ۲۴ ساعته با اساتید و رتبه‌های برتر.';
+    : 'آموزشگاه فامو در بابل؛ ارائه کلاس‌های خصوصی، آزمون‌های شخصی‌سازی‌شده و پیگیری هوشمند عملکرد تحصیلی دانش‌آموزان.';
 $seoCanonical = isset($canonicalUrl) && is_string($canonicalUrl) && trim($canonicalUrl) !== ''
     ? trim($canonicalUrl)
     : famo_canonical_url(isset($canonicalPath) && is_string($canonicalPath) ? $canonicalPath : '');
@@ -52,7 +52,7 @@ $organizationSchema = [
     '@id'           => $orgId,
     'name'          => 'آموزشگاه فامو',
     'alternateName' => 'Famo Academy',
-    'description'   => 'آموزشگاه فامو نهاد آموزشی پیشرو در بابل با هفت سال سابقه در مشاوره تخصصی، آموزش مفهومی و آمادگی کنکور و تیزهوشان برای مقاطع راهنمایی و دبیرستان.',
+    'description'   => 'آموزشگاه فامو در بابل؛ ارائه کلاس‌های خصوصی، آزمون‌های شخصی‌سازی‌شده، رفع اشکال انفرادی و پیگیری هوشمند عملکرد تحصیلی دانش‌آموزان از ابتدایی تا کنکور و تیزهوشان.',
     'url'           => $siteUrl . '/',
     'logo'          => [
         '@type' => 'ImageObject',
@@ -287,6 +287,7 @@ $fontBoldTtf      = htmlspecialchars(famo_asset('fonts/Vazirmatn-Bold.ttf', $bas
 <?php if (!empty($libs['animation'])): ?>
 <script defer src="<?= htmlspecialchars(famo_local_asset('assets/js/animation.js', $base), ENT_QUOTES, 'UTF-8') ?>"></script>
 <?php endif; ?>
+<script defer src="<?= htmlspecialchars(famo_local_asset('assets/js/nav.js', $base), ENT_QUOTES, 'UTF-8') ?>"></script>
 
 <!-- Favicon Multi-size -->
 <link rel="icon" type="image/png" sizes="16x16" href="<?= htmlspecialchars(famo_asset('images/favicon-16.png', $base . '../shared/images/favicon-16.png'), ENT_QUOTES, 'UTF-8') ?>">

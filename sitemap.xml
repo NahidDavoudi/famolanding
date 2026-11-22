@@ -1,126 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <!-- Core canonical, indexable pages only. Blog posts are listed dynamically in sitemap-blog.php. -->
     <url>
         <loc>https://famoacademy.ir/</loc>
-        <lastmod>2026-11-20</lastmod>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
         <loc>https://famoacademy.ir/pages/course.php</loc>
-        <lastmod>2026-11-20</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/pages/services.php</loc>
         <changefreq>monthly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
         <loc>https://famoacademy.ir/pages/team.php</loc>
-        <lastmod>2026-11-20</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.9</priority>
+        <priority>0.8</priority>
     </url>
     <url>
         <loc>https://famoacademy.ir/pages/admissions.php</loc>
-        <lastmod>2026-11-21</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.9</priority>
+        <priority>0.8</priority>
     </url>
     <url>
         <loc>https://famoacademy.ir/pages/testimonials.php</loc>
-        <lastmod>2026-11-21</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://famoacademy.ir/pages/blog.php</loc>
-        <lastmod>2026-10-22</lastmod>
         <changefreq>daily</changefreq>
-        <priority>0.9</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/blog.php?category=study-methods</loc>
-        <lastmod>2026-10-22</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.7</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/blog.php?category=planning</loc>
-        <lastmod>2026-09-09</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.7</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/blog.php?category=calm-and-focus</loc>
-        <lastmod>2026-10-22</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.7</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/blog.php?category=math</loc>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/blog.php?category=physics</loc>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/blog.php?category=chemistry</loc>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/blog.php?category=biology</loc>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/blog.php?category=persian-literature</loc>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/blog.php?category=english</loc>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/blog.php?category=arabic-religion</loc>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/blog.php?category=major-selection</loc>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/blog.php?category=school-exams</loc>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/blog.php?category=news</loc>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/post.php?slug=exam-stress-and-sleep</loc>
-        <lastmod>2026-10-22</lastmod>
-        <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://famoacademy.ir/pages/post.php?slug=effective-learning-review-methods</loc>
-        <lastmod>2026-10-22</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/post.php?slug=konkur-study-plan</loc>
-        <lastmod>2026-09-09</lastmod>
+        <loc>https://famoacademy.ir/pages/contact.php</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
 </urlset>
-

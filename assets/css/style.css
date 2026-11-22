@@ -2681,4 +2681,748 @@ body>header.fixed>div::after {
 .famo-submit-btn:disabled {
     opacity: 0.65;
     cursor: wait;
-}
+}
+
+/* ==================== هدر: منوی کشویی و دکمه‌های مستقل ==================== */
+address {
+    font-style: normal;
+}
+
+.famo-header-desktop {
+    display: none;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.famo-desktop-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.1rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.famo-desktop-nav > li > a,
+.famo-desktop-nav .famo-nav-dropdown__trigger {
+    white-space: nowrap;
+}
+
+.famo-header-mobile-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+}
+
+@media (min-width: 1180px) {
+    .famo-header-desktop {
+        display: flex;
+    }
+
+    .famo-header-mobile-btn,
+    .famo-header-mobile-menu {
+        display: none !important;
+    }
+}
+
+.famo-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.famo-portal-btn {
+    border: 1.5px solid rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.famo-portal-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: rgba(226, 217, 198, 0.85);
+}
+
+.famo-nav-dropdown {
+    position: relative;
+}
+
+.famo-nav-dropdown__trigger {
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.famo-nav-dropdown.is-open .famo-nav-dropdown__trigger .icon {
+    transform: rotate(180deg);
+}
+
+.famo-nav-dropdown__trigger .icon {
+    transition: transform 0.2s ease;
+}
+
+.famo-nav-dropdown__menu {
+    position: absolute;
+    top: calc(100% + 0.65rem);
+    inset-inline-start: 0;
+    min-width: 13.5rem;
+    padding: 0.45rem;
+    margin: 0;
+    list-style: none;
+    background: #ffffff;
+    border: 1px solid #E2D9C6;
+    border-radius: 1rem;
+    box-shadow: 0 18px 36px -14px rgba(31, 45, 68, 0.35);
+    z-index: 60;
+}
+
+.famo-nav-dropdown__link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 0.65rem;
+    color: #344868;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.famo-nav-dropdown__link:hover {
+    background: #f9f7f3;
+    color: #445D84;
+}
+
+/* ==================== فاز ۱: کامپوننت‌های معماری محتوای نسخه ۱.۰ ==================== */
+.famo-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    background: rgba(226, 217, 198, 0.18);
+    border: 1px solid rgba(226, 217, 198, 0.42);
+    color: #E2D9C6;
+    margin-bottom: 0.9rem;
+}
+
+.famo-eyebrow--light {
+    background: #EFE9DD;
+    border-color: #E2D9C6;
+    color: #445D84;
+}
+
+/* دو مزیت رقابتی اصلی */
+.famo-two-col {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .famo-two-col {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.75rem;
+    }
+}
+
+.famo-advantage-card {
+    background: linear-gradient(160deg, #ffffff 0%, #f9f7f3 100%);
+    border: 1px solid #E2D9C6;
+    border-radius: 1.5rem;
+    padding: 1.75rem;
+    box-shadow: 0 12px 30px -16px rgba(68, 93, 132, 0.22);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+@media (min-width: 640px) {
+    .famo-advantage-card {
+        padding: 2.1rem;
+    }
+}
+
+.famo-advantage-icon {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #445D84 0%, #55719b 100%);
+    color: #E2D9C6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.famo-advantage-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #445D84;
+    line-height: 1.5;
+}
+
+.famo-advantage-text {
+    margin: 0;
+    color: #4b5563;
+    font-size: 0.95rem;
+    line-height: 1.9;
+}
+
+.famo-inline-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
+    color: #445D84;
+    font-weight: 700;
+    font-size: 0.92rem;
+    text-decoration: none;
+    transition: gap 0.2s ease, color 0.2s ease;
+}
+
+.famo-inline-link:hover {
+    color: #2f4261;
+    gap: 0.55rem;
+}
+
+/* فرایند آموزش (۴ مرحله) */
+.famo-steps-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+    .famo-steps-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .famo-steps-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+.famo-step-card {
+    background: #ffffff;
+    border: 1px solid #E2D9C6;
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    box-shadow: 0 10px 26px -16px rgba(68, 93, 132, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.famo-step-num {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    background: #EFE9DD;
+    color: #445D84;
+    border: 1px solid #E2D9C6;
+    font-weight: 800;
+    font-size: 1.05rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.famo-step-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #445D84;
+    line-height: 1.5;
+}
+
+.famo-step-desc {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #4b5563;
+    line-height: 1.85;
+}
+
+/* معرفی سامانه هوشمند و پیش‌نمایش شماتیک کارنامه */
+.famo-platform-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: center;
+}
+
+@media (min-width: 1024px) {
+    .famo-platform-grid {
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 2.5rem;
+    }
+}
+
+.famo-feature-list {
+    list-style: none;
+    margin: 1.25rem 0 1.75rem;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+}
+
+@media (min-width: 640px) {
+    .famo-feature-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.famo-feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: #374151;
+    font-size: 0.93rem;
+    font-weight: 600;
+}
+
+.famo-feature-check {
+    width: 1.45rem;
+    height: 1.45rem;
+    border-radius: 9999px;
+    background: #EFE9DD;
+    color: #445D84;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.famo-platform-mock {
+    background: #ffffff;
+    border: 1px solid #E2D9C6;
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 20px 44px -20px rgba(68, 93, 132, 0.3);
+}
+
+.famo-mock-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #EFE9DD;
+}
+
+.famo-mock-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.2rem 0.65rem;
+    border-radius: 9999px;
+    background: #EFE9DD;
+    color: #445D84;
+}
+
+.famo-mock-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.famo-mock-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.famo-mock-row-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.83rem;
+    font-weight: 700;
+    color: #374151;
+}
+
+.famo-mock-track {
+    height: 0.55rem;
+    border-radius: 9999px;
+    background: #f3efe6;
+    overflow: hidden;
+}
+
+.famo-mock-fill {
+    height: 100%;
+    border-radius: 9999px;
+    background: linear-gradient(90deg, #445D84 0%, #6482ad 100%);
+}
+
+.famo-mock-note {
+    margin-top: 1.1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 0.9rem;
+    background: #f9f7f3;
+    border-right: 3px solid #445D84;
+    font-size: 0.84rem;
+    color: #4b5563;
+    line-height: 1.8;
+}
+
+.famo-mock-caption {
+    margin: 0.75rem 0 0;
+    font-size: 0.75rem;
+    color: #6b7280;
+    text-align: center;
+}
+
+/* کارت‌های مقاطع آموزشی (۵ برنامه در خانه و صفحه دوره‌ها) */
+.famo-programs-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+    .famo-programs-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .famo-programs-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.famo-program-card {
+    background: #ffffff;
+    border: 1px solid #E2D9C6;
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    box-shadow: 0 10px 26px -16px rgba(68, 93, 132, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.famo-program-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 34px -18px rgba(68, 93, 132, 0.32);
+}
+
+.famo-program-icon {
+    width: 2.85rem;
+    height: 2.85rem;
+    border-radius: 0.85rem;
+    background: #EFE9DD;
+    color: #445D84;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* نوار دسترسی سریع مقاطع در صفحه دوره‌ها */
+.famo-anchor-pills {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.famo-anchor-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 1.05rem;
+    border-radius: 9999px;
+    background: #ffffff;
+    border: 1px solid #E2D9C6;
+    color: #445D84;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.famo-anchor-pill:hover {
+    background: #445D84;
+    border-color: #445D84;
+    color: #ffffff;
+}
+
+/* بلوک‌های تفصیلی مقاطع و خدمات */
+.famo-detail-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.famo-detail-block {
+    background: #ffffff;
+    border: 1px solid #E2D9C6;
+    border-radius: 1.5rem;
+    padding: 1.75rem;
+    box-shadow: 0 12px 30px -18px rgba(68, 93, 132, 0.2);
+    scroll-margin-top: 6.5rem;
+}
+
+@media (min-width: 768px) {
+    .famo-detail-block {
+        padding: 2.25rem;
+    }
+}
+
+.famo-detail-block--media {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+    align-items: center;
+}
+
+@media (min-width: 768px) {
+    .famo-detail-block--media {
+        grid-template-columns: 1.45fr 0.85fr;
+    }
+}
+
+.famo-detail-img-wrap {
+    width: 100%;
+    max-width: 17rem;
+    margin: 0 auto;
+    aspect-ratio: 1 / 1;
+    border-radius: 1.25rem;
+    background: #f9f7f3;
+    border: 1px solid #EFE9DD;
+    padding: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.famo-detail-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 0.75rem;
+}
+
+.famo-bullet-grid {
+    list-style: none;
+    margin: 1rem 0 1.5rem;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+}
+
+@media (min-width: 640px) {
+    .famo-bullet-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.famo-bullet-grid li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.92rem;
+    color: #374151;
+}
+
+/* صفحه تماس با ما و کانال‌های مستقیم مشاوره */
+.famo-contact-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+}
+
+@media (min-width: 1024px) {
+    .famo-contact-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.famo-channel-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 640px) {
+    .famo-channel-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+.famo-channel-card {
+    background: #f9f7f3;
+    border: 1px solid #E2D9C6;
+    border-radius: 1.15rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.famo-channel-card:hover {
+    transform: translateY(-3px);
+    border-color: #445D84;
+    box-shadow: 0 14px 28px -16px rgba(68, 93, 132, 0.28);
+}
+
+/* گزیده زنده قبولی‌ها و نظرات در صفحه اصلی */
+.famo-excerpt-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+    margin-top: 1rem;
+}
+
+.famo-excerpt-item {
+    background: #ffffff;
+    border: 1px solid #EFE9DD;
+    border-radius: 0.9rem;
+    padding: 0.9rem 1rem;
+}
+
+.famo-excerpt-title {
+    margin: 0;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.famo-excerpt-sub {
+    margin: 0.25rem 0 0;
+    font-size: 0.83rem;
+    color: #445D84;
+    font-weight: 600;
+}
+
+.famo-excerpt-body {
+    margin: 0.4rem 0 0;
+    font-size: 0.85rem;
+    color: #4b5563;
+    line-height: 1.75;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* هیرو صفحات داخلی و بلوک‌های صفحه تماس و فوتر (مستقل از کمبود کلاس‌های CDN) */
+.famo-page-hero {
+    padding: 8.25rem 1rem 4rem;
+}
+
+@media (min-width: 640px) {
+    .famo-page-hero {
+        padding: 9rem 1rem 4.5rem;
+    }
+}
+
+.famo-anchor-bar {
+    padding: 1.35rem 1rem;
+    background: #ffffff;
+    border-bottom: 1px solid #E2D9C6;
+}
+
+.famo-contact-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.famo-contact-info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem 1.15rem;
+    border-radius: 1rem;
+    background: #f9f7f3;
+    border: 1px solid #E2D9C6;
+}
+
+.famo-contact-info-icon {
+    width: 2.85rem;
+    height: 2.85rem;
+    border-radius: 9999px;
+    background: #EFE9DD;
+    color: #445D84;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.famo-map-box {
+    border-radius: 1.15rem;
+    border: 1px solid #E2D9C6;
+    background: linear-gradient(150deg, #EFE9DD 0%, #f9f7f3 100%);
+    padding: 2rem 1.5rem;
+    text-align: center;
+}
+
+.famo-footer-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.25rem;
+    padding-bottom: 2.5rem;
+}
+
+@media (min-width: 768px) {
+    .famo-footer-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .famo-footer-grid {
+        grid-template-columns: 1.2fr 0.95fr 1fr 0.95fr;
+        gap: 2rem;
+    }
+}
+
+.famo-footer-consult-btn {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.38);
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 700;
+    transition: background-color 0.25s ease, border-color 0.25s ease;
+}
+
+.famo-footer-consult-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(226, 217, 198, 0.8);
+}
+
+.famo-footer-map-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 0.85rem;
+    padding: 0.95rem;
+    text-align: center;
+}
+
+

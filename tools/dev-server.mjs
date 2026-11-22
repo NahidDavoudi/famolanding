@@ -116,6 +116,7 @@ const MIME_TYPES = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.webp': 'image/webp',
+  '.avif': 'image/avif',
   '.ico': 'image/x-icon',
   '.xml': 'application/xml; charset=utf-8',
   '.txt': 'text/plain; charset=utf-8',
@@ -211,12 +212,14 @@ function buildPreviewGraph(relPath, seo) {
 
   const crumbs = [{ '@type': 'ListItem', position: 1, name: 'خانه', item: famoCanonicalUrl('') }];
   const pageLabels = {
-    'pages/course.php': 'دوره‌های تخصصی',
+    'pages/course.php': 'دوره‌ها و مقاطع آموزشی',
+    'pages/services.php': 'خدمات آموزشی فامو',
     'pages/team.php': 'اساتید و مشاوران',
     'pages/admissions.php': 'قبولی‌های سال‌های قبل',
     'pages/testimonials.php': 'نظرات شاگردان و اولیا',
     'pages/blog.php': 'وبلاگ و مقالات',
     'pages/post.php': 'وبلاگ و مقالات',
+    'pages/contact.php': 'تماس با ما و درخواست مشاوره',
   };
   if (pageLabels[relPath]) {
     crumbs.push({
@@ -252,7 +255,25 @@ function buildPreviewGraph(relPath, seo) {
       '@id': `${seo.canonical}#faq`,
       inLanguage: 'fa-IR',
       mainEntity: [
-        { '@type': 'Question', name: 'آیا دوره‌ها به صورت حضوری برگزار می‌شوند؟', acceptedAnswer: { '@type': 'Answer', text: 'بله، تمامی دوره‌های آموزشگاه فامو در حال حاضر به صورت حضوری در محل آموزشگاه واقع در بابل، میدان باغ فردوس برگزار می‌شوند.' } },
+        { '@type': 'Question', name: 'دوره‌ها و کلاس‌های آموزشگاه فامو حضوری است یا آنلاین؟', acceptedAnswer: { '@type': 'Answer', text: 'کلاس‌ها و جلسات آموزشی فامو به‌صورت حضوری در محل آموزشگاه در بابل (میدان باغ فردوس) برگزار می‌شوند.' } },
+        { '@type': 'Question', name: 'آیا برای هر پایه و رشته، آزمون و برنامه جداگانه طراحی می‌شود؟', acceptedAnswer: { '@type': 'Answer', text: 'بله؛ آزمون‌ها و برنامه‌های هفتگی بر اساس پایه تحصیلی، رشته، بودجه‌بندی و وضعیت درسی هر دانش‌آموز تنظیم می‌شوند.' } },
+        { '@type': 'Question', name: 'پایش عملکرد و گزارش وضعیت دانش‌آموز چگونه به خانواده اطلاع داده می‌شود؟', acceptedAnswer: { '@type': 'Answer', text: 'پس از هر آزمون، کارنامه تحلیلی و گزارش روند عملکرد در سامانه هوشمند فامو ثبت می‌شود و در دسترس دانش‌آموز و خانواده قرار می‌گیرد.' } },
+      ],
+    });
+  }
+
+  if (relPath === 'pages/services.php') {
+    graph.push({
+      '@type': 'ItemList',
+      '@id': `${seo.canonical}#services`,
+      name: 'خدمات آموزشی آموزشگاه فامو بابل',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, item: { '@type': 'Service', name: 'کلاس خصوصی و تقویتی' } },
+        { '@type': 'ListItem', position: 2, item: { '@type': 'Service', name: 'آزمون شخصی‌سازی‌شده' } },
+        { '@type': 'ListItem', position: 3, item: { '@type': 'Service', name: 'رفع اشکال انفرادی' } },
+        { '@type': 'ListItem', position: 4, item: { '@type': 'Service', name: 'مشاوره و برنامه‌ریزی تحصیلی' } },
+        { '@type': 'ListItem', position: 5, item: { '@type': 'Service', name: 'پایش عملکرد و گزارش مستمر' } },
+        { '@type': 'ListItem', position: 6, item: { '@type': 'Service', name: 'کارنامه هفتگی تحلیلی' } },
       ],
     });
   }
@@ -296,10 +317,10 @@ function renderPhpPreviewFile(relPath, base, vars = {}) {
 
   const siteUrl = famoPublicSiteUrl();
   const seo = {
-    title: parsePhpStringVar(preamble, 'pageTitle') || vars.pageTitle || 'آموزشگاه فامو | مشاوره تخصصی کنکور و تیزهوشان بابل',
-    description: parsePhpStringVar(preamble, 'metaDescription') || vars.metaDescription || 'آموزشگاه فامو بابل؛ مشاوره تخصصی کنکور و تیزهوشان.',
+    title: parsePhpStringVar(preamble, 'pageTitle') || vars.pageTitle || 'آموزشگاه فامو بابل | آموزش شخصی، با نگاهی هوشمند',
+    description: parsePhpStringVar(preamble, 'metaDescription') || vars.metaDescription || 'آموزشگاه فامو در بابل؛ آموزش شخصی‌سازی‌شده، کلاس خصوصی، آزمون شخصی، مشاوره و پایش عملکرد از ابتدایی تا کنکور و تیزهوشان.',
     canonical: famoCanonicalUrl(parsePhpStringVar(preamble, 'canonicalPath') || (relPath === 'index.php' ? '' : relPath)),
-    robots: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+    robots: parsePhpStringVar(preamble, 'robots') || 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
     ogType: parsePhpStringVar(preamble, 'ogType') || 'website',
     ogImage: relPath === 'pages/course.php'
       ? `${siteUrl}/assets/images/courses_banner.webp`
@@ -325,14 +346,17 @@ function renderPhpPreviewFile(relPath, base, vars = {}) {
   // Evaluate $libs conditionals from head-common.php
   content = evalLibsConditionals(content, libs);
 
-  const loginUrl = famoEnv('LOGIN_URL', '').replace(/\/+$/, '') + '/';
+  const loginBase = famoEnv('LOGIN_URL', 'https://login.famoacademy.ir').replace(/\/+$/, '');
+  const loginUrl = `${loginBase}/`;
+  const homeHref = base === '' ? './' : base;
 
   // Evaluate standard echo expressions used across the PHP pages for preview
   return content
     .replace(/<\?=\s*famo_config_script\(\)\s*\?>/g, famoConfigScript())
     .replace(/<\?=\s*\$jsonLdGraph\s*\?>/g, buildPreviewGraph(relPath, seo))
     .replace(/<\?=\s*\$courseSchemaJson\s*\?>/g, buildPreviewCourseSchema())
-    .replace(/<\?=\s*\$base\s*===\s*''\s*\?\s*'\.\/'\s*:\s*\$baseEsc\s*\?>/g, base === '' ? './' : base)
+    .replace(/<\?=\s*\$homeHref\s*\?>/g, homeHref)
+    .replace(/<\?=\s*\$base\s*===\s*''\s*\?\s*'\.\/'\s*:\s*\$baseEsc\s*\?>/g, homeHref)
     .replace(/<\?=\s*htmlspecialchars\(\$seoTitle[^)]+\)\s*\?>/g, escapeHtml(seo.title))
     .replace(/<\?=\s*htmlspecialchars\(\$seoDescription[^)]+\)\s*\?>/g, escapeHtml(seo.description))
     .replace(/<\?=\s*htmlspecialchars\(\$seoCanonical[^)]+\)\s*\?>/g, escapeHtml(seo.canonical))
@@ -509,6 +533,24 @@ const server = http.createServer(async (req, res) => {
   const reqUrl = new URL(req.url || '/', `http://${req.headers.host || '127.0.0.1'}`);
   const pathname = reqUrl.pathname;
 
+  // Mirror .htaccess Phase 0 hardening: block internal/config files & directories
+  if (
+    /^\/(\.env|\.git|config\.php|Dockerfile|docker-compose\.ya?ml|package(?:-lock)?\.json)$/i.test(pathname) ||
+    /^\/(layouts|docker|scripts|tools)(\/|$)/i.test(pathname)
+  ) {
+    res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Forbidden');
+    return;
+  }
+
+  // Mirror .htaccess Phase 0 canonical redirect: /index.php -> /
+  if (pathname === '/index.php') {
+    const qs = reqUrl.search || '';
+    res.writeHead(301, { Location: `/${qs}` });
+    res.end();
+    return;
+  }
+
   if (pathname.startsWith('/assets/') || pathname === '/robots.txt' || pathname === '/sitemap.xml') {
     const safeRel = path.normalize(pathname).replace(/^(\.\.(\/|\\|$))+/, '');
     const filePath = path.join(ROOT_DIR, safeRel);
@@ -523,44 +565,56 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  if (pathname === '/' || pathname === '/index.php') {
-    const html = renderPhpPreviewFile('index.php', '', {
-      pageTitle: 'آموزشگاه فامو | مشاوره کنکور و تیزهوشان بابل',
-      metaDescription: 'آموزشگاه فامو بابل - مشاوره تخصصی کنکور و تیزهوشان',
-    });
+  if (pathname === '/') {
+    const html = renderPhpPreviewFile('index.php', '');
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(html);
     return;
   }
 
-  if (pathname === '/pages/course.php' || pathname === '/courses') {
+  if (pathname === '/pages/course.php') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(renderPhpPreviewFile('pages/course.php', '../'));
     return;
   }
-  if (pathname === '/pages/team.php' || pathname === '/team') {
+  if (pathname === '/pages/services.php') {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(renderPhpPreviewFile('pages/services.php', '../'));
+    return;
+  }
+  if (pathname === '/pages/contact.php') {
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(renderPhpPreviewFile('pages/contact.php', '../'));
+    return;
+  }
+  if (pathname === '/pages/team.php') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(renderPhpPreviewFile('pages/team.php', '../'));
     return;
   }
-  if (pathname === '/pages/admissions.php' || pathname === '/admissions') {
+  if (pathname === '/pages/admissions.php') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(renderPhpPreviewFile('pages/admissions.php', '../'));
     return;
   }
-  if (pathname === '/pages/testimonials.php' || pathname === '/testimonials') {
+  if (pathname === '/pages/testimonials.php') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(renderPhpPreviewFile('pages/testimonials.php', '../'));
     return;
   }
-  if (pathname === '/pages/blog.php' || pathname === '/blog') {
+  if (pathname === '/pages/blog.php') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(renderPhpPreviewFile('pages/blog.php', '../'));
     return;
   }
-  if (pathname === '/pages/post.php' || pathname === '/post') {
+  if (pathname === '/pages/post.php') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(renderPhpPreviewFile('pages/post.php', '../'));
+    return;
+  }
+  if (pathname === '/404.php') {
+    res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+    res.end(renderPhpPreviewFile('404.php', '/'));
     return;
   }
   if (pathname === '/sitemap-blog.php') {
@@ -663,8 +717,8 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-  res.end('Not Found');
+  res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
+  res.end(renderPhpPreviewFile('404.php', '/'));
 });
 
 server.listen(PORT, HOST, () => {

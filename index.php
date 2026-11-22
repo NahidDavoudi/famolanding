@@ -1,10 +1,16 @@
 <?php
+declare(strict_types=1);
 require_once __DIR__ . '/config.php';
 $base = '';
-$pageTitle = 'آموزشگاه فامو | مشاوره تخصصی کنکور و تیزهوشان بابل';
-$metaDescription = 'آموزشگاه فامو بابل؛ مشاوره تخصصی کنکور سراسری و تیزهوشان، کلاس‌های مفهومی، آزمون‌های هفتگی و پشتیبانی ۲۴ ساعته با اساتید و رتبه‌های برتر.';
+$baseEsc = '';
+$siteUrl = famo_public_site_url();
+$loginUrlRaw = famo_login_url();
+$loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'https://login.famoacademy.ir/'), ENT_QUOTES, 'UTF-8');
+
+$pageTitle = 'آموزشگاه فامو بابل | آموزش خصوصی و هوشمند';
+$metaDescription = 'آموزشگاه فامو در بابل؛ ارائه کلاس‌های خصوصی، آزمون‌های شخصی‌سازی‌شده و پیگیری هوشمند عملکرد تحصیلی دانش‌آموزان.';
 $canonicalPath = '';
-$ogImage = famo_public_site_url() . '/assets/images/poster_hero.webp';
+$ogImage = $siteUrl . '/assets/images/poster_hero.webp';
 $ogImageAlt = 'محیط آموزشی آموزشگاه فامو بابل';
 $breadcrumbs = [
     ['name' => 'خانه', 'url' => famo_canonical_url('')],
@@ -17,34 +23,26 @@ $extraSchemas = [
         'mainEntity' => [
             [
                 '@type'          => 'Question',
-                'name'           => 'آیا دوره‌ها به صورت حضوری برگزار می‌شوند؟',
+                'name'           => 'کلاس‌های آموزشگاه فامو در بابل به چه صورت برگزار می‌شوند؟',
                 'acceptedAnswer' => [
                     '@type' => 'Answer',
-                    'text'  => 'بله، تمامی دوره‌های آموزشگاه فامو در حال حاضر به صورت حضوری در محل آموزشگاه واقع در بابل، میدان باغ فردوس برگزار می‌شوند. کلاس‌ها در محیطی استاندارد و مجهز به امکانات آموزشی روز برگزار می‌گردد.',
+                    'text'  => 'در آموزشگاه فامو در بابل، کلاس‌های آموزشی، آزمون‌ها و جلسات رفع اشکال به‌صورت انفرادی و متناسب با سطح علمی و نیازهای هر دانش‌آموز در محل آموزشگاه واقع در میدان باغ فردوس برگزار می‌شوند.',
                 ],
             ],
             [
                 '@type'          => 'Question',
-                'name'           => 'هزینه دوره‌ها چقدر است و آیا امکان پرداخت اقساطی وجود دارد؟',
+                'name'           => 'خانواده‌ها چگونه روند تحصیلی دانش‌آموز را دنبال می‌کنند؟',
                 'acceptedAnswer' => [
                     '@type' => 'Answer',
-                    'text'  => 'برای اطلاع از شرایط پرداخت اقساطی و تخفیف‌های ویژه، لطفا با شماره تماس آموزشگاه در ارتباط باشید. امکان پرداخت قسطی نیز برای دانش‌آموزان فراهم است.',
+                    'text'  => 'نتایج آزمون‌ها و روند عملکرد دروس در سامانه اختصاصی فامو ثبت می‌شود. همچنین کارنامه هفتگی همراه با نظرات اساتید آماده شده و اطلاع‌رسانی آن از طریق پیامک برای خانواده انجام می‌گیرد.',
                 ],
             ],
             [
                 '@type'          => 'Question',
-                'name'           => 'پشتیبانی درسی به چه صورت است؟',
+                'name'           => 'چگونه می‌توانم برای مشاوره و انتخاب برنامه آموزشی اقدام کنم؟',
                 'acceptedAnswer' => [
                     '@type' => 'Answer',
-                    'text'  => 'پشتیبانان ما که از رتبه‌های برتر کنکور سال‌های گذشته هستند، به صورت ۲۴ ساعته از طریق پیام‌رسان‌ها آماده پاسخگویی به سوالات درسی و مشاوره‌ای شما هستند. همچنین جلسات رفع اشکال هفتگی نیز برگزار می‌شود.',
-                ],
-            ],
-            [
-                '@type'          => 'Question',
-                'name'           => 'چگونه می‌توانم برای مشاوره رایگان ثبت‌نام کنم؟',
-                'acceptedAnswer' => [
-                    '@type' => 'Answer',
-                    'text'  => 'شما می‌توانید با مراجعه به صفحه ثبت‌نام و پر کردن فرم مربوطه، درخواست خود را برای جلسه مشاوره رایگان ثبت کنید. همکاران ما در اسرع وقت با شما تماس خواهند گرفت تا زمان مناسبی را با شما هماهنگ کنند.',
+                    'text'  => 'برای بررسی مقطع، شرایط تحصیلی و انتخاب خدمات متناسب با نیاز دانش‌آموز، می‌توانید از طریق صفحه تماس با ما به‌صورت تلفنی یا در واتساپ و تلگرام با واحد مشاوره فامو در ارتباط باشید.',
                 ],
             ],
         ],
@@ -60,7 +58,6 @@ $page_libs = [
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?php include __DIR__ . '/layouts/head-common.php'; ?>
-    <!-- استایل کارت‌های دوره (طرح مشترک با pages/course.php): فاصله‌ها و رنگ‌ها از توکن‌های برند -->
     <style>
         #courses .coursesSwiper .swiper-slide {
             height: auto;
@@ -70,70 +67,334 @@ $page_libs = [
 <body class="font-family text-gray-800">
     <!-- Header -->
     <?php include __DIR__ . '/layouts/header.php'; ?>
+
     <main id="main-content">
-    <!-- Hero Section -->
+    <!-- ۱) Hero Section -->
     <section id="home" class="hero-section gradient-bg text-white px-4">
         <div class="container mx-auto max-w-6xl hero-inner">
-            <!-- ۱) تصویر هیرو: تمام‌عرض، بدون overlay -->
+            <!-- تصویر اصلی هیرو: تمام‌عرض، بدون lazy load -->
             <div class="hero-media">
-                <img src="assets/images/poster_hero.webp" alt="محیط آموزشی آموزشگاه فامو" width="2816" height="1584" decoding="async" fetchpriority="high" class="hero-media-img">
+                <img src="assets/images/poster_hero.webp" alt="محیط آموزشی و کلاس‌های خصوصی آموزشگاه فامو در بابل" width="2816" height="1584" decoding="async" fetchpriority="high" class="hero-media-img">
             </div>
 
-            <!-- ۲) تیتر -->
-            <h1 class="hero-title">
-                مشاوره تخصصی، آزمون‌های جامع و آموزش مفهومی
-                <span class="hero-title-accent">کنکور و تیزهوشان</span>
+            <p class="famo-eyebrow mt-5">آموزشگاه فامو | بابل</p>
+
+            <h1 class="hero-title" style="margin-top: 0;">
+                هر دانش‌آموز، یک مسیر متفاوت برای موفقیت
+                <span class="hero-title-accent">فامو؛ آموزش شخصی، با نگاهی هوشمند</span>
             </h1>
 
-            <!-- ۳) توضیح کوتاه -->
-            <p class="hero-desc">اساتید مجرب و مشاوران حرفه‌ای، همراه دانش‌آموزان تا قبولی.</p>
+            <p class="hero-desc max-w-3xl">
+                آموزشگاه فامو در بابل، با ارائه کلاس‌های خصوصی، آزمون‌های شخصی‌سازی‌شده و پیگیری هوشمند عملکرد تحصیلی، مسیر آموزشی متناسب با نیاز هر دانش‌آموز را طراحی می‌کند.
+            </p>
 
-            <!-- ۴) کارت آمار: شیشه مایع Liquid Glass -->
-            <div class="hero-stats">
-                <div class="grid grid-cols-3 text-center hero-stats-grid">
-                    <div class="hero-stat">
-                        <div class="hero-stat-number text-2xl sm:text-3xl font-bold"><span id="years-counter">7</span><span class="hero-stat-plus">+</span></div>
-                        <div class="hero-stat-label text-sm">سال تجربه</div>
-                    </div>
-                    <div class="hero-stat">
-                        <div class="hero-stat-number text-2xl sm:text-3xl font-bold"><span id="students-counter">200</span><span class="hero-stat-plus">+</span></div>
-                        <div class="hero-stat-label text-sm">قبولی کنکور</div>
-                    </div>
-                    <div class="hero-stat">
-                        <div class="hero-stat-number text-2xl sm:text-3xl font-bold"><span id="teachers-counter">10</span><span class="hero-stat-plus">+</span></div>
-                        <div class="hero-stat-label text-sm">استاد برتر</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ۵) دکمه‌ها -->
             <div class="hero-ctas">
-                <a href="<?= htmlspecialchars(famo_login_url() . '/', ENT_QUOTES, 'UTF-8') ?>"
+                <a href="pages/contact.php#consultation"
                     class="hero-cta bg-[#E2D9C6] text-[#445D84] font-bold px-8 py-3 rounded-full hover:bg-white transition duration-300 shadow-lg hover:shadow-xl">
-                    <i class="icon ml-2" data-lucide="school" aria-hidden="true"></i>
-                    رزرو نوبت
+                    <i class="icon ml-2" data-lucide="phone" aria-hidden="true"></i>
+                    درخواست مشاوره
                 </a>
-                <a href="#courses"
+                <a href="pages/course.php"
                     class="hero-cta border-2 border-[#E2D9C6] text-[#E2D9C6] font-bold px-8 py-3 rounded-full hover:bg-[#E2D9C6] hover:text-[#445D84] transition duration-300">
                     <i class="icon ml-2" data-lucide="book-open" aria-hidden="true"></i>
-                    مشاهده دوره‌ها
+                    مشاهده برنامه‌های آموزشی
                 </a>
             </div>
         </div>
     </section>
 
-
-    <!-- Courses Section -->
-    <section id="courses" class="py-20 px-4 bg-gradient-to-b from-[#f9f7f3] to-white">
+    <!-- ۲) دو مزیت رقابتی اصلی فامو -->
+    <section id="advantages" class="py-16 sm:py-20 px-4 bg-white">
         <div class="container mx-auto max-w-6xl">
-            <div class="text-center mb-12 sm:mb-16">
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3 sm:mb-4">دوره‌های تخصصی فامو
+            <div class="text-center mb-12">
+                <span class="famo-eyebrow famo-eyebrow--light">رویکرد آموزشی فامو</span>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3">
+                    فامو چه تفاوتی با یک آموزشگاه معمولی دارد؟
                 </h2>
-                <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4"> دوره‌های جامع آمادگی کنکور و
-                    تیزهوشان با اساتید مجرب و روش‌های نوین آموزشی</p>
+                <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+                    هیچ دو دانش‌آموزی دقیقاً شرایط یکسانی ندارند؛ بنابراین مسیر آموزشی و پیگیری عملکرد آن‌ها نیز نباید یکسان باشد.
+                </p>
             </div>
 
-            <!-- Course Cards - Swiper Carousel -->
+            <div class="famo-two-col">
+                <article class="famo-advantage-card hover-lift">
+                    <span class="famo-advantage-icon" aria-hidden="true">
+                        <i class="icon icon--lg" data-lucide="user-check" aria-hidden="true"></i>
+                    </span>
+                    <h3 class="famo-advantage-title">آموزش کاملاً شخصی‌سازی‌شده</h3>
+                    <p class="famo-advantage-text">
+                        در فامو، هر دانش‌آموز مسیر آموزشی متناسب با شرایط خودش را دنبال می‌کند. کلاس‌ها، آزمون‌ها و جلسات رفع اشکال به‌صورت انفرادی برگزار می‌شوند تا زمان آموزش بر نیازها و نقاط ضعف واقعی هر دانش‌آموز متمرکز باشد.
+                    </p>
+                    <a href="pages/services.php" class="famo-inline-link">
+                        آشنایی با خدمات آموزشی
+                        <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+                    </a>
+                </article>
+
+                <article class="famo-advantage-card hover-lift">
+                    <span class="famo-advantage-icon" aria-hidden="true">
+                        <i class="icon icon--lg" data-lucide="chart-bar" aria-hidden="true"></i>
+                    </span>
+                    <h3 class="famo-advantage-title">آموزش هوشمند و مبتنی بر داده</h3>
+                    <p class="famo-advantage-text">
+                        اطلاعات آموزشی دانش‌آموزان در سامانه اختصاصی فامو ثبت می‌شود. تاریخچه آزمون‌ها، روند عملکرد دروس و کارنامه‌های هفتگی به خانواده‌ها کمک می‌کنند وضعیت تحصیلی را دقیق‌تر و شفاف‌تر دنبال کنند.
+                    </p>
+                    <a href="#smart-platform" class="famo-inline-link">
+                        آشنایی با سامانه هوشمند
+                        <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+                    </a>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ۳) فرایند آموزش در فامو -->
+    <section id="process" class="py-16 sm:py-20 px-4 bg-[#f9f7f3]">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-12">
+                <span class="famo-eyebrow famo-eyebrow--light">شیوه فعالیت فامو</span>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3">
+                    از شناخت نیاز تا بررسی پیشرفت
+                </h2>
+                <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+                    مسیر یادگیری در چهار گام منظم و قابل پیگیری طراحی و اجرا می‌شود.
+                </p>
+            </div>
+
+            <div class="famo-steps-grid">
+                <article class="famo-step-card">
+                    <span class="famo-step-num" aria-hidden="true">۱</span>
+                    <h3 class="famo-step-title">بررسی وضعیت دانش‌آموز</h3>
+                    <p class="famo-step-desc">
+                        در آغاز مسیر، شرایط تحصیلی، سطح علمی و نیازهای آموزشی دانش‌آموز بررسی می‌شوند تا خدمات مناسب انتخاب شوند.
+                    </p>
+                </article>
+
+                <article class="famo-step-card">
+                    <span class="famo-step-num" aria-hidden="true">۲</span>
+                    <h3 class="famo-step-title">طراحی مسیر آموزشی</h3>
+                    <p class="famo-step-desc">
+                        با توجه به شرایط دانش‌آموز، برنامه کلاس‌ها، آزمون‌ها و فعالیت‌های آموزشی متناسب با نیاز او تنظیم می‌شوند.
+                    </p>
+                </article>
+
+                <article class="famo-step-card">
+                    <span class="famo-step-num" aria-hidden="true">۳</span>
+                    <h3 class="famo-step-title">آموزش و ارزیابی انفرادی</h3>
+                    <p class="famo-step-desc">
+                        کلاس‌ها، آزمون‌ها و جلسات رفع اشکال به‌صورت اختصاصی برگزار می‌شوند تا تمرکز آموزش بر مباحث مورد نیاز دانش‌آموز باشد.
+                    </p>
+                </article>
+
+                <article class="famo-step-card">
+                    <span class="famo-step-num" aria-hidden="true">۴</span>
+                    <h3 class="famo-step-title">ثبت و بررسی عملکرد</h3>
+                    <p class="famo-step-desc">
+                        نتایج آزمون‌ها و روند دروس در سامانه ثبت می‌شوند و گزارش‌های هفتگی، همراه با نظرات اساتید، در اختیار دانش‌آموز و خانواده قرار می‌گیرند.
+                    </p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- ۴) معرفی سامانه هوشمند فامو -->
+    <section id="smart-platform" class="py-16 sm:py-20 px-4 bg-white">
+        <div class="container mx-auto max-w-6xl">
+            <div class="famo-platform-grid">
+                <div>
+                    <span class="famo-eyebrow famo-eyebrow--light">سامانه هوشمند فامو</span>
+                    <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-4 leading-snug">
+                        وضعیت تحصیلی، شفاف و قابل پیگیری
+                    </h2>
+                    <p class="text-gray-600 leading-relaxed mb-3">
+                        در فامو، اطلاعات آموزشی دانش‌آموز فقط در برگه‌های کاغذی یا گزارش‌های مقطعی باقی نمی‌مانند. سامانه اختصاصی فامو امکان مشاهده سوابق آزمون‌ها، بررسی روند عملکرد دروس و دسترسی به کارنامه‌های هفتگی را فراهم می‌کند.
+                    </p>
+                    <p class="text-gray-600 leading-relaxed">
+                        خانواده‌ها می‌توانند با اطلاعات دقیق‌تری وضعیت آموزشی فرزندشان را دنبال کنند و از گزارش‌های هفتگی او مطلع شوند.
+                    </p>
+
+                    <ul class="famo-feature-list">
+                        <li>
+                            <span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>
+                            تاریخچه نتایج آزمون‌ها
+                        </li>
+                        <li>
+                            <span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>
+                            نمودار روند عملکرد دروس
+                        </li>
+                        <li>
+                            <span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>
+                            کارنامه هفتگی اختصاصی
+                        </li>
+                        <li>
+                            <span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>
+                            ثبت نظرات اساتید و پشتیبان
+                        </li>
+                        <li>
+                            <span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>
+                            اطلاع‌رسانی پیامکی کارنامه
+                        </li>
+                        <li>
+                            <span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>
+                            سیستم نوبت‌دهی جلسات
+                        </li>
+                    </ul>
+
+                    <div class="flex flex-wrap gap-3">
+                        <a href="<?= $loginUrlEsc ?>"
+                            class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-6 py-3 rounded-full hover:bg-[#344868] transition duration-300 shadow-md">
+                            <i class="icon icon--sm" data-lucide="user" aria-hidden="true"></i>
+                            ورود به پنل دانش‌آموزی
+                        </a>
+                        <a href="pages/services.php#weekly-report"
+                            class="inline-flex items-center gap-2 border-2 border-[#445D84] text-[#445D84] font-bold px-6 py-3 rounded-full hover:bg-[#445D84] hover:text-white transition duration-300">
+                            جزئیات کارنامه و پایش
+                        </a>
+                    </div>
+                </div>
+
+                <!-- پیش‌نمایش شماتیک ساختار کارنامه هفتگی فامو (بدون اطلاعات واقعی دانش‌آموزان) -->
+                <div>
+                    <div class="famo-platform-mock" aria-label="نمای شماتیک کارنامه هفتگی سامانه فامو">
+                        <div class="famo-mock-head">
+                            <div>
+                                <p class="text-sm font-bold text-[#445D84] m-0">کارنامه هفتگی سامانه فامو</p>
+                                <p class="text-xs text-gray-500 m-0 mt-0.5">نمای ساختاری گزارش عملکرد دروس و نظر استاد</p>
+                            </div>
+                            <span class="famo-mock-badge">اطلاع‌رسانی پیامکی</span>
+                        </div>
+
+                        <div class="famo-mock-bars">
+                            <div class="famo-mock-row">
+                                <div class="famo-mock-row-label">
+                                    <span>ریاضی — مبحث تابع و معادلات</span>
+                                    <span class="text-[#445D84]">ثبت درصد و تعداد صحیح/غلط</span>
+                                </div>
+                                <div class="famo-mock-track"><div class="famo-mock-fill" style="width: 78%;"></div></div>
+                            </div>
+                            <div class="famo-mock-row">
+                                <div class="famo-mock-row-label">
+                                    <span>فیزیک — تمرین‌های مفهومی</span>
+                                    <span class="text-[#445D84]">مقایسه با آزمون‌های قبل</span>
+                                </div>
+                                <div class="famo-mock-track"><div class="famo-mock-fill" style="width: 68%;"></div></div>
+                            </div>
+                            <div class="famo-mock-row">
+                                <div class="famo-mock-row-label">
+                                    <span>دروس پایه — ارزیابی هفتگی</span>
+                                    <span class="text-[#445D84]">تشخیص نقاط نیازمند رفع اشکال</span>
+                                </div>
+                                <div class="famo-mock-track"><div class="famo-mock-fill" style="width: 84%;"></div></div>
+                            </div>
+                        </div>
+
+                        <div class="famo-mock-note">
+                            <strong class="text-[#445D84] block mb-1">بخش تحلیل دبیر و پشتیبان:</strong>
+                            در کنار درصد هر درس، نظر اختصاصی استاد و اولویت مباحث هفته آینده برای دانش‌آموز و خانواده ثبت می‌شود.
+                        </div>
+                        <p class="famo-mock-caption">نمونه نمایشی ساختار سامانه؛ اطلاعات واقعی دانش‌آموزان صرفاً در پنل شخصی نمایش داده می‌شود.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ۵) برنامه‌های آموزشی و دوره‌های فعال -->
+    <section id="courses" class="py-16 sm:py-20 px-4 bg-gradient-to-b from-[#f9f7f3] to-white">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-12">
+                <span class="famo-eyebrow famo-eyebrow--light">مقاطع و اهداف تحصیلی</span>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3">
+                    برنامه‌های آموزشی فامو
+                </h2>
+                <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+                    فامو خدمات آموزشی خود را برای مقاطع و اهداف تحصیلی مختلف در بابل ارائه می‌کند. محتوای هر برنامه با توجه به نیازها و شرایط دانش‌آموز تنظیم می‌شود.
+                </p>
+            </div>
+
+            <!-- ۵ کارت مقاطع مطابق سند نسخه ۱.۰ -->
+            <div class="famo-programs-grid mb-14">
+                <article class="famo-program-card">
+                    <span class="famo-program-icon" aria-hidden="true"><i class="icon" data-lucide="book-open" aria-hidden="true"></i></span>
+                    <h3 class="text-lg font-bold text-[#445D84] m-0">آموزش ابتدایی</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed m-0">
+                        تقویت مفاهیم پایه، درک عمیق‌تر مباحث درسی و شناسایی زمینه‌های نیازمند تقویت در سال‌های ابتدایی تحصیل.
+                    </p>
+                    <a href="pages/course.php#elementary" class="famo-inline-link">
+                        مشاهده جزئیات
+                        <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+                    </a>
+                </article>
+
+                <article class="famo-program-card">
+                    <span class="famo-program-icon" aria-hidden="true"><i class="icon" data-lucide="layers" aria-hidden="true"></i></span>
+                    <h3 class="text-lg font-bold text-[#445D84] m-0">آموزش متوسطه اول</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed m-0">
+                        تقویت پایه‌های درسی، افزایش مهارت حل مسئله و آماده‌سازی برای ورود به مقاطع بالاتر.
+                    </p>
+                    <a href="pages/course.php#middle-school" class="famo-inline-link">
+                        مشاهده جزئیات
+                        <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+                    </a>
+                </article>
+
+                <article class="famo-program-card">
+                    <span class="famo-program-icon" aria-hidden="true"><i class="icon" data-lucide="graduation-cap" aria-hidden="true"></i></span>
+                    <h3 class="text-lg font-bold text-[#445D84] m-0">آموزش متوسطه دوم</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed m-0">
+                        آموزش دروس تخصصی و عمومی، رفع اشکال مباحث و همراهی دانش‌آموزان در مسیر تحصیلی.
+                    </p>
+                    <a href="pages/course.php#high-school" class="famo-inline-link">
+                        مشاهده جزئیات
+                        <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+                    </a>
+                </article>
+
+                <article class="famo-program-card">
+                    <span class="famo-program-icon" aria-hidden="true"><i class="icon" data-lucide="target" aria-hidden="true"></i></span>
+                    <h3 class="text-lg font-bold text-[#445D84] m-0">آمادگی کنکور</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed m-0">
+                        آموزش خصوصی دروس، آزمون‌های شخصی‌سازی‌شده و بررسی روند عملکرد برای داوطلبان کنکور.
+                    </p>
+                    <a href="pages/course.php#konkur" class="famo-inline-link">
+                        مشاهده جزئیات
+                        <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+                    </a>
+                </article>
+
+                <article class="famo-program-card">
+                    <span class="famo-program-icon" aria-hidden="true"><i class="icon" data-lucide="sparkles" aria-hidden="true"></i></span>
+                    <h3 class="text-lg font-bold text-[#445D84] m-0">آمادگی تیزهوشان</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed m-0">
+                        تقویت مهارت‌های تحلیل، استدلال و حل مسئله برای دانش‌آموزان متقاضی ورود به مدارس استعدادهای درخشان.
+                    </p>
+                    <a href="pages/course.php#tizhooshan" class="famo-inline-link">
+                        مشاهده جزئیات
+                        <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+                    </a>
+                </article>
+
+                <article class="famo-program-card bg-gradient-to-br from-[#445D84] to-[#55719b] text-white border-transparent">
+                    <span class="w-11 h-11 rounded-xl bg-white/15 text-[#E2D9C6] inline-flex items-center justify-center" aria-hidden="true">
+                        <i class="icon" data-lucide="compass" aria-hidden="true"></i>
+                    </span>
+                    <h3 class="text-lg font-bold text-white m-0">نیاز به راهنمایی در انتخاب برنامه دارید؟</h3>
+                    <p class="text-sm text-white/85 leading-relaxed m-0">
+                        انتخاب برنامه آموزشی بر اساس مقطع، سطح علمی و هدف دانش‌آموز انجام می‌شود.
+                    </p>
+                    <a href="pages/contact.php#consultation" class="inline-flex items-center gap-1.5 mt-auto pt-2 text-[#E2D9C6] hover:text-white font-bold text-sm">
+                        درخواست مشاوره
+                        <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+                    </a>
+                </article>
+            </div>
+
+            <!-- دوره‌های ثبت‌شده در سامانه (بارگذاری زنده از API) -->
+            <div class="text-center mb-8">
+                <h3 class="text-xl sm:text-2xl font-bold text-[#445D84] mb-2">دوره‌های فعال آموزشگاه فامو</h3>
+                <p class="text-sm sm:text-base text-gray-600">فهرست به‌روز دوره‌های در حال برگزاری در آموزشگاه فامو بابل</p>
+            </div>
+
             <div class="swiper coursesSwiper coursesSwiper--loading relative pb-12">
                 <div class="swiper-wrapper" id="coursesContainer" aria-busy="true">
                     <!-- Skeleton Loaders -->
@@ -146,9 +407,7 @@ $page_libs = [
                                 <div class="skel-chips"><span class="skeleton-shimmer"></span><span class="skeleton-shimmer"></span></div>
                                 <div class="skeleton-shimmer skel-bar skel-bar--desc"></div>
                                 <div class="skeleton-shimmer skel-bar skel-bar--desc-short"></div>
-                                <div class="famo-course-footer">
-                                    <span class="skeleton-shimmer skel-cta"></span>
-                                </div>
+                                <div class="famo-course-footer"><span class="skeleton-shimmer skel-cta"></span></div>
                             </div>
                         </div>
                     </div>
@@ -161,9 +420,7 @@ $page_libs = [
                                 <div class="skel-chips"><span class="skeleton-shimmer"></span><span class="skeleton-shimmer"></span></div>
                                 <div class="skeleton-shimmer skel-bar skel-bar--desc"></div>
                                 <div class="skeleton-shimmer skel-bar skel-bar--desc-short"></div>
-                                <div class="famo-course-footer">
-                                    <span class="skeleton-shimmer skel-cta"></span>
-                                </div>
+                                <div class="famo-course-footer"><span class="skeleton-shimmer skel-cta"></span></div>
                             </div>
                         </div>
                     </div>
@@ -176,9 +433,7 @@ $page_libs = [
                                 <div class="skel-chips"><span class="skeleton-shimmer"></span><span class="skeleton-shimmer"></span></div>
                                 <div class="skeleton-shimmer skel-bar skel-bar--desc"></div>
                                 <div class="skeleton-shimmer skel-bar skel-bar--desc-short"></div>
-                                <div class="famo-course-footer">
-                                    <span class="skeleton-shimmer skel-cta"></span>
-                                </div>
+                                <div class="famo-course-footer"><span class="skeleton-shimmer skel-cta"></span></div>
                             </div>
                         </div>
                     </div>
@@ -191,9 +446,7 @@ $page_libs = [
                                 <div class="skel-chips"><span class="skeleton-shimmer"></span><span class="skeleton-shimmer"></span></div>
                                 <div class="skeleton-shimmer skel-bar skel-bar--desc"></div>
                                 <div class="skeleton-shimmer skel-bar skel-bar--desc-short"></div>
-                                <div class="famo-course-footer">
-                                    <span class="skeleton-shimmer skel-cta"></span>
-                                </div>
+                                <div class="famo-course-footer"><span class="skeleton-shimmer skel-cta"></span></div>
                             </div>
                         </div>
                     </div>
@@ -202,30 +455,126 @@ $page_libs = [
                 <div class="swiper-pagination"></div>
             </div>
 
-            <div class="text-center mt-10">
+            <div class="text-center mt-8">
                 <a href="pages/course.php"
                     class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-8 py-3 rounded-full hover:bg-[#344868] transition duration-300 shadow-lg hover:shadow-xl">
-                    مشاهده همه دوره‌ها و جزئیات کامل
+                    مشاهده همه برنامه‌ها و جزئیات دوره‌ها
                     <i class="icon icon--sm mr-1" data-lucide="chevron-left" aria-hidden="true"></i>
                 </a>
             </div>
         </div>
     </section>
 
-
-    <!-- Team Section -->
-    <section id="team" class="py-20 px-4 bg-[#f9f7f3]">
+    <!-- ۶) خدمات آموزشی فامو (با تصاویر بهینه‌شده AVIF + WebP) -->
+    <section id="services" class="py-16 sm:py-20 px-4 gradient-bg-light">
         <div class="container mx-auto max-w-6xl">
-            <div class="text-center mb-12 sm:mb-16">
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3 sm:mb-4">کادر حرفه‌ای آموزشگاه فامو
+            <div class="text-center mb-12">
+                <span class="famo-eyebrow famo-eyebrow--light">شیوه اجرای آموزش انفرادی</span>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3">
+                    خدمات آموزشی آموزشگاه فامو
                 </h2>
-                <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">اساتید، مشاوران و پشتیبانان برتر بابل؛ همراه دانش‌آموزان از آموزش تا رفع اشکال</p>
+                <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+                    مجموعه‌ای از خدمات آموزشی و پیگیری تحصیلی متناسب با شرایط و نیاز هر دانش‌آموز در بابل
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+                <!-- Service 1 -->
+                <article class="service-card hover-lift">
+                    <div class="service-media">
+                        <picture>
+                            <source srcset="<?= htmlspecialchars(famo_local_asset('assets/images/services/private_classes.avif', $base), ENT_QUOTES, 'UTF-8') ?>" type="image/avif">
+                            <img src="<?= htmlspecialchars(famo_local_asset('assets/images/services/private_classes.webp', $base), ENT_QUOTES, 'UTF-8') ?>"
+                                alt="کلاس‌های خصوصی و انفرادی آموزشگاه فامو"
+                                width="800" height="800" loading="lazy" decoding="async"
+                                class="service-illustration">
+                        </picture>
+                    </div>
+                    <div class="service-body">
+                        <h3 class="service-title">کلاس‌های خصوصی</h3>
+                        <p class="service-desc">برگزاری کلاس‌های انفرادی با تمرکز کامل بر سطح یادگیری و مباحث مورد نیاز هر دانش‌آموز.</p>
+                    </div>
+                </article>
+
+                <!-- Service 2 -->
+                <article class="service-card hover-lift">
+                    <div class="service-media">
+                        <picture>
+                            <source srcset="<?= htmlspecialchars(famo_local_asset('assets/images/services/weekly_exams.avif', $base), ENT_QUOTES, 'UTF-8') ?>" type="image/avif">
+                            <img src="<?= htmlspecialchars(famo_local_asset('assets/images/services/weekly_exams.webp', $base), ENT_QUOTES, 'UTF-8') ?>"
+                                alt="آزمون‌های شخصی‌سازی‌شده و تحلیل عملکرد فامو"
+                                width="800" height="800" loading="lazy" decoding="async"
+                                class="service-illustration">
+                        </picture>
+                    </div>
+                    <div class="service-body">
+                        <h3 class="service-title">آزمون‌های شخصی‌سازی‌شده</h3>
+                        <p class="service-desc">ارزیابی تسلط درسی و ثبت نتایج آزمون‌ها در سامانه برای بررسی روند پیشرفت و کارنامه هفتگی.</p>
+                    </div>
+                </article>
+
+                <!-- Service 3 -->
+                <article class="service-card hover-lift">
+                    <div class="service-media">
+                        <picture>
+                            <source srcset="<?= htmlspecialchars(famo_local_asset('assets/images/services/24support.avif', $base), ENT_QUOTES, 'UTF-8') ?>" type="image/avif">
+                            <img src="<?= htmlspecialchars(famo_local_asset('assets/images/services/24support.webp', $base), ENT_QUOTES, 'UTF-8') ?>"
+                                alt="رفع اشکال انفرادی و همراهی آموزشی فامو"
+                                width="800" height="800" loading="lazy" decoding="async"
+                                class="service-illustration">
+                        </picture>
+                    </div>
+                    <div class="service-body">
+                        <h3 class="service-title">رفع اشکال انفرادی</h3>
+                        <p class="service-desc">تمرکز مستقیم روی مباحث دشوار و نقاط ابهام دانش‌آموز در جلسات اختصاصی رفع اشکال.</p>
+                    </div>
+                </article>
+
+                <!-- Service 4 -->
+                <article class="service-card hover-lift">
+                    <div class="service-media">
+                        <picture>
+                            <source srcset="<?= htmlspecialchars(famo_local_asset('assets/images/services/weekly_plans.avif', $base), ENT_QUOTES, 'UTF-8') ?>" type="image/avif">
+                            <img src="<?= htmlspecialchars(famo_local_asset('assets/images/services/weekly_plans.webp', $base), ENT_QUOTES, 'UTF-8') ?>"
+                                alt="مشاوره و برنامه‌ریزی تحصیلی متناسب با شرایط فردی"
+                                width="800" height="800" loading="lazy" decoding="async"
+                                class="service-illustration">
+                        </picture>
+                    </div>
+                    <div class="service-body">
+                        <h3 class="service-title">مشاوره و برنامه‌ریزی</h3>
+                        <p class="service-desc">تنظیم برنامه مطالعه و تمرین هماهنگ با سطح علمی، شرایط واقعی و هدف آموزشی دانش‌آموز.</p>
+                    </div>
+                </article>
+            </div>
+
+            <div class="text-center mt-10">
+                <a href="pages/services.php"
+                    class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-8 py-3 rounded-full hover:bg-[#344868] transition duration-300 shadow-lg">
+                    آشنایی کامل با تمام خدمات فامو
+                    <i class="icon icon--sm mr-1" data-lucide="chevron-left" aria-hidden="true"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ۷) معرفی اساتید و پشتیبانان (کاروسل زنده API) -->
+    <section id="team" class="py-16 sm:py-20 px-4 bg-[#f9f7f3]">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-12">
+                <span class="famo-eyebrow famo-eyebrow--light">تیم آموزشی و پشتیبانی</span>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3">
+                    آشنایی با اساتید و پشتیبانان فامو
+                </h2>
+                <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+                    در فامو، هر حوزه آموزشی با همراهی استاد تخصصی همان حوزه ارائه می‌شود و پشتیبانان در حوزه‌های فعالیت خود دانش‌آموزان را در مسیر پیشرفت همراهی می‌کنند.
+                </p>
             </div>
 
             <div class="curve-carousel">
                 <div class="curve-carousel__wrap">
                     <div class="curve-carousel__stage" tabindex="0"
-                         aria-label="کاروسل کادر آموزشی فامو؛ با کشیدن یا کلیدهای جهت‌دار جابه‌جا کنید">
+                         aria-label="کاروسل اساتید و پشتیبانان فامو؛ با کشیدن یا کلیدهای جهت‌دار جابه‌جا کنید">
                         <div class="curve-carousel__edge-blur curve-carousel__edge-blur--left" aria-hidden="true"></div>
                         <div class="curve-carousel__edge-blur curve-carousel__edge-blur--right" aria-hidden="true"></div>
                         <div class="curve-carousel__track is-skeleton" id="instructorsContainer" aria-busy="true">
@@ -263,7 +612,6 @@ $page_libs = [
                         </div>
                     </div>
 
-                    <!-- کنترل‌ها (dotها + فلش‌ها = جایگزین درگ برای دسترس‌پذیری) -->
                     <div class="curve-carousel__controls">
                         <div class="curve-carousel__arrows">
                             <button type="button" class="curve-carousel__arrow" id="instCarouselPrev" aria-label="قبلی">
@@ -278,25 +626,30 @@ $page_libs = [
                 </div>
             </div>
 
-            <div class="text-center mt-10">
+            <div class="flex flex-wrap justify-center gap-3 mt-10">
                 <a href="pages/team.php"
                     class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-8 py-3 rounded-full hover:bg-[#344868] transition duration-300 shadow-lg hover:shadow-xl">
-                    مشاهده کادر آموزشگاه فامو
+                    مشاهده تمام اساتید
                     <i class="icon icon--sm mr-1" data-lucide="chevron-left" aria-hidden="true"></i>
+                </a>
+                <a href="pages/team.php#support"
+                    class="inline-flex items-center gap-2 border-2 border-[#445D84] text-[#445D84] font-bold px-7 py-3 rounded-full hover:bg-[#445D84] hover:text-white transition duration-300">
+                    آشنایی با پشتیبانان
                 </a>
             </div>
         </div>
     </section>
 
-    <!-- Admissions & Testimonials Highlights -->
-    <section id="achievements-testimonials" class="py-16 px-4 bg-white">
+    <!-- ۸) نتایج واقعی و تجربه خانواده‌ها -->
+    <section id="achievements-testimonials" class="py-16 sm:py-20 px-4 bg-white">
         <div class="container mx-auto max-w-6xl">
             <div class="text-center mb-10">
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3 sm:mb-4">
-                    افتخارات و صدای همراهان فامو
+                <span class="famo-eyebrow famo-eyebrow--light">نتایج و بازخوردهای واقعی</span>
+                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3">
+                    نتایج قبولی‌ها و تجربه خانواده‌ها
                 </h2>
                 <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-                    نتایج درخشان سال‌های گذشته و دیدگاه دانش‌آموزان و خانواده‌ها درباره مسیر همراهی با آموزشگاه فامو
+                    نتایج مستند سال‌های گذشته و بازخورد واقعی دانش‌آموزان و خانواده‌ها از همراهی با آموزشگاه فامو
                 </p>
             </div>
 
@@ -310,8 +663,9 @@ $page_libs = [
                             <h3 class="famo-highlight-title">قبولی‌های سال‌های قبل</h3>
                         </div>
                         <p class="famo-highlight-desc">
-                            آشنایی با رتبه‌های برتر و پذیرفته‌شدگان کنکور سراسری، تیزهوشان، نمونه دولتی و المپیادهای علمی آموزشگاه فامو به تفکیک سال.
+                            فهرست نتایج و قبولی‌های مستند دانش‌آموزان فامو در کنکور سراسری، تیزهوشان، نمونه دولتی و المپیادهای علمی به تفکیک سال شمسی.
                         </p>
+                        <div id="homeAdmissionsExcerpt" class="famo-excerpt-list" aria-live="polite"></div>
                     </div>
                     <div>
                         <a href="pages/admissions.php"
@@ -328,11 +682,12 @@ $page_libs = [
                             <span class="famo-highlight-icon" aria-hidden="true">
                                 <i class="icon" data-lucide="message-circle" aria-hidden="true"></i>
                             </span>
-                            <h3 class="famo-highlight-title">نظرات شاگردان و اولیا</h3>
+                            <h3 class="famo-highlight-title">تجربه خانواده‌ها و دانش‌آموزان</h3>
                         </div>
                         <p class="famo-highlight-desc">
-                            تجربه واقعی دانش‌آموزان، فارغ‌التحصیلان و اولیا از کلاس‌ها، آزمون‌های هفتگی و مشاوره فامو را بخوانید یا نظر خود را ثبت کنید.
+                            بازخورد واقعی و تأییدشده دانش‌آموزان، فارغ‌التحصیلان و اولیا درباره تجربه همکاری با فامو را بخوانید یا دیدگاه خود را ثبت کنید.
                         </p>
+                        <div id="homeTestimonialsExcerpt" class="famo-excerpt-list" aria-live="polite"></div>
                     </div>
                     <div>
                         <a href="pages/testimonials.php"
@@ -346,280 +701,101 @@ $page_libs = [
         </div>
     </section>
 
-    <!-- About Section -->
-<section id="about" class="relative py-20 px-4 bg-white overflow-hidden">
-    <!-- تصویر پس‌زمینه -->
-    <div class="absolute inset-0 z-0">
-        <div class="absolute inset-0 bg-white/85"></div>
-    </div>
-
-    <div class="container mx-auto max-w-6xl relative z-10">
-        <div class="text-center mb-10">
-            <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3 sm:mb-4">
-                درباره آموزشگاه فامو
-            </h2>
-            <div class="w-24 h-1 bg-gradient-to-r from-[#E2D9C6] to-[#445D84] mx-auto rounded-full"></div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-            <!-- متن -->
-            <div class="text-gray-700 leading-loose text-base sm:text-lg space-y-5 text-justify">
-                <p>
-                    <span class="font-bold text-[#445D84]">فامو</span> یک موسسه آموزشی کنکور پیشرو در بابل است که با
-                    بهره‌گیری از تجربه نخبگان علمی، از جمله دانشجویان برتر رشته‌های پزشکی و مهندسی و اساتید مدال‌آور
-                    المپیاد، به هدایت دانش‌آموزان می‌پردازد.
-                </p>
-
-                <p>
-                    این مجموعه با تکیه بر <strong class="text-[#445D84]">هفت سال سابقه درخشان</strong> در مسیر قبولی
-                    دانشگاه‌های معتبر، خدماتی جامع شامل برنامه‌ریزی شخصی‌سازی‌شده و رفع اشکال دقیق تمامی دروس را برای
-                    مقاطع راهنمایی و دبیرستان فراهم می‌آورد.
+    <!-- ۹) پرسش‌های متداول منتخب (حداکثر ۳ سؤال طبق سند) -->
+    <section id="faq-contact" class="py-16 sm:py-20 px-4 bg-[#f9f7f3]">
+        <div class="container mx-auto max-w-4xl">
+            <div class="text-center mb-10">
+                <span class="famo-eyebrow famo-eyebrow--light">پرسش‌های پرتکرار</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-[#445D84] mb-3">
+                    پرسش‌های متداول خانواده‌ها
+                </h2>
+                <p class="text-gray-600 text-base">
+                    پاسخ کوتاه به چند سؤال رایج درباره شیوه آموزش و پیگیری تحصیلی در فامو
                 </p>
             </div>
 
-            <!-- تصویر -->
-            <div class="relative">
-                <div class="rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
-                    <img src="assets/images/about_us-small.webp"
-                         alt="محیط آموزشگاه فامو"
-                         width="1200" height="896"
-                         loading="lazy"
-                         decoding="async"
-                         class="w-full h-auto object-cover">
+            <div class="space-y-4">
+                <!-- FAQ 1 -->
+                <div class="faq-item bg-white rounded-xl shadow-md border border-[#E2D9C6] overflow-hidden">
+                    <div class="faq-question cursor-pointer p-5 flex justify-between items-center gap-4" tabindex="0" role="button" aria-expanded="false">
+                        <h3 class="text-base sm:text-lg font-bold text-[#445D84] m-0">کلاس‌های آموزشگاه فامو در بابل به چه صورت برگزار می‌شوند؟</h3>
+                        <span class="faq-icon text-[#8B786D] transform transition-transform duration-300 shrink-0">
+                            <i class="icon icon--sm" data-lucide="chevron-down" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    <div class="faq-answer px-5">
+                        <p class="pb-5 text-gray-600 leading-relaxed m-0">
+                            در آموزشگاه فامو در بابل، کلاس‌های آموزشی، آزمون‌ها و جلسات رفع اشکال به‌صورت انفرادی و متناسب با سطح علمی و نیازهای هر دانش‌آموز در محل آموزشگاه واقع در میدان باغ فردوس برگزار می‌شوند.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ 2 -->
+                <div class="faq-item bg-white rounded-xl shadow-md border border-[#E2D9C6] overflow-hidden">
+                    <div class="faq-question cursor-pointer p-5 flex justify-between items-center gap-4" tabindex="0" role="button" aria-expanded="false">
+                        <h3 class="text-base sm:text-lg font-bold text-[#445D84] m-0">خانواده‌ها چگونه روند تحصیلی دانش‌آموز را دنبال می‌کنند؟</h3>
+                        <span class="faq-icon text-[#8B786D] transform transition-transform duration-300 shrink-0">
+                            <i class="icon icon--sm" data-lucide="chevron-down" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    <div class="faq-answer px-5">
+                        <p class="pb-5 text-gray-600 leading-relaxed m-0">
+                            نتایج آزمون‌ها و روند عملکرد دروس در سامانه اختصاصی فامو ثبت می‌شود. همچنین کارنامه هفتگی همراه با نظرات اساتید آماده شده و اطلاع‌رسانی آن از طریق پیامک برای خانواده انجام می‌گیرد.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ 3 -->
+                <div class="faq-item bg-white rounded-xl shadow-md border border-[#E2D9C6] overflow-hidden">
+                    <div class="faq-question cursor-pointer p-5 flex justify-between items-center gap-4" tabindex="0" role="button" aria-expanded="false">
+                        <h3 class="text-base sm:text-lg font-bold text-[#445D84] m-0">چگونه می‌توانم برای مشاوره و انتخاب برنامه آموزشی اقدام کنم؟</h3>
+                        <span class="faq-icon text-[#8B786D] transform transition-transform duration-300 shrink-0">
+                            <i class="icon icon--sm" data-lucide="chevron-down" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                    <div class="faq-answer px-5">
+                        <p class="pb-5 text-gray-600 leading-relaxed m-0">
+                            برای بررسی مقطع، شرایط تحصیلی و انتخاب خدمات متناسب با نیاز دانش‌آموز، می‌توانید از طریق صفحه تماس با ما به‌صورت تلفنی یا در واتساپ و تلگرام با واحد مشاوره فامو در ارتباط باشید.
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-</section>
 
-    <!-- Services Section -->
-    <section id="services" class="py-20 px-4 gradient-bg-light">
-        <div class="container mx-auto max-w-6xl">
-            <div class="text-center mb-12 sm:mb-16">
-                <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[#445D84] mb-3 sm:mb-4">خدمات ویژه آموزشگاه
-                    فامو</h2>
-                <p class="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">امکانات و خدمات منحصر به فرد ما
-                    برای موفقیت صددرصدی دانش‌آموزان</p>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-                <!-- Service 1 -->
-                <article class="service-card hover-lift">
-                    <div class="service-media">
-                        <img src="assets/images/services/24support.webp"
-                            alt="ایلوستریشن پشتیبانی ۲۴ ساعته آموزشگاه فامو"
-                            width="1200" height="1200" loading="lazy" decoding="async"
-                            class="service-illustration">
-                    </div>
-                    <div class="service-body">
-                        <h3 class="service-title">پشتیبانی ۲۴ ساعته</h3>
-                        <p class="service-desc">پاسخگویی به سوالات درسی دانش‌آموزان در تمامی ساعات شبانه‌روز.</p>
-                    </div>
-                </article>
-
-                <!-- Service 2 -->
-                <article class="service-card hover-lift animate-card-slide" style="animation-delay: 0.2s">
-                    <div class="service-media">
-                        <img src="assets/images/services/weekly_exams.webp"
-                            alt="ایلوستریشن آزمون‌های هفتگی و تحلیل پیشرفت"
-                            width="1200" height="1200" loading="lazy" decoding="async"
-                            class="service-illustration">
-                    </div>
-                    <div class="service-body">
-                        <h3 class="service-title">آزمون‌های هفتگی</h3>
-                        <p class="service-desc">برگزاری آزمون‌های استاندارد با تحلیل پیشرفت فردی هر دانش‌آموز و ارائه گزارش کامل.</p>
-                    </div>
-                </article>
-
-                <!-- Service 3 -->
-                <article class="service-card hover-lift animate-card-slide" style="animation-delay: 0.3s">
-                    <div class="service-media">
-                        <img src="assets/images/services/private_classes.webp"
-                            alt="ایلوستریشن کلاس‌های خصوصی و رفع اشکال"
-                            width="1200" height="1200" loading="lazy" decoding="async"
-                            class="service-illustration">
-                    </div>
-                    <div class="service-body">
-                        <h3 class="service-title">کلاس‌های خصوصی</h3>
-                        <p class="service-desc">برگزاری جلسات خصوصی برای رفع اشکال تک‌تک دروس با هماهنگی قبلی و اساتید مجرب.</p>
-                    </div>
-                </article>
-
-                <!-- Service 4 -->
-                <article class="service-card hover-lift animate-card-slide" style="animation-delay: 0.4s">
-                    <div class="service-media">
-                        <img src="assets/images/services/weekly_plans.webp"
-                            alt="ایلوستریشن مشاوره تخصصی و برنامه‌ریزی تحصیلی"
-                            width="1200" height="1200" loading="lazy" decoding="async"
-                            class="service-illustration">
-                    </div>
-                    <div class="service-body">
-                        <h3 class="service-title">مشاوره تخصصی</h3>
-                        <p class="service-desc">برنامه‌ریزی تحصیلی شخصی‌سازی شده توسط مشاوران خبره و رتبه‌های برتر کنکور.</p>
-                    </div>
-                </article>
-            </div>
-
-            <div
-                class="mt-16 gradient-bg rounded-3xl p-8 text-center text-white shadow-2xl">
-                <h3 class="text-2xl font-bold mb-4">همین امروز شروع کنید!</h3>
-                <p class="mb-6 max-w-2xl mx-auto">برای دریافت مشاوره رایگان و آگاهی از شرایط ویژه ثبت‌نام، با ما در تماس
-                    باشید.</p>
-                <a href="#faq-contact"
-                    class="inline-flex items-center bg-[#E2D9C6] text-[#445D84] font-bold px-8 py-3 rounded-full hover:bg-white transition duration-300 shadow-lg">
-                    <i class="icon ml-2" data-lucide="phone" aria-hidden="true"></i>
-                    تماس با ما
+            <div class="flex flex-wrap items-center justify-center gap-4 mt-8 text-sm font-bold">
+                <a href="pages/contact.php" class="text-[#445D84] hover:underline inline-flex items-center gap-1">
+                    سؤال دیگری دارید؟ تماس با فامو
+                    <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+                </a>
+                <span class="text-gray-300" aria-hidden="true">|</span>
+                <a href="pages/blog.php" class="text-[#445D84] hover:underline inline-flex items-center gap-1">
+                    مطالعه مقالات و راهنمای آموزشی
+                    <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
                 </a>
             </div>
         </div>
     </section>
 
-    <!-- FAQ & Contact Section -->
-    <section id="faq-contact" class="py-20 px-4 bg-white">
-        <div class="container mx-auto max-w-6xl">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                <!-- FAQ Section -->
-                <div>
-                    <h2 class="text-2xl sm:text-3xl font-bold text-[#445D84] mb-6 sm:mb-8 flex items-center">
-                        <i class="icon icon--lg ml-3 text-[#8B786D]" data-lucide="circle-help" aria-hidden="true"></i>
-                        سوالات متداول
-                    </h2>
-
-                    <div class="space-y-4">
-                        <!-- FAQ Item 1 -->
-                        <div
-                            class="faq-item bg-gradient-to-r from-white to-[#f9f7f3] rounded-xl shadow-md border border-[#E2D9C6] overflow-hidden hover-lift">
-                            <div class="faq-question cursor-pointer p-5 flex justify-between items-center" tabindex="0" role="button" aria-expanded="false">
-                                <h3 class="text-lg font-bold text-[#445D84]">آیا دوره‌ها به صورت حضوری برگزار می‌شوند؟
-                                </h3>
-                                <span class="faq-icon text-[#8B786D] transform transition-transform duration-300">
-                                    <i class="icon icon--sm" data-lucide="chevron-down" aria-hidden="true"></i>
-                                </span>
-                            </div>
-                            <div class="faq-answer px-5">
-                                <p class="pb-5 text-gray-600 leading-relaxed">بله، تمامی دوره‌های آموزشگاه فامو در حال
-                                    حاضر به صورت حضوری در محل آموزشگاه واقع در بابل، میدان باغ فردوس برگزار می‌شوند.
-                                    کلاس‌ها در محیطی استاندارد و مجهز به امکانات آموزشی روز برگزار می‌گردد.</p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ Item 2 -->
-                        <div
-                            class="faq-item bg-gradient-to-r from-white to-[#f9f7f3] rounded-xl shadow-md border border-[#E2D9C6] overflow-hidden hover-lift">
-                            <div class="faq-question cursor-pointer p-5 flex justify-between items-center" tabindex="0" role="button" aria-expanded="false">
-                                <h3 class="text-lg font-bold text-[#445D84]">هزینه دوره‌ها چقدر است و آیا امکان پرداخت
-                                    اقساطی وجود دارد؟</h3>
-                                <span class="faq-icon text-[#8B786D] transform transition-transform duration-300">
-                                    <i class="icon icon--sm" data-lucide="chevron-down" aria-hidden="true"></i>
-                                </span>
-                            </div>
-                            <div class="faq-answer px-5">
-                                <p class="pb-5 text-gray-600 leading-relaxed">برای اطلاع از شرایط پرداخت اقساطی و
-                                    تخفیف‌های ویژه، لطفا با شماره تماس آموزشگاه در ارتباط باشید. امکان پرداخت قسطی نیز
-                                    برای دانش‌آموزان فراهم است.</p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ Item 3 -->
-                        <div
-                            class="faq-item bg-gradient-to-r from-white to-[#f9f7f3] rounded-xl shadow-md border border-[#E2D9C6] overflow-hidden hover-lift">
-                            <div class="faq-question cursor-pointer p-5 flex justify-between items-center" tabindex="0" role="button" aria-expanded="false">
-                                <h3 class="text-lg font-bold text-[#445D84]">پشتیبانی درسی به چه صورت است؟</h3>
-                                <span class="faq-icon text-[#8B786D] transform transition-transform duration-300">
-                                    <i class="icon icon--sm" data-lucide="chevron-down" aria-hidden="true"></i>
-                                </span>
-                            </div>
-                            <div class="faq-answer px-5">
-                                <p class="pb-5 text-gray-600 leading-relaxed">پشتیبانان ما که از رتبه‌های برتر کنکور
-                                    سال‌های گذشته هستند، به صورت ۲۴ ساعته از طریق پیام‌رسان‌ها آماده پاسخگویی به سوالات
-                                    درسی و مشاوره‌ای شما هستند. همچنین جلسات رفع اشکال هفتگی نیز برگزار می‌شود.</p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ Item 4 -->
-                        <div
-                            class="faq-item bg-gradient-to-r from-white to-[#f9f7f3] rounded-xl shadow-md border border-[#E2D9C6] overflow-hidden hover-lift">
-                            <div class="faq-question cursor-pointer p-5 flex justify-between items-center" tabindex="0" role="button" aria-expanded="false">
-                                <h3 class="text-lg font-bold text-[#445D84]">چگونه می‌توانم برای مشاوره رایگان ثبت‌نام
-                                    کنم؟</h3>
-                                <span class="faq-icon text-[#8B786D] transform transition-transform duration-300">
-                                    <i class="icon icon--sm" data-lucide="chevron-down" aria-hidden="true"></i>
-                                </span>
-                            </div>
-                            <div class="faq-answer px-5">
-                                <p class="pb-5 text-gray-600 leading-relaxed">شما می‌توانید با مراجعه به صفحه ثبت‌نام و
-                                    پر کردن فرم مربوطه، درخواست خود را برای جلسه مشاوره رایگان ثبت کنید. همکاران ما در
-                                    اسرع وقت با شما تماس خواهند گرفت تا زمان مناسبی را با شما هماهنگ کنند.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Contact Section -->
-                <div>
-                    <h2 class="text-2xl sm:text-3xl font-bold text-[#445D84] mb-6 sm:mb-8 flex items-center">
-                        <i class="icon icon--lg ml-3 text-[#8B786D]" data-lucide="id-card" aria-hidden="true"></i>
-                        با ما در ارتباط باشید
-                    </h2>
-
-                    <div
-                        class="bg-gradient-to-br from-white to-[#f9f7f3] rounded-2xl shadow-xl border border-[#E2D9C6] p-2 hover-lift">
-                        <address class="not-italic space-y-1">
-                            <!-- Address -->
-                            <div
-                                class="flex items-start space-x-4 space-x-reverse hover:bg-white/50 p-3 rounded-lg transition duration-300 gap-4">
-                                <div
-                                    class="bg-gradient-to-br from-[#E2D9C6] to-[#d4c9b2] text-[#445D84] w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <i class="icon" data-lucide="map-pin" aria-hidden="true"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-lg text-[#445D84] mb-1">آدرس آموزشگاه</h3>
-                                    <p class="text-gray-600">بابل، میدان باغ فردوس</p>
-                                </div>
-                            </div>
-
-                            <!-- Phone -->
-                            <div
-                                class="flex items-start space-x-4 space-x-reverse hover:bg-white/50 p-3 rounded-lg transition duration-300 gap-4">
-                                <div
-                                    class="bg-gradient-to-br from-[#E2D9C6] to-[#d4c9b2] text-[#445D84] w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <i class="icon" data-lucide="phone" aria-hidden="true"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-lg text-[#445D84] mb-1">شماره تماس</h3>
-                                    <p class="text-gray-600"><a href="tel:+989014402300" dir="ltr" class="hover:text-[#445D84] transition">0901-440-2300</a></p>
-                                    <p class="text-gray-600"><a href="tel:+989999041429" dir="ltr" class="hover:text-[#445D84] transition">0999-904-1429</a></p>
-                                    <p class="text-gray-600"><a href="tel:+989906817387" dir="ltr" class="hover:text-[#445D84] transition">0990-681-7387</a></p>
-                                </div>
-                            </div>
-
-                            <!-- Email -->
-                            <div
-                                class="flex items-start space-x-4 space-x-reverse hover:bg-white/50 p-3 rounded-lg transition duration-300 gap-4">
-                                <div
-                                    class="bg-gradient-to-br from-[#E2D9C6] to-[#d4c9b2] text-[#445D84] w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <i class="icon" data-lucide="mail" aria-hidden="true"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-lg text-[#445D84] mb-1">ایمیل</h3>
-                                    <p class="text-gray-600"><a href="mailto:info@famoacademy.ir" class="hover:text-[#445D84] transition">info@famoacademy.ir</a></p>
-                                </div>
-                            </div>
-
-                            <!-- Telegram -->
-                            <div
-                                class="flex items-start space-x-4 space-x-reverse hover:bg-white/50 p-3 rounded-lg transition duration-300 gap-4">
-                                <div
-                                    class="bg-gradient-to-br from-[#E2D9C6] to-[#d4c9b2] text-[#445D84] w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
-                                    <i class="icon" data-lucide="send" aria-hidden="true"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-lg text-[#445D84] mb-1">تلگرام</h3>
-                                    <p class="text-black"><a href="https://t.me/famoacademy" target="_blank" rel="noopener noreferrer" dir="ltr" class="hover:text-[#445D84] transition">@famoacademy</a></p>
-                                </div>
-                            </div>
-                        </address>
-                    </div>
+    <!-- ۱۰) دعوت پایانی -->
+    <section id="cta-final" class="py-16 px-4 bg-white">
+        <div class="container mx-auto max-w-5xl">
+            <div class="gradient-bg rounded-3xl p-8 sm:p-12 text-center text-white shadow-2xl">
+                <h2 class="text-2xl sm:text-3xl font-bold mb-4 leading-snug">
+                    مسیر آموزشی مناسب فرزندتان را با یک گفت‌وگو شروع کنید
+                </h2>
+                <p class="text-white/90 mb-7 max-w-2xl mx-auto leading-relaxed">
+                    برای بررسی نیازهای آموزشی دانش‌آموز و آشنایی با برنامه‌ها و خدمات آموزشگاه فامو در بابل، با ما در ارتباط باشید.
+                </p>
+                <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+                    <a href="pages/contact.php#consultation"
+                        class="inline-flex items-center gap-2 bg-[#E2D9C6] text-[#445D84] font-bold px-8 py-3 rounded-full hover:bg-white transition duration-300 shadow-lg">
+                        <i class="icon icon--sm" data-lucide="phone" aria-hidden="true"></i>
+                        درخواست مشاوره
+                    </a>
+                    <a href="pages/contact.php"
+                        class="inline-flex items-center gap-2 border-2 border-[#E2D9C6] text-[#E2D9C6] font-bold px-8 py-3 rounded-full hover:bg-[#E2D9C6] hover:text-[#445D84] transition duration-300">
+                        <i class="icon icon--sm" data-lucide="map-pin" aria-hidden="true"></i>
+                        تماس با فامو
+                    </a>
                 </div>
             </div>
         </div>
@@ -632,5 +808,4 @@ $page_libs = [
     <!-- Scripts -->
     <script type="module" src="<?= htmlspecialchars(famo_local_asset('assets/js/main.js', $base), ENT_QUOTES, 'UTF-8') ?>"></script>
 </body>
-
 </html>

@@ -1,14 +1,17 @@
 <?php
 $base = $base ?? '';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
+$homeHref = $base === '' ? './' : $baseEsc;
+$loginUrlRaw = famo_login_url();
+$loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'https://login.famoacademy.ir/'), ENT_QUOTES, 'UTF-8');
 ?>
 <!-- Footer -->
 <footer class="gradient-bg text-white pt-12 pb-6 px-4">
     <div class="container mx-auto max-w-6xl">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 pb-10">
-            <!-- Logo & Description -->
+        <div class="famo-footer-grid">
+            <!-- Brand & Description -->
             <div>
-                <div class="flex items-center gap-4 mb-6">
+                <div class="flex items-center gap-3.5 mb-5">
                     <div class="bg-[#445D84] w-12 h-12 rounded-full flex items-center justify-center shrink-0">
                         <picture>
                             <source srcset="<?= htmlspecialchars(famo_asset('images/logo.webp', $base . '../shared/images/logo.webp'), ENT_QUOTES, 'UTF-8') ?>" type="image/webp">
@@ -16,38 +19,37 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
                         </picture>
                     </div>
                     <div>
-                        <p class="text-2xl font-bold">آموزشگاه <span class="text-[#E2D9C6]">فامو</span></p>
-                        <p class="text-white/80 text-sm mt-1">مشاوره تخصصی کنکور و تیزهوشان</p>
+                        <p class="text-xl font-bold leading-snug">آموزشگاه <span class="text-[#E2D9C6]">فامو</span></p>
+                        <p class="text-white/80 text-xs mt-0.5">آموزش شخصی، با نگاهی هوشمند</p>
                     </div>
                 </div>
-                <p class="text-white/85 leading-relaxed mb-6">
-                    آموزشگاه فامو با بیش از 7 سال سابقه درخشان در زمینه مشاوره و کنکور و تیزهوشان، همراه
-                    دانش‌آموزان در مسیر موفقیت تحصیلی است.
+                <p class="text-white/85 text-sm leading-relaxed mb-6">
+                    آموزش خصوصی، آزمون‌های شخصی‌سازی‌شده و پیگیری هوشمند عملکرد تحصیلی در بابل؛ برای ساختن مسیری متناسب با نیاز هر دانش‌آموز.
                 </p>
-                <div class="flex gap-4">
-                    <a href="https://t.me/famoacademy"
+                <div class="flex gap-3">
+                    <a href="https://t.me/famoacademy" target="_blank" rel="noopener noreferrer"
                         class="bg-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#E2D9C6] hover:text-[#445D84] transition duration-300 shrink-0"
                         aria-label="فامو در تلگرام">
                         <i class="icon" data-lucide="send" aria-hidden="true"></i>
                     </a>
-                    <a href="#"
-                        class="bg-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#E2D9C6] hover:text-[#445D84] transition duration-300 shrink-0"
-                        aria-label="فامو در اینستاگرام">
-                        <i class="icon" data-lucide="instagram" aria-hidden="true"></i>
-                    </a>
-                    <a href="https://wa.me/989014402300"
+                    <a href="https://wa.me/989014402300" target="_blank" rel="noopener noreferrer"
                         class="bg-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#E2D9C6] hover:text-[#445D84] transition duration-300 shrink-0"
                         aria-label="فامو در واتساپ">
                         <i class="icon" data-lucide="message-circle" aria-hidden="true"></i>
+                    </a>
+                    <a href="mailto:info@famoacademy.ir"
+                        class="bg-white/10 w-10 h-10 rounded-full flex items-center justify-center hover:bg-[#E2D9C6] hover:text-[#445D84] transition duration-300 shrink-0"
+                        aria-label="ایمیل آموزشگاه فامو">
+                        <i class="icon" data-lucide="mail" aria-hidden="true"></i>
                     </a>
                 </div>
             </div>
 
             <!-- Quick Links -->
             <nav aria-label="دسترسی سریع">
-                <h2 class="text-xl font-bold mb-6 text-[#E2D9C6]">دسترسی سریع</h2>
-                <ul class="space-y-3">
-                    <li><a href="<?= $baseEsc ?>#home"
+                <h2 class="text-lg font-bold mb-5 text-[#E2D9C6]">دسترسی سریع</h2>
+                <ul class="space-y-2.5 text-sm">
+                    <li><a href="<?= $homeHref ?>"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
                         خانه
@@ -55,12 +57,17 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
                     <li><a href="<?= $baseEsc ?>pages/course.php"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
-                        دوره‌ها
+                        دوره‌ها و مقاطع آموزشی
+                    </a></li>
+                    <li><a href="<?= $baseEsc ?>pages/services.php"
+                            class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
+                        <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
+                        خدمات آموزشی
                     </a></li>
                     <li><a href="<?= $baseEsc ?>pages/team.php"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
-                        اساتید
+                        اساتید و پشتیبانان
                     </a></li>
                     <li><a href="<?= $baseEsc ?>pages/admissions.php"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
@@ -70,52 +77,81 @@ $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
                     <li><a href="<?= $baseEsc ?>pages/testimonials.php"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
-                        نظرات شاگردان
+                        نظرات شاگردان و اولیا
                     </a></li>
                     <li><a href="<?= $baseEsc ?>pages/blog.php"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
-                        وبلاگ
+                        مقالات آموزشی
                     </a></li>
-                    <li><a href="<?= $baseEsc ?>#services"
+                    <li><a href="<?= $baseEsc ?>pages/contact.php"
                             class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
-                        خدمات ویژه
-                    </a></li>
-                    <li><a href="<?= $baseEsc ?>#faq-contact"
-                            class="text-white/80 hover:text-white transition duration-300 hover:pr-2 flex items-center">
-                        <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
-                        سوالات و تماس
+                        تماس با ما
                     </a></li>
                 </ul>
             </nav>
 
-            <!-- Map Section -->
+            <!-- Contact Info (NAP Consistent) -->
             <div>
-                <h2 class="text-xl font-bold mb-6 text-[#E2D9C6]">موقعیت آموزشگاه</h2>
-                <div class="bg-white/10 rounded-xl overflow-hidden border border-white/20 p-4">
-                    <div class="h-48 bg-gradient-to-r from-[#E2D9C6] to-[#d4c9b2] rounded-lg flex flex-col items-center justify-center text-[#445D84]">
-                        <i class="icon icon--3xl mb-3" data-lucide="map-pin" aria-hidden="true"></i>
-                        <p class="font-bold text-center">بابل، میدان باغ فردوس</p>
+                <h2 class="text-lg font-bold mb-5 text-[#E2D9C6]">ارتباط با فامو</h2>
+                <address class="not-italic space-y-3 text-sm text-white/85">
+                    <div class="flex items-start gap-2.5">
+                        <i class="icon icon--sm mt-1 text-[#E2D9C6] shrink-0" data-lucide="map-pin" aria-hidden="true"></i>
+                        <span>بابل، میدان باغ فردوس</span>
                     </div>
-                    <div class="mt-4 text-center">
-                        <a href="https://maps.google.com/?q=بابل، میدان باغ فردوس" target="_blank" rel="noopener noreferrer"
-                            class="inline-flex items-center bg-[#E2D9C6] text-[#445D84] text-sm font-bold px-4 py-2 rounded-full hover:bg-white transition duration-300">
-                            <i class="icon icon--sm ml-1" data-lucide="external-link" aria-hidden="true"></i>
-                            مشاهده در نقشه
-                        </a>
+                    <div class="flex items-start gap-2.5">
+                        <i class="icon icon--sm mt-1 text-[#E2D9C6] shrink-0" data-lucide="phone" aria-hidden="true"></i>
+                        <div class="flex flex-col gap-1">
+                            <a href="tel:+989014402300" dir="ltr" class="hover:text-[#E2D9C6] transition text-right">0901-440-2300</a>
+                            <a href="tel:+989999041429" dir="ltr" class="hover:text-[#E2D9C6] transition text-right">0999-904-1429</a>
+                            <a href="tel:+989906817387" dir="ltr" class="hover:text-[#E2D9C6] transition text-right">0990-681-7387</a>
+                        </div>
                     </div>
+                    <div class="flex items-center gap-2.5">
+                        <i class="icon icon--sm text-[#E2D9C6] shrink-0" data-lucide="mail" aria-hidden="true"></i>
+                        <a href="mailto:info@famoacademy.ir" class="hover:text-[#E2D9C6] transition">info@famoacademy.ir</a>
+                    </div>
+                    <div class="flex items-center gap-2.5">
+                        <i class="icon icon--sm text-[#E2D9C6] shrink-0" data-lucide="send" aria-hidden="true"></i>
+                        <a href="https://t.me/famoacademy" target="_blank" rel="noopener noreferrer" dir="ltr" class="hover:text-[#E2D9C6] transition">@famoacademy</a>
+                    </div>
+                </address>
+            </div>
+
+            <!-- Student Portal & Map -->
+            <div>
+                <h2 class="text-lg font-bold mb-5 text-[#E2D9C6]">دسترسی دانش‌آموزان</h2>
+                <div class="space-y-3 mb-5">
+                    <a href="<?= $loginUrlEsc ?>"
+                        class="w-full inline-flex items-center justify-center gap-2 bg-[#E2D9C6] text-[#445D84] text-sm font-bold px-4 py-2.5 rounded-xl hover:bg-white transition duration-300">
+                        <i class="icon icon--sm" data-lucide="user" aria-hidden="true"></i>
+                        ورود به پنل دانش‌آموزی
+                    </a>
+                    <a href="<?= $baseEsc ?>pages/contact.php#consultation"
+                        class="famo-footer-consult-btn">
+                        <i class="icon icon--sm" data-lucide="phone" aria-hidden="true"></i>
+                        درخواست مشاوره
+                    </a>
+                </div>
+                <div class="famo-footer-map-card">
+                    <p class="text-xs text-white/85 mb-2">مراجعه حضوری: بابل، میدان باغ فردوس</p>
+                    <a href="https://maps.google.com/?q=بابل، میدان باغ فردوس" target="_blank" rel="noopener noreferrer"
+                        class="inline-flex items-center gap-1.5 text-[#E2D9C6] hover:text-white text-xs font-bold transition">
+                        <i class="icon icon--sm" data-lucide="external-link" aria-hidden="true"></i>
+                        مشاهده موقعیت در نقشه
+                    </a>
                 </div>
             </div>
         </div>
 
         <!-- Copyright -->
         <div class="border-t border-white/20 pt-6 text-center text-white/80">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-2">
-                <p>© <span id="copyright-year">۱۴۰۳</span> تمامی حقوق برای آموزشگاه فامو محفوظ است.</p>
+            <div class="flex flex-col md:flex-row justify-between items-center gap-2 text-sm">
+                <p>© <span id="copyright-year">۱۴۰۴</span> تمامی حقوق برای آموزشگاه فامو محفوظ است.</p>
                 <p class="text-[#E2D9C6]">مدیریت: دکتر محمد موسی زاده موسوی</p>
             </div>
-            <p class="mt-4 text-sm">
+            <p class="mt-4 text-xs sm:text-sm">
                 طراحی و توسعه توسط
                 <a href="https://mhdavoudi.ir" target="_blank" rel="noopener noreferrer"
                     class="inline-flex items-center gap-1.5 text-[#E2D9C6] underline hover:text-white transition duration-300 font-medium" id="nahid">

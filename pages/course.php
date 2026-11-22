@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 require_once __DIR__ . '/../config.php';
 $base = '../';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
@@ -11,18 +12,18 @@ $orgRef = [
     'url'   => $siteUrl . '/',
 ];
 
-$pageTitle = 'دوره‌های تخصصی کنکور و تیزهوشان بابل | آموزشگاه فامو';
-$metaDescription = 'دوره‌های جامع آمادگی کنکور تجربی، ریاضی، انسانی و آزمون‌های تیزهوشان در بابل؛ کلاس‌های مفهومی و تست‌زنی با اساتید مدال‌آور المپیاد و رتبه‌های برتر.';
+$pageTitle = 'دوره‌های آموزشی فامو در بابل | ابتدایی تا کنکور';
+$metaDescription = 'آشنایی با برنامه‌های آموزشی فامو برای ابتدایی، متوسطه، کنکور و تیزهوشان؛ همراه با کلاس‌های خصوصی و مسیر آموزشی شخصی‌سازی‌شده.';
 $canonicalPath = 'pages/course.php';
 $webPageType = 'CollectionPage';
 $ogImage = $siteUrl . '/assets/images/courses_banner.webp';
-$ogImageAlt = 'دوره‌های تخصصی کنکور و تیزهوشان آموزشگاه فامو بابل';
+$ogImageAlt = 'دوره‌های آموزشی آموزشگاه فامو در بابل';
 $breadcrumbs = [
     ['name' => 'خانه', 'url' => famo_canonical_url('')],
-    ['name' => 'دوره‌های تخصصی', 'url' => $coursePageUrl],
+    ['name' => 'دوره‌های آموزشی', 'url' => $coursePageUrl],
 ];
 
-// Server-side Course JSON-LD hydration (fail-soft with core course fallback when API is unreachable)
+// Server-side Course JSON-LD hydration (fail-soft with 5 core programs when API is unreachable)
 $courseApiRes = famo_internal_api_get('/public/courses', 2);
 $rawCourses = is_array($courseApiRes['json']['data'] ?? null) ? $courseApiRes['json']['data'] : [];
 $courseListItems = [];
@@ -34,7 +35,7 @@ if (count($rawCourses) > 0) {
             continue;
         }
         $cId = isset($c['id']) ? (string) $c['id'] : (string) $pos;
-        $cDesc = trim((string) ($c['full_description'] ?? $c['description'] ?? 'دوره آموزشی تخصصی آموزشگاه فامو بابل'));
+        $cDesc = trim((string) ($c['full_description'] ?? $c['description'] ?? 'دوره آموزشی آموزشگاه فامو بابل'));
         $courseEntity = [
             '@type'             => 'Course',
             'name'              => (string) $c['name'],
@@ -69,19 +70,34 @@ if (count($rawCourses) > 0) {
 } else {
     $fallbackCourses = [
         [
-            'name'        => 'دوره‌های تخصصی کنکور تجربی، ریاضی و انسانی',
-            'description' => 'آموزش مفهومی، تست‌زنی هدفمند، برنامه‌ریزی شخصی‌سازی‌شده و آزمون‌های استاندارد ویژه داوطلبان کنکور سراسری در بابل.',
-            'level'       => 'دوره دوم متوسطه (دهم، یازدهم، دوازدهم)',
+            'name'        => 'آموزش و تقویت دروس ابتدایی در بابل',
+            'description' => 'کلاس‌های خصوصی ابتدایی فامو بر اساس سطح یادگیری دانش‌آموز برای تقویت مفاهیم پایه، رفع اشکال و تثبیت آموخته‌ها.',
+            'level'       => 'دوره ابتدایی',
+            'anchor'      => '#elementary',
         ],
         [
-            'name'        => 'دوره‌های آمادگی آزمون تیزهوشان و نمونه دولتی',
-            'description' => 'تقویت هوش، استعداد تحلیلی و دروس تخصصی متوسطه اول برای قبولی در مدارس تیزهوشان و نمونه دولتی.',
+            'name'        => 'کلاس خصوصی متوسطه اول در بابل',
+            'description' => 'تقویت پایه‌های درسی، آموزش مفهومی، رفع اشکال تخصصی و افزایش مهارت حل مسئله برای دانش‌آموزان متوسطه اول.',
             'level'       => 'دوره اول متوسطه',
+            'anchor'      => '#middle-school',
         ],
         [
-            'name'        => 'مشاوره تخصصی و برنامه‌ریزی فردی با پشتیبانی ۲۴ ساعته',
-            'description' => 'برنامه‌ریزی هفتگی منطبق بر شرایط هر دانش‌آموز همراه با تحلیل کارنامه آزمون‌ها و رفع اشکال پیوسته.',
-            'level'       => 'متوسطه اول و دوم',
+            'name'        => 'کلاس خصوصی متوسطه دوم در بابل',
+            'description' => 'آموزش دروس تخصصی و عمومی، رفع اشکال موضوعی و آمادگی امتحانات مدرسه و مسیر کنکور متناسب با شرایط هر دانش‌آموز.',
+            'level'       => 'دوره دوم متوسطه',
+            'anchor'      => '#high-school',
+        ],
+        [
+            'name'        => 'کلاس خصوصی و آمادگی کنکور در بابل',
+            'description' => 'کلاس خصوصی دروس کنکور، آزمون‌های شخصی‌سازی‌شده، تحلیل نتایج و گزارش هفتگی وضعیت آموزشی داوطلبان.',
+            'level'       => 'آمادگی کنکور',
+            'anchor'      => '#konkur',
+        ],
+        [
+            'name'        => 'آمادگی آزمون تیزهوشان در بابل',
+            'description' => 'تقویت مهارت استدلال، تحلیل، حل مسائل هوش و تمرین متناسب با سطح دانش‌آموز برای آمادگی آزمون مدارس استعدادهای درخشان.',
+            'level'       => 'آمادگی تیزهوشان',
+            'anchor'      => '#tizhooshan',
         ],
     ];
     foreach ($fallbackCourses as $idx => $fc) {
@@ -92,7 +108,7 @@ if (count($rawCourses) > 0) {
                 '@type'            => 'Course',
                 'name'             => $fc['name'],
                 'description'      => $fc['description'],
-                'url'              => $coursePageUrl,
+                'url'              => $coursePageUrl . $fc['anchor'],
                 'inLanguage'       => 'fa-IR',
                 'educationalLevel' => $fc['level'],
                 'provider'         => $orgRef,
@@ -132,9 +148,8 @@ $page_libs = [
     <!-- Course ItemList Schema Markup (SSR hydrated + kept in sync by courses.js) -->
     <script type="application/ld+json" id="courseSchema"><?= $courseSchemaJson ?></script>
 
-    <!-- استایل کارت‌های دوره: تصویر در بالا، نام و قیمت زیر آن، چیدمان گرید در لپ‌تاپ -->
+    <!-- استایل کارت‌های دوره: تصویر در بالا، نام و مشخصات زیر آن، چیدمان گرید -->
     <style>
-        /* گرید دوره‌ها: موبایل ۱ ستون، تبلت ۲ ستون، لپ‌تاپ ۳ ستون */
         #courses .courses-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -156,7 +171,6 @@ $page_libs = [
             }
         }
 
-        /* ---------- کارت دوره ---------- */
         #courses .course-card {
             display: flex;
             flex-direction: column;
@@ -176,7 +190,6 @@ $page_libs = [
             box-shadow: 0 20px 35px -16px rgba(68, 93, 132, 0.5);
         }
 
-        /* تصویر دوره: نسبت ثابت 16/10 (بدون overlay) */
         #courses .course-image-wrapper {
             position: relative;
             width: 100%;
@@ -222,7 +235,6 @@ $page_libs = [
             box-shadow: 0 4px 10px rgba(68, 93, 132, 0.15);
         }
 
-        /* بدنه کارت */
         #courses .course-body {
             display: flex;
             flex-direction: column;
@@ -298,32 +310,6 @@ $page_libs = [
             flex-wrap: wrap;
         }
 
-        #courses .course-price-box {
-            display: flex;
-            flex-direction: column;
-            line-height: 1.4;
-        }
-
-        #courses .course-price-label {
-            font-size: 11px;
-            color: #6b7280;
-        }
-
-        #courses .course-price-value {
-            font-size: 16px;
-            font-weight: 700;
-            color: #445D84;
-            white-space: nowrap;
-            font-variant-numeric: tabular-nums;
-        }
-
-        #courses .course-price-unit {
-            font-size: 11px;
-            font-weight: 500;
-            color: #736158;
-            margin-inline-start: 4px;
-        }
-
         #courses .course-cta {
             display: inline-flex;
             align-items: center;
@@ -350,7 +336,6 @@ $page_libs = [
             outline-offset: 2px;
         }
 
-        /* ---------- اسکلتون لودینگ هم‌شکل با کارت ---------- */
         #courses .course-card-skeleton {
             background: var(--skeleton-bg, #f5f5f5);
             border: 1px solid var(--skeleton-border, #e0e0e0);
@@ -369,27 +354,10 @@ $page_libs = [
             border-radius: 0;
         }
 
-        #courses .course-card-skeleton .skeleton-line-lg {
-            height: 15px;
-            width: 75%;
-        }
-
-        #courses .course-card-skeleton .skeleton-line {
-            height: 11px;
-            width: 100%;
-        }
-
-        #courses .course-card-skeleton .skeleton-line-sm {
-            height: 11px;
-            width: 60%;
-        }
-
-        #courses .course-card-skeleton .skeleton-price {
-            height: 16px;
-            width: 45%;
-            margin-top: 6px;
-            align-self: flex-end;
-        }
+        #courses .course-card-skeleton .skeleton-line-lg { height: 15px; width: 75%; }
+        #courses .course-card-skeleton .skeleton-line { height: 11px; width: 100%; }
+        #courses .course-card-skeleton .skeleton-line-sm { height: 11px; width: 60%; }
+        #courses .course-card-skeleton .skeleton-price { height: 16px; width: 45%; margin-top: 6px; align-self: flex-end; }
     </style>
 </head>
 
@@ -400,24 +368,175 @@ $page_libs = [
 
 <main id="main-content">
 <!-- Page Title Banner -->
-<section class="pt-28 sm:pt-32 pb-12 gradient-bg text-white text-center">
+<section class="famo-page-hero gradient-bg text-white text-center">
     <div class="container mx-auto px-4 max-w-5xl">
-        <h1 class="text-3xl sm:text-4xl font-bold mb-6 text-white">دوره‌های تخصصی کنکور و تیزهوشان بابل</h1>
+        <p class="famo-eyebrow">آموزشگاه فامو | بابل</p>
+        <h1 class="text-3xl sm:text-4xl font-bold mb-6 text-white">دوره‌های آموزشی فامو در بابل</h1>
 
-        <!-- بنر یا پوستر با ارتفاع کنترل‌شده و گوشه‌های گرد -->
         <div class="relative w-full h-56 sm:h-72 md:h-96 rounded-2xl overflow-hidden shadow-2xl border border-white/20 mb-8">
-            <img src="<?= $baseEsc ?>assets/images/courses_banner.webp" alt="دوره‌های تخصصی کنکور و تیزهوشان بابل"
+            <img src="<?= $baseEsc ?>assets/images/courses_banner.webp" alt="دوره‌های آموزشی و کلاس‌های خصوصی آموزشگاه فامو در بابل"
                 width="2752" height="1536" decoding="async" fetchpriority="high" class="w-full h-full object-cover">
         </div>
 
-        <p class="text-white/90 max-w-2xl mx-auto text-base sm:text-lg leading-relaxed">برنامه‌ریزی، کادر مجرب، آزمون‌های استاندارد
-            و تحلیل پیشرفت فردی برای تضمین موفقیت تحصیلی</p>
+        <p class="text-white/90 max-w-3xl mx-auto text-base sm:text-lg leading-relaxed mb-3">
+            فامو برنامه‌های آموزشی خود را برای دانش‌آموزان مقاطع مختلف ارائه می‌کند. در این مجموعه، کلاس‌های خصوصی بر اساس سطح علمی، نیازهای آموزشی و هدف هر دانش‌آموز برگزار می‌شوند.
+        </p>
+        <p class="text-white/80 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
+            از تقویت مفاهیم درسی در دوره ابتدایی تا آمادگی کنکور و آزمون تیزهوشان، مسیر آموزش متناسب با شرایط دانش‌آموز طراحی می‌شود.
+        </p>
     </div>
 </section>
 
-<!-- Detailed Courses Grid -->
-<section id="courses" class="py-16 px-4">
+<!-- Quick Section Navigation -->
+<section class="famo-anchor-bar" aria-label="فهرست مقاطع و برنامه‌های آموزشی">
     <div class="container mx-auto max-w-6xl">
+        <div class="famo-anchor-pills">
+            <a href="#elementary" class="famo-anchor-pill">آموزش ابتدایی</a>
+            <a href="#middle-school" class="famo-anchor-pill">متوسطه اول</a>
+            <a href="#high-school" class="famo-anchor-pill">متوسطه دوم</a>
+            <a href="#konkur" class="famo-anchor-pill">آمادگی کنکور</a>
+            <a href="#tizhooshan" class="famo-anchor-pill">آمادگی تیزهوشان</a>
+            <a href="#courses" class="famo-anchor-pill">دوره‌های فعال فامو</a>
+        </div>
+    </div>
+</section>
+
+<!-- 5 Core Grade & Goal Programs (Strategy Doc v1.0 Section 3.2) -->
+<section class="py-14 px-4">
+    <div class="container mx-auto max-w-6xl famo-detail-stack">
+        <!-- ۱. آموزش ابتدایی -->
+        <article id="elementary" class="famo-detail-block">
+            <span class="famo-eyebrow famo-eyebrow--light">مقطع ابتدایی</span>
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#445D84] mb-3">آموزش و تقویت دروس ابتدایی در بابل</h2>
+            <p class="text-gray-600 leading-relaxed mb-3">
+                سال‌های ابتدایی تحصیل نقش مهمی در شکل‌گیری پایه علمی دانش‌آموز دارند. یادگیری درست مفاهیم در این دوره می‌تواند زمینه مناسبی برای ادامه تحصیل فراهم کند.
+            </p>
+            <p class="text-gray-600 leading-relaxed">
+                در کلاس‌های خصوصی ابتدایی فامو، آموزش بر اساس سطح یادگیری دانش‌آموز پیش می‌رود و مباحثی که نیاز به توضیح یا تمرین بیشتری دارند، با تمرکز بررسی می‌شوند.
+            </p>
+            <h3 class="text-base font-bold text-[#445D84] mt-5 mb-2">محورهای آموزشی</h3>
+            <ul class="famo-bullet-grid">
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>تقویت مفاهیم پایه درسی</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>رفع اشکال مباحث</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>افزایش تسلط بر مطالب</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>تمرین و تثبیت آموخته‌ها</li>
+            </ul>
+            <a href="<?= $baseEsc ?>pages/contact.php#consultation" class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-6 py-2.5 rounded-full hover:bg-[#344868] transition text-sm">
+                درخواست مشاوره آموزش ابتدایی
+                <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+            </a>
+        </article>
+
+        <!-- ۲. آموزش متوسطه اول -->
+        <article id="middle-school" class="famo-detail-block">
+            <span class="famo-eyebrow famo-eyebrow--light">متوسطه اول</span>
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#445D84] mb-3">کلاس خصوصی متوسطه اول در بابل</h2>
+            <p class="text-gray-600 leading-relaxed mb-3">
+                دوره متوسطه اول مرحله‌ای مهم در تثبیت پایه‌های علمی و تقویت مهارت‌های یادگیری است.
+            </p>
+            <p class="text-gray-600 leading-relaxed">
+                در این مقطع، کلاس‌های خصوصی فامو با توجه به وضعیت دانش‌آموز برگزار می‌شوند تا مباحث درسی به‌صورت دقیق‌تر آموزش داده شوند و نقاط ضعف پیش از ورود به متوسطه دوم شناسایی شوند.
+            </p>
+            <h3 class="text-base font-bold text-[#445D84] mt-5 mb-2">محورهای آموزشی</h3>
+            <ul class="famo-bullet-grid">
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>تقویت پایه‌های درسی</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>آموزش مفهومی</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>رفع اشکال تخصصی</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>تقویت مهارت حل مسئله</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>آمادگی برای آزمون‌های ورودی مدارس</li>
+            </ul>
+            <a href="<?= $baseEsc ?>pages/contact.php#consultation" class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-6 py-2.5 rounded-full hover:bg-[#344868] transition text-sm">
+                درخواست مشاوره متوسطه اول
+                <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+            </a>
+        </article>
+
+        <!-- ۳. آموزش متوسطه دوم -->
+        <article id="high-school" class="famo-detail-block">
+            <span class="famo-eyebrow famo-eyebrow--light">متوسطه دوم</span>
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#445D84] mb-3">کلاس خصوصی متوسطه دوم در بابل</h2>
+            <p class="text-gray-600 leading-relaxed mb-3">
+                با ورود به متوسطه دوم، نیازهای آموزشی دانش‌آموزان تخصصی‌تر می‌شوند. رشته تحصیلی، سطح علمی و هدف هر دانش‌آموز، محتوای آموزشی و نحوه تدریس را تحت تأثیر قرار می‌دهد.
+            </p>
+            <p class="text-gray-600 leading-relaxed">
+                در فامو، کلاس‌های خصوصی این مقطع متناسب با شرایط دانش‌آموز برگزار می‌شوند تا آموزش بر مباحث مورد نیاز و اهداف تحصیلی او متمرکز باشد.
+            </p>
+            <h3 class="text-base font-bold text-[#445D84] mt-5 mb-2">محورهای آموزشی</h3>
+            <ul class="famo-bullet-grid">
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>آموزش دروس تخصصی و عمومی</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>تقویت مباحث پایه</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>رفع اشکال موضوعی</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>آمادگی امتحانات مدرسه</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>آماده‌سازی برای مسیر کنکور</li>
+            </ul>
+            <a href="<?= $baseEsc ?>pages/contact.php#consultation" class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-6 py-2.5 rounded-full hover:bg-[#344868] transition text-sm">
+                درخواست مشاوره متوسطه دوم
+                <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+            </a>
+        </article>
+
+        <!-- ۴. آمادگی کنکور -->
+        <article id="konkur" class="famo-detail-block">
+            <span class="famo-eyebrow famo-eyebrow--light">کنکور سراسری</span>
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#445D84] mb-3">کلاس خصوصی و آمادگی کنکور در بابل</h2>
+            <p class="text-gray-600 leading-relaxed mb-3">
+                هر داوطلب کنکور با شرایط علمی، نقاط ضعف و هدف متفاوتی وارد این مسیر می‌شود. به همین دلیل، برنامه آموزشی یکسان نمی‌تواند پاسخ‌گوی نیاز تمام داوطلبان باشد.
+            </p>
+            <p class="text-gray-600 leading-relaxed">
+                فامو با تمرکز بر کلاس‌های خصوصی، آزمون‌های شخصی‌سازی‌شده و بررسی نتایج، مسیر آمادگی هر دانش‌آموز را متناسب با وضعیت او پیش می‌برد.
+            </p>
+            <h3 class="text-base font-bold text-[#445D84] mt-5 mb-2">محورهای آموزشی</h3>
+            <ul class="famo-bullet-grid">
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>کلاس خصوصی دروس کنکور</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>آزمون‌های متناسب با شرایط داوطلب</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>تحلیل نتایج آزمون</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>شناسایی مباحث نیازمند تقویت</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>بررسی روند عملکرد دروس</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>گزارش هفتگی وضعیت آموزشی</li>
+            </ul>
+            <a href="<?= $baseEsc ?>pages/contact.php#consultation" class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-6 py-2.5 rounded-full hover:bg-[#344868] transition text-sm">
+                درخواست مشاوره کنکور
+                <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+            </a>
+        </article>
+
+        <!-- ۵. آمادگی تیزهوشان -->
+        <article id="tizhooshan" class="famo-detail-block">
+            <span class="famo-eyebrow famo-eyebrow--light">مدارس استعدادهای درخشان</span>
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#445D84] mb-3">آمادگی آزمون تیزهوشان در بابل</h2>
+            <p class="text-gray-600 leading-relaxed mb-3">
+                آزمون‌های ورودی مدارس استعدادهای درخشان، علاوه بر تسلط درسی، به مهارت‌هایی مانند تحلیل، استدلال، تشخیص الگو و حل مسئله نیاز دارند.
+            </p>
+            <p class="text-gray-600 leading-relaxed">
+                برنامه آمادگی تیزهوشان در فامو با توجه به سطح و نیازهای دانش‌آموز تنظیم می‌شود تا تمرین و آموزش بر مهارت‌های مورد نیاز او متمرکز باشد.
+            </p>
+            <h3 class="text-base font-bold text-[#445D84] mt-5 mb-2">محورهای آموزشی</h3>
+            <ul class="famo-bullet-grid">
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>تقویت مهارت استدلال</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>توسعه توانایی تحلیل</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>حل مسائل و تمرین‌های هوش</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>شناسایی نقاط ضعف</li>
+                <li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>ارزیابی و تمرین متناسب با سطح دانش‌آموز</li>
+            </ul>
+            <a href="<?= $baseEsc ?>pages/contact.php#consultation" class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-6 py-2.5 rounded-full hover:bg-[#344868] transition text-sm">
+                درخواست مشاوره تیزهوشان
+                <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+            </a>
+        </article>
+    </div>
+</section>
+
+<!-- Detailed Active Courses Grid (Preserved Live API Integration) -->
+<section id="courses" class="py-14 px-4 bg-white border-t border-[#E2D9C6]">
+    <div class="container mx-auto max-w-6xl">
+        <div class="text-center mb-10">
+            <span class="famo-eyebrow famo-eyebrow--light">فهرست به‌روز سامانه</span>
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#445D84] mb-3">دوره‌های فعال آموزشگاه فامو</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                جزئیات دوره‌های ثبت‌شده در سامانه آموزشگاه فامو بابل
+            </p>
+        </div>
+
         <div class="courses-grid" id="coursesContainer">
             <!-- Skeleton loaders shown until the API responds -->
             <div class="course-card-skeleton">
@@ -440,6 +559,25 @@ $page_libs = [
                 <div class="skeleton skeleton-pulse skeleton-line"></div>
                 <div class="skeleton skeleton-pulse skeleton-line-sm"></div>
                 <div class="skeleton skeleton-pulse skeleton-price"></div>
+            </div>
+        </div>
+
+        <!-- Bottom Guidance CTA -->
+        <div class="gradient-bg rounded-3xl p-8 sm:p-10 text-center text-white shadow-xl mt-14">
+            <h2 class="text-2xl sm:text-3xl font-bold mb-3">نمی‌دانید کدام برنامه برای دانش‌آموز مناسب است؟</h2>
+            <p class="text-white/90 max-w-2xl mx-auto leading-relaxed mb-7">
+                انتخاب برنامه آموزشی باید با توجه به مقطع، سطح علمی، هدف و نیازهای دانش‌آموز انجام شود. برای بررسی شرایط تحصیلی و انتخاب خدمات مناسب با ما در ارتباط باشید.
+            </p>
+            <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+                <a href="<?= $baseEsc ?>pages/contact.php#consultation"
+                    class="inline-flex items-center gap-2 bg-[#E2D9C6] text-[#445D84] font-bold px-8 py-3 rounded-full hover:bg-white transition duration-300 shadow-lg">
+                    <i class="icon icon--sm" data-lucide="phone" aria-hidden="true"></i>
+                    درخواست مشاوره
+                </a>
+                <a href="<?= $baseEsc ?>pages/services.php"
+                    class="inline-flex items-center gap-2 border-2 border-[#E2D9C6] text-[#E2D9C6] font-bold px-7 py-3 rounded-full hover:bg-[#E2D9C6] hover:text-[#445D84] transition duration-300">
+                    آشنایی با خدمات آموزشی
+                </a>
             </div>
         </div>
     </div>

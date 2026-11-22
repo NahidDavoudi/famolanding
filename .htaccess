@@ -1,2 +1,17 @@
+Options -Indexes
+
 RewriteEngine On
+
+# Protect sensitive files and internal directories from direct HTTP access (Apache 2.4 & LiteSpeed compatible)
+RewriteRule ^(?:\.env(?:\..*)?|\.git(?:/.*)?|config\.php|Dockerfile|docker-compose\.yml|package\.json|package-lock\.json)$ - [F,L,NC]
+RewriteRule ^(?:layouts|docker|scripts|tools)(?:/.*)?$ - [F,L,NC]
+
+# Canonicalize /index.php to / without redirect loops (checks original client request line)
+RewriteCond %{THE_REQUEST} \s/+index\.php[\s?] [NC]
+RewriteRule ^index\.php$ / [R=301,L]
+
+# Weekly exam result share links
 RewriteRule ^r/([A-Za-z0-9_-]{32,64})/?$ r.php?token=$1 [L,QSA]
+
+# Dedicated 404 page (serves true HTTP 404 status)
+ErrorDocument 404 /404.php

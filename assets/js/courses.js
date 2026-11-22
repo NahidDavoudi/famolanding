@@ -145,8 +145,7 @@ function renderCourseCard(course) {
             ${featuresBlock}
 
             <div class="course-footer">
-                
-                <a href="${DASHBOARD_URL}/" class="course-cta">مشاوره و ثبت‌نام</a>
+                <a href="contact.php#consultation" class="course-cta">درخواست مشاوره</a>
             </div>
         </div>
     </article>`;
@@ -240,6 +239,5 @@ onReady(() => {
 // Set current Persian year in footer
 const copyrightYear = document.getElementById('copyright-year');
 if (copyrightYear) {
-    const persianYear = new Date().toLocaleDateString('fa-IR', { year: 'numeric' });
-    copyrightYear.textContent = persianYear.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+    copyrightYear.textContent = new Date().toLocaleDateString('fa-IR', { year: 'numeric' });
 }

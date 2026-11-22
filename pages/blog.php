@@ -2,10 +2,10 @@
 require_once __DIR__ . '/../config.php';
 $base = '../';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
-$categoryParam = isset($_GET['category']) && is_string($_GET['category']) ? trim($_GET['category']) : '';
-$pageTitle = 'وبلاگ و مقالات آموزشی کنکور و تیزهوشان | آموزشگاه فامو بابل';
-$metaDescription = 'مقالات تخصصی روش مطالعه، برنامه‌ریزی کنکور سراسری، مدیریت استرس آزمون و راهنمای موفقیت در تیزهوشان از مشاوران و اساتید آموزشگاه فامو بابل.';
-$canonicalPath = $categoryParam !== '' ? 'pages/blog.php?category=' . rawurlencode($categoryParam) : 'pages/blog.php';
+$pageTitle = 'وبلاگ و مقالات آموزشی | آموزشگاه فامو بابل';
+$metaDescription = 'مقالات آموزشی، روش مطالعه، برنامه‌ریزی تحصیلی، مدیریت استرس آزمون و راهنمای آمادگی کنکور و تیزهوشان در آموزشگاه فامو بابل.';
+// Category query strings are client-side filter views of the same shell, so canonical stays on the main blog index.
+$canonicalPath = 'pages/blog.php';
 $webPageType = 'Blog';
 $breadcrumbs = [
     ['name' => 'خانه', 'url' => famo_canonical_url('')],

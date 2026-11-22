@@ -912,70 +912,73 @@ async function loadTeamFromAPI() {
         container.innerHTML = '<div class="famo-empty-message">خطا در بارگذاری کادر فامو</div>';
     }
 }
-// Load all data on page load
-onReady(() => {
-    Promise.allSettled([loadCoursesFromAPI(), loadTeamFromAPI()]).then(scheduleScrollRefresh);
-});
+// Load live excerpts of real admissions & approved testimonials for Home (fail-soft, never fabricates data)
+function toPersianDigits(val) {
+    return String(val ?? '').replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
+}
 
-// Stats Counter Animation with GSAP
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-function animateCounter(elementId, finalValue, suffix = '') {
-    const element = document.getElementById(elementId);
-    if (!element) return;
-    if (prefersReducedMotion || typeof gsap === 'undefined') {
-        element.textContent = finalValue + suffix;
-        return;
+async function loadHomeHighlights() {
+    const admBox = document.getElementById('homeAdmissionsExcerpt');
+    const testiBox = document.getElementById('homeTestimonialsExcerpt');
+    if (!admBox && !testiBox) return;
+
+    const tasks = [];
+
+    if (admBox) {
+        tasks.push(
+            API.get('/public/admissions?featured=1')
+                .then((res) => {
+                    const list = Array.isArray(res?.data) ? res.data.slice(0, 3) : [];
+                    if (list.length === 0) return;
+                    admBox.innerHTML = list.map((item) => {
+                        const yearStr = item.year ? ` (${toPersianDigits(item.year)})` : '';
+                        const rankStr = item.rank ? ` — رتبه ${toPersianDigits(item.rank)}` : '';
+                        return `
+                            <div class="famo-excerpt-item">
+                                <p class="famo-excerpt-title">${esc(item.student_name || '')}${esc(yearStr)}</p>
+                                <p class="famo-excerpt-sub">${esc(item.result_title || '')}${esc(rankStr)}</p>
+                            </div>
+                        `;
+                    }).join('');
+                })
+                .catch(() => {})
+        );
     }
 
-    const obj = { value: 0 };
-    gsap.to(obj, {
-        value: finalValue,
-        duration: 2,
-        ease: "power2.out",
-        onUpdate: () => {
-            element.textContent = Math.floor(obj.value) + suffix;
-        }
-    });
+    if (testiBox) {
+        tasks.push(
+            API.get('/public/testimonials?per_page=2')
+                .then((res) => {
+                    const items = Array.isArray(res?.data) ? res.data.slice(0, 2) : [];
+                    if (items.length === 0) return;
+                    testiBox.innerHTML = items.map((item) => {
+                        const meta = item.author_meta ? ` — ${item.author_meta}` : '';
+                        return `
+                            <div class="famo-excerpt-item">
+                                <p class="famo-excerpt-title">${esc(item.author_name || '')}<span class="text-xs font-normal text-gray-500">${esc(meta)}</span></p>
+                                <p class="famo-excerpt-body">${esc(item.content || '')}</p>
+                            </div>
+                        `;
+                    }).join('');
+                })
+                .catch(() => {})
+        );
+    }
+
+    await Promise.allSettled(tasks);
 }
 
-// مقادیر آمار (تأییدشده): باید دقیقاً با عددهای HTML هیرو یکی باشند (200 قبولی، 10 استاد).
-const STATS = { students: 200, teachers: 10 };
+// Load all data on page load
+onReady(() => {
+    Promise.allSettled([loadCoursesFromAPI(), loadTeamFromAPI(), loadHomeHighlights()]).then(scheduleScrollRefresh);
+});
 
-// Intersection Observer for stats animation with GSAP
-const statsSection = document.querySelector('#home');
-if (statsSection) {
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                // Animate stats card with GSAP (if loaded; counters must run regardless)
-                if (!prefersReducedMotion && typeof gsap !== 'undefined') {
-                    gsap.from('#home .hero-stats', {
-                        opacity: 0,
-                        y: 30,
-                        duration: 0.8,
-                        ease: "power2.out"
-                    });
-                }
-
-                setTimeout(() => {
-                    animateCounter('years-counter', 7);
-                    if (STATS.students !== null) animateCounter('students-counter', STATS.students);
-                    if (STATS.teachers !== null) animateCounter('teachers-counter', STATS.teachers);
-                }, 500);
-
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.5 });
-
-    observer.observe(statsSection);
-}
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Set current Persian year in footer
 const copyrightYear = document.getElementById('copyright-year');
 if (copyrightYear) {
-    const persianYear = new Date().toLocaleDateString('fa-IR', { year: 'numeric' });
-    copyrightYear.textContent = persianYear.replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+    copyrightYear.textContent = new Date().toLocaleDateString('fa-IR', { year: 'numeric' });
 }
 
 // Add hover effects to service cards with GSAP

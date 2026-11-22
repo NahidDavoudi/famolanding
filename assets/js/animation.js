@@ -215,31 +215,25 @@ class FAQAnimations {
 
         if (faqItems.length === 0) return;
 
-        // Add initial animations
-        gsap.from(faqItems, {
-            opacity: 0,
-            y: 20,
-            stagger: AnimationConfig.staggers.small,
-            duration: AnimationConfig.durations.medium,
-            ease: AnimationConfig.easings.smooth,
-            scrollTrigger: {
-                trigger: '#faq-contact',
-                start: "top 75%"
-            }
-        });
-
-        // Setup click handlers
+        // Setup click and keyboard handlers
         faqItems.forEach(item => {
             const question = item.querySelector('.faq-question');
             const answer = item.querySelector('.faq-answer');
             const icon = item.querySelector('.faq-icon');
 
             if (question && answer) {
-                // Reset initial state
                 gsap.set(answer, { maxHeight: 0 });
+                question.setAttribute('aria-expanded', 'false');
 
                 question.addEventListener('click', () => {
                     this.toggleFAQ(item, answer, icon);
+                });
+
+                question.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        this.toggleFAQ(item, answer, icon);
+                    }
                 });
             }
         });
@@ -265,6 +259,8 @@ class FAQAnimations {
 
     static openFAQ(item, answer, icon) {
         item.classList.add('active');
+        const question = item.querySelector('.faq-question');
+        if (question) question.setAttribute('aria-expanded', 'true');
 
         // Animate answer
         gsap.to(answer, {
@@ -272,12 +268,10 @@ class FAQAnimations {
             duration: AnimationConfig.durations.medium,
             ease: AnimationConfig.easings.smooth,
             onComplete: () => {
-                // Allow natural height after animation
                 answer.style.maxHeight = 'none';
             }
         });
 
-        // Animate icon
         if (icon) {
             gsap.to(icon, {
                 rotation: 180,
@@ -285,22 +279,16 @@ class FAQAnimations {
                 ease: AnimationConfig.easings.smooth
             });
         }
-
-        // Add background color animation
-        gsap.to(item, {
-            backgroundColor: "rgba(68, 93, 132, 0.05)",
-            duration: AnimationConfig.durations.fast,
-            ease: AnimationConfig.easings.smooth
-        });
     }
 
     static closeFAQ(item) {
+        const question = item.querySelector('.faq-question');
         const answer = item.querySelector('.faq-answer');
         const icon = item.querySelector('.faq-icon');
 
         item.classList.remove('active');
+        if (question) question.setAttribute('aria-expanded', 'false');
 
-        // Store current height before animating
         const currentHeight = answer.scrollHeight;
         answer.style.maxHeight = currentHeight + "px";
 
