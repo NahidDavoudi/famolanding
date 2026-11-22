@@ -6,13 +6,14 @@ $loginUrlRaw = famo_login_url();
 $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'https://login.famoacademy.ir/'), ENT_QUOTES, 'UTF-8');
 ?>
 <!-- Header fragment: parent page owns the document shell and includes layouts/head-common.php. Requires $base. -->
+<a href="#main-content" class="famo-skip-link">رفتن به محتوای اصلی</a>
 <header class="fixed top-0 left-0 right-0 z-50 px-2 sm:px-4 py-2 sm:py-4">
     <div class="header-alpha px-3 sm:px-5 py-3 sm:py-3.5 max-w-7xl mx-auto">
         <div class="flex justify-between items-center gap-3">
             <!-- Logo -->
             <div class="flex items-center gap-3 shrink-0">
                 <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0">
-                    <a href="<?= $homeHref ?>" aria-label="صفحه اصلی آموزشگاه فامو">
+                    <a href="<?= $homeHref ?>" aria-label="صفحه اصلی آموزشگاه فامو" class="inline-flex items-center justify-center w-11 h-11">
                         <img src="<?= htmlspecialchars(famo_asset('images/logo.webp', $base . '../shared/images/logo.webp'), ENT_QUOTES, 'UTF-8') ?>" alt="لوگوی آموزشگاه فامو" width="44" height="44" decoding="async" class="w-11 h-11 object-contain">
                     </a>
                 </div>

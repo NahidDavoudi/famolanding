@@ -222,7 +222,7 @@ class FAQAnimations {
             const icon = item.querySelector('.faq-icon');
 
             if (question && answer) {
-                gsap.set(answer, { maxHeight: 0 });
+                answer.style.maxHeight = '0px';
                 question.setAttribute('aria-expanded', 'false');
 
                 question.addEventListener('click', () => {
@@ -262,20 +262,30 @@ class FAQAnimations {
         const question = item.querySelector('.faq-question');
         if (question) question.setAttribute('aria-expanded', 'true');
 
-        // Animate answer
+        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reducedMotion || typeof gsap === 'undefined') {
+            answer.style.maxHeight = 'none';
+            if (icon) icon.style.transform = 'rotate(180deg)';
+            return;
+        }
+
+        gsap.killTweensOf(answer);
         gsap.to(answer, {
             maxHeight: answer.scrollHeight + "px",
-            duration: AnimationConfig.durations.medium,
+            duration: 0.22,
             ease: AnimationConfig.easings.smooth,
             onComplete: () => {
-                answer.style.maxHeight = 'none';
+                if (item.classList.contains('active')) {
+                    answer.style.maxHeight = 'none';
+                }
             }
         });
 
         if (icon) {
+            gsap.killTweensOf(icon);
             gsap.to(icon, {
                 rotation: 180,
-                duration: AnimationConfig.durations.fast,
+                duration: 0.2,
                 ease: AnimationConfig.easings.smooth
             });
         }
@@ -289,31 +299,33 @@ class FAQAnimations {
         item.classList.remove('active');
         if (question) question.setAttribute('aria-expanded', 'false');
 
+        if (!answer) return;
+
+        const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reducedMotion || typeof gsap === 'undefined') {
+            answer.style.maxHeight = '0px';
+            if (icon) icon.style.transform = 'rotate(0deg)';
+            return;
+        }
+
+        gsap.killTweensOf(answer);
         const currentHeight = answer.scrollHeight;
         answer.style.maxHeight = currentHeight + "px";
 
-        // Animate answer
         gsap.to(answer, {
             maxHeight: 0,
-            duration: AnimationConfig.durations.fast,
+            duration: 0.18,
             ease: AnimationConfig.easings.smooth
         });
 
-        // Animate icon
         if (icon) {
+            gsap.killTweensOf(icon);
             gsap.to(icon, {
                 rotation: 0,
-                duration: AnimationConfig.durations.fast,
+                duration: 0.18,
                 ease: AnimationConfig.easings.smooth
             });
         }
-
-        // Reset background color
-        gsap.to(item, {
-            backgroundColor: "transparent",
-            duration: AnimationConfig.durations.fast,
-            ease: AnimationConfig.easings.smooth
-        });
     }
 }
 
@@ -609,7 +621,13 @@ class AnimationManager {
     static init() {
         // Check if GSAP is loaded
         if (typeof gsap === 'undefined') {
-            console.warn('GSAP not loaded. Animations disabled.');
+            FAQAnimations.init();
+            return;
+        }
+
+        // Respect prefers-reduced-motion: keep interactive FAQ functional without scroll/entrance animations
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            FAQAnimations.init();
             return;
         }
 

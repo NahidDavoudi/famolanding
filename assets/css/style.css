@@ -2816,9 +2816,14 @@ address {
 }
 
 .famo-eyebrow--light {
-    background: #EFE9DD;
-    border-color: #E2D9C6;
-    color: #445D84;
+    padding: 0 0 0.35rem;
+    border-radius: 0;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid #E2D9C6;
+    color: #5b4d46;
+    font-size: 0.82rem;
+    margin-bottom: 0.75rem;
 }
 
 /* دو مزیت رقابتی اصلی */
@@ -3069,10 +3074,10 @@ address {
 
 .famo-mock-note {
     margin-top: 1.1rem;
-    padding: 0.85rem 1rem;
+    padding: 0.9rem 1.05rem;
     border-radius: 0.9rem;
     background: #f9f7f3;
-    border-right: 3px solid #445D84;
+    border: 1px solid #E2D9C6;
     font-size: 0.84rem;
     color: #4b5563;
     line-height: 1.8;
@@ -3424,5 +3429,151 @@ address {
     padding: 0.95rem;
     text-align: center;
 }
+
+/* ==================== استانداردهای UI/UX Pro Max و دسترسی‌پذیری (WCAG 2.2 AA) ==================== */
+html {
+    scroll-padding-top: 6.5rem;
+}
+
+@media (min-width: 640px) {
+    html {
+        scroll-padding-top: 7.5rem;
+    }
+}
+
+h1,
+h2 {
+    text-wrap: balance;
+}
+
+a,
+button,
+[role="button"] {
+    touch-action: manipulation;
+}
+
+button {
+    cursor: pointer;
+}
+
+/* لینک پرش مستقیم به محتوای اصلی برای کاربران صفحه‌کلید */
+.famo-skip-link {
+    position: fixed;
+    top: 0.75rem;
+    inset-inline-start: 0.75rem;
+    z-index: 120;
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    background: #E2D9C6;
+    color: #24344d;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.3);
+    transform: translateY(-200%);
+    transition: transform 0.16s ease;
+}
+
+.famo-skip-link:focus-visible {
+    transform: translateY(0);
+    outline: 3px solid #445D84;
+    outline-offset: 2px;
+}
+
+/* نشانگر فوکوس صفحه‌کلید با کنتراست استاندارد */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+    outline: 2px solid #445D84;
+    outline-offset: 3px;
+}
+
+header a:focus-visible,
+header button:focus-visible,
+footer a:focus-visible,
+footer button:focus-visible,
+.gradient-bg a:focus-visible,
+.gradient-bg button:focus-visible {
+    outline-color: #E2D9C6;
+}
+
+/* وضعیت فعال صفحه در ناوبری دسکتاپ و موبایل */
+.famo-desktop-nav > li > a,
+.famo-desktop-nav .famo-nav-dropdown__trigger {
+    min-height: 40px;
+}
+
+.famo-desktop-nav > li > a[aria-current="page"],
+.famo-nav-dropdown.is-active-group .famo-nav-dropdown__trigger {
+    color: #E2D9C6;
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.famo-nav-dropdown__link[aria-current="page"] {
+    background: #EFE9DD;
+    color: #2f4261;
+    font-weight: 700;
+}
+
+#mobileMenu a {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+}
+
+#mobileMenu a[aria-current="page"] {
+    background: rgba(226, 217, 198, 0.22);
+    color: #E2D9C6;
+    font-weight: 700;
+}
+
+/* حداقل اندازه هدف لمسی استاندارد و جلوگیری از سرریز متن‌های طولانی */
+.famo-anchor-pill {
+    min-height: 42px;
+}
+
+.faq-question {
+    min-height: 52px;
+}
+
+.famo-contact-info-item > div,
+.famo-detail-block,
+.famo-advantage-card,
+.famo-program-card,
+.famo-step-card {
+    min-width: 0;
+}
+
+.famo-contact-info-item a {
+    overflow-wrap: anywhere;
+}
+
+a[href^="tel:"],
+.famo-mock-row-label {
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 639px) {
+    .famo-anchor-pill,
+    .famo-inline-link,
+    .famo-footer-consult-btn {
+        min-height: 44px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto !important;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 
 

@@ -100,7 +100,31 @@
         }
     }
 
+    function initActiveNav() {
+        var currentPath = (window.location.pathname || '/').replace(/\/index\.php$/i, '/');
+        var navLinks = document.querySelectorAll('header nav a[href]');
+        navLinks.forEach(function (link) {
+            var href = link.getAttribute('href') || '';
+            if (!href || href.indexOf('#') !== -1 || /^https?:\/\//i.test(href)) return;
+            try {
+                var target = new URL(href, window.location.href);
+                var targetPath = target.pathname.replace(/\/index\.php$/i, '/');
+                if (targetPath === currentPath) {
+                    link.setAttribute('aria-current', 'page');
+                    link.classList.add('is-active');
+                    var parentDropdown = link.closest('[data-famo-dropdown]');
+                    if (parentDropdown) {
+                        parentDropdown.classList.add('is-active-group');
+                    }
+                }
+            } catch (_) {
+                // Ignore malformed relative URLs
+            }
+        });
+    }
+
     function init() {
+        initActiveNav();
         initDropdowns();
         initStaticMobileMenu();
     }

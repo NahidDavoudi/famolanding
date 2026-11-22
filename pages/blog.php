@@ -49,7 +49,8 @@ $page_libs = [
     </div>
 </section>
 <!-- Detailed Posts List -->
-<section class="py-8 px-4">
+<section class="py-8 px-4" aria-labelledby="blog-posts-heading">
+    <h2 id="blog-posts-heading" class="sr-only">فهرست مقالات آموزشی</h2>
     <div class="container mx-auto max-w-6xl space-y-12" id="postsContainer">
         <!-- Skeleton loaders shown until the API responds -->
         <div

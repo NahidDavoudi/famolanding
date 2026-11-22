@@ -175,13 +175,17 @@ $page_libs = [
             display: flex;
             flex-direction: column;
             height: 100%;
+            width: 100%;
+            max-width: 100%;
             min-width: 0;
+            min-height: 0;
+            aspect-ratio: auto;
             background: #ffffff;
             border: 1px solid #E2D9C6;
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 10px 25px -12px rgba(68, 93, 132, 0.35);
-            transition: transform .3s ease, box-shadow .3s ease;
+            transition: transform .2s ease, box-shadow .2s ease;
             scroll-margin-top: 100px;
         }
 
@@ -315,11 +319,12 @@ $page_libs = [
             align-items: center;
             justify-content: center;
             gap: 6px;
+            min-height: 44px;
             background: #445D84;
             color: #fff;
             font-size: 13px;
             font-weight: 700;
-            padding: 8px 14px;
+            padding: 10px 16px;
             border-radius: 10px;
             text-decoration: none;
             white-space: nowrap;
