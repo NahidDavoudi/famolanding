@@ -1,11 +1,27 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/layouts/home-data.php';
+require_once __DIR__ . '/layouts/home-render.php';
 $base = '';
 $baseEsc = '';
 $siteUrl = famo_public_site_url();
 $loginUrlRaw = famo_login_url();
 $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'https://login.famoacademy.ir/'), ENT_QUOTES, 'UTF-8');
+
+$homeData = famo_home_data();
+$ssrCoursesRaw = is_array($homeData['courses'])
+    ? array_values(array_filter($homeData['courses'], 'is_array'))
+    : [];
+$ssrCourses = count($ssrCoursesRaw) > 0 ? array_slice($ssrCoursesRaw, 0, 4) : null;
+$hasCoursesSsr = $ssrCourses !== null;
+
+$ssrTeam = (is_array($homeData['instructors']) && is_array($homeData['supporters']))
+    ? famo_home_build_team_list($homeData['instructors'], $homeData['supporters'])
+    : [];
+$hasTeamSsr = is_array($homeData['instructors']) && is_array($homeData['supporters']) && count($ssrTeam) > 0;
+$ssrTeamTotal = count($ssrTeam);
+$ssrTeamOffMode = $hasTeamSsr && $ssrTeamTotal < 3;
 
 $pageTitle = 'آموزشگاه فامو بابل | آموزش خصوصی و هوشمند';
 $metaDescription = 'آموزشگاه فامو در بابل؛ ارائه کلاس‌های خصوصی، آزمون‌های شخصی‌سازی‌شده و پیگیری هوشمند عملکرد تحصیلی دانش‌آموزان.';
@@ -116,13 +132,16 @@ $page_libs = [
                 </p>
             </div>
 
-            <div class="curve-carousel">
+            <div class="curve-carousel<?= $ssrTeamOffMode ? ' curve-carousel--off-mode' : '' ?>">
                 <div class="curve-carousel__wrap">
                     <div class="curve-carousel__stage" tabindex="0"
                          aria-label="کاروسل اساتید و پشتیبانان فامو؛ با کشیدن یا کلیدهای جهت‌دار جابه‌جا کنید">
                         <div class="curve-carousel__edge-blur curve-carousel__edge-blur--left" aria-hidden="true"></div>
                         <div class="curve-carousel__edge-blur curve-carousel__edge-blur--right" aria-hidden="true"></div>
-                        <div class="curve-carousel__track is-skeleton" id="instructorsContainer" aria-busy="true">
+                        <div class="curve-carousel__track<?= $hasTeamSsr ? '' : ' is-skeleton' ?>" id="instructorsContainer" aria-busy="<?= $hasTeamSsr ? 'false' : 'true' ?>"<?= $hasTeamSsr ? ' data-ssr="1" data-ssr-total="' . $ssrTeamTotal . '"' : '' ?>>
+<?php if ($hasTeamSsr): ?>
+<?= famo_render_team_cards($ssrTeam) ?>
+<?php else: ?>
                             <!-- Skeleton Loaders -->
                             <div class="skeleton-instructor-wrapper">
                                 <div class="famo-inst-skel" aria-hidden="true">
@@ -154,16 +173,17 @@ $page_libs = [
                                     <div class="skel-inst-socials"><span class="skeleton-shimmer"></span><span class="skeleton-shimmer"></span></div>
                                 </div>
                             </div>
+<?php endif; ?>
                         </div>
                     </div>
 
                     <div class="curve-carousel__controls">
                         <div class="curve-carousel__arrows">
-                            <button type="button" class="curve-carousel__arrow" id="instCarouselPrev" aria-label="قبلی">
+                            <button type="button" class="curve-carousel__arrow" id="instCarouselPrev" aria-label="قبلی"<?= $ssrTeamOffMode ? ' hidden' : '' ?>>
                                 <i class="icon" data-lucide="chevron-right" aria-hidden="true"></i>
                             </button>
-                            <div class="curve-carousel__dots" id="instCarouselDots"></div>
-                            <button type="button" class="curve-carousel__arrow" id="instCarouselNext" aria-label="بعدی">
+                            <div class="curve-carousel__dots" id="instCarouselDots"<?= $ssrTeamOffMode ? ' hidden' : '' ?>><?= ($hasTeamSsr && !$ssrTeamOffMode) ? famo_render_team_dots($ssrTeam) : '' ?></div>
+                            <button type="button" class="curve-carousel__arrow" id="instCarouselNext" aria-label="بعدی"<?= $ssrTeamOffMode ? ' hidden' : '' ?>>
                                 <i class="icon" data-lucide="chevron-left" aria-hidden="true"></i>
                             </button>
                         </div>
@@ -260,8 +280,13 @@ $page_libs = [
                 <a href="pages/course.php#tizhooshan" class="famo-course-chip">آمادگی تیزهوشان</a>
             </div>
 
-            <div class="swiper coursesSwiper coursesSwiper--loading relative pb-12">
-                <div class="swiper-wrapper" id="coursesContainer" aria-busy="true">
+            <div class="swiper coursesSwiper<?= $hasCoursesSsr ? '' : ' coursesSwiper--loading' ?> relative pb-12">
+                <div class="swiper-wrapper" id="coursesContainer" aria-busy="<?= $hasCoursesSsr ? 'false' : 'true' ?>"<?= $hasCoursesSsr ? ' data-ssr="1"' : '' ?>>
+<?php if ($hasCoursesSsr): ?>
+<?php foreach ($ssrCourses as $courseIdx => $course): ?>
+<?= famo_render_course_slide($course, $courseIdx) ?>
+<?php endforeach; ?>
+<?php else: ?>
                     <!-- Skeleton Loaders -->
                     <div class="swiper-slide skeleton-course-wrapper h-auto">
                         <div class="famo-course-card course-card-skeleton" aria-hidden="true">
@@ -315,6 +340,7 @@ $page_libs = [
                             </div>
                         </div>
                     </div>
+<?php endif; ?>
                 </div>
 
                 <div class="swiper-pagination"></div>

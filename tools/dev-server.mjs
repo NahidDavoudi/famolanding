@@ -4,6 +4,13 @@ import https from 'node:https';
 import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import {
+  famoHomeData,
+  renderCourseSlide,
+  buildTeamList,
+  renderTeamCards,
+  renderTeamDots,
+} from './home-ssr-preview.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -346,6 +353,40 @@ function renderPhpPreviewFile(relPath, base, vars = {}) {
   // Evaluate $libs conditionals from head-common.php
   content = evalLibsConditionals(content, libs);
 
+  // Evaluate Homepage SSR blocks for index.php (mirrors layouts/home-data.php + layouts/home-render.php)
+  if (relPath === 'index.php') {
+    const homeData = vars.homeData || { courses: null, instructors: null, supporters: null };
+    const ssrCoursesRaw = Array.isArray(homeData.courses)
+      ? homeData.courses.filter((c) => c && typeof c === 'object')
+      : [];
+    const ssrCourses = ssrCoursesRaw.length > 0 ? ssrCoursesRaw.slice(0, 4) : null;
+    const hasCoursesSsr = ssrCourses !== null;
+
+    const ssrTeam = (Array.isArray(homeData.instructors) && Array.isArray(homeData.supporters))
+      ? buildTeamList(homeData.instructors, homeData.supporters)
+      : [];
+    const hasTeamSsr = Array.isArray(homeData.instructors) && Array.isArray(homeData.supporters) && ssrTeam.length > 0;
+    const ssrTeamTotal = ssrTeam.length;
+    const ssrTeamOffMode = hasTeamSsr && ssrTeamTotal < 3;
+
+    content = content
+      .replace(/<\?=\s*\$ssrTeamOffMode\s*\?\s*' curve-carousel--off-mode'\s*:\s*''\s*\?>/g, ssrTeamOffMode ? ' curve-carousel--off-mode' : '')
+      .replace(/<\?=\s*\$hasTeamSsr\s*\?\s*''\s*:\s*' is-skeleton'\s*\?>/g, hasTeamSsr ? '' : ' is-skeleton')
+      .replace(/<\?=\s*\$hasTeamSsr\s*\?\s*'false'\s*:\s*'true'\s*\?>/g, hasTeamSsr ? 'false' : 'true')
+      .replace(/<\?=\s*\$hasTeamSsr\s*\?\s*' data-ssr="1" data-ssr-total="'\s*\.\s*\$ssrTeamTotal\s*\.\s*'"'\s*:\s*''\s*\?>/g, hasTeamSsr ? ` data-ssr="1" data-ssr-total="${ssrTeamTotal}"` : '')
+      .replace(/<\?=\s*\$ssrTeamOffMode\s*\?\s*' hidden'\s*:\s*''\s*\?>/g, ssrTeamOffMode ? ' hidden' : '')
+      .replace(/<\?=\s*\(\$hasTeamSsr\s*&&\s*!\$ssrTeamOffMode\)\s*\?\s*famo_render_team_dots\(\$ssrTeam\)\s*:\s*''\s*\?>/g, (hasTeamSsr && !ssrTeamOffMode) ? renderTeamDots(ssrTeam) : '')
+      .replace(/<\?php if \(\$hasTeamSsr\): \?>[\s\S]*?<\?php else: \?>([\s\S]*?)<\?php endif; \?>/g, (_m, fallbackHtml) => (hasTeamSsr ? renderTeamCards(ssrTeam) : fallbackHtml))
+      .replace(/<\?=\s*\$hasCoursesSsr\s*\?\s*''\s*:\s*' coursesSwiper--loading'\s*\?>/g, hasCoursesSsr ? '' : ' coursesSwiper--loading')
+      .replace(/<\?=\s*\$hasCoursesSsr\s*\?\s*'false'\s*:\s*'true'\s*\?>/g, hasCoursesSsr ? 'false' : 'true')
+      .replace(/<\?=\s*\$hasCoursesSsr\s*\?\s*' data-ssr="1"'\s*:\s*''\s*\?>/g, hasCoursesSsr ? ' data-ssr="1"' : '')
+      .replace(/<\?php if \(\$hasCoursesSsr\): \?>[\s\S]*?<\?php else: \?>([\s\S]*?)<\?php endif; \?>/g, (_m, fallbackHtml) => (
+        hasCoursesSsr
+          ? ssrCourses.map((c, idx) => renderCourseSlide(c, idx)).join('\n')
+          : fallbackHtml
+      ));
+  }
+
   const loginBase = famoEnv('LOGIN_URL', 'https://login.famoacademy.ir').replace(/\/+$/, '');
   const loginUrl = `${loginBase}/`;
   const homeHref = base === '' ? './' : base;
@@ -566,7 +607,8 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (pathname === '/') {
-    const html = renderPhpPreviewFile('index.php', '');
+    const homeData = await famoHomeData();
+    const html = renderPhpPreviewFile('index.php', '', { homeData });
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(html);
     return;

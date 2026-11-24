@@ -7,10 +7,10 @@ function esc(value) {
     return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
-// Only allow https:// or /-rooted URLs (same-origin relative paths) into markup.
+// Only allow https:// or single-slash /-rooted URLs (same-origin relative paths) into markup.
 function safeUrl(value) {
     const s = String(value ?? '').trim();
-    return (/^https?:\/\//i.test(s) || s.startsWith('/')) ? s : '';
+    return (/^https?:\/\//i.test(s) || (s.startsWith('/') && !s.startsWith('//'))) ? s : '';
 }
 
 // Only accept hex colors for gradients; otherwise fall back to the brand color.
@@ -25,9 +25,10 @@ function resolveImageUrl(value) {
     if (!value) return '';
     const src = String(value).trim();
     if (!src) return '';
-    if (/^(https?:)?\/\//i.test(src) || src.startsWith('data:')) return src;
+    if (src.startsWith('//') || (/^[a-z][a-z0-9+.-]*:/i.test(src) && !/^https?:/i.test(src))) return '';
+    if (/^https?:\/\//i.test(src)) return src;
     if (src.startsWith('/')) return src;
-    if (src.startsWith('uploads/') || src.startsWith('../') || src.startsWith('assets/')) return src;
+    if (src.startsWith('uploads/') || src.startsWith('../') || src.startsWith('assets/')) return '';
     return `${UPLOADS_BASE.replace(/\/$/, '')}/${src}`;
 }
 
@@ -242,24 +243,67 @@ function buildCourseSlide(course, index) {
     `;
 }
 
-// Load courses from API
+// Initialize or update Courses Swiper from existing .swiper-slide children (used by both SSR and CSR paths).
+function initCoursesSwiper(container) {
+    const swiperRoot = container.closest('.coursesSwiper');
+    if (swiperRoot) swiperRoot.classList.remove('coursesSwiper--loading');
+
+    const courseCount = container.querySelectorAll('.swiper-slide').length;
+
+    // حالت ۰/۱/۲ دوره: بدون سوایپر (گرید ساده)؛ در غیر این صورت سوایپر ساخته می‌شود
+    if (courseCount > 2 && window.Swiper) {
+        if (swiperRoot) swiperRoot.classList.remove('coursesSwiper--disabled');
+        if (!coursesSwiper) {
+            coursesSwiper = new Swiper('.coursesSwiper', {
+                slidesPerView: 1.15,
+                spaceBetween: 16,
+                grabCursor: true,
+                loop: courseCount > 4,
+                pagination: {
+                    el: '.coursesSwiper .swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.coursesSwiper .swiper-button-next',
+                    prevEl: '.coursesSwiper .swiper-button-prev',
+                },
+                breakpoints: {
+                    640: { slidesPerView: 2 },
+                    1024: { slidesPerView: 3 },
+                    1280: { slidesPerView: 4 },
+                },
+            });
+        } else {
+            coursesSwiper.update();
+        }
+    } else if (swiperRoot) {
+        swiperRoot.classList.add('coursesSwiper--disabled');
+    }
+}
+
+// Load courses from API (or hydrate SSR markup when data-ssr="1" is present)
 async function loadCoursesFromAPI() {
+    const container = document.getElementById('coursesContainer');
+    if (!container) return;
+
+    if (container.dataset.ssr === '1') {
+        if (window.refreshLucideIcons) window.refreshLucideIcons(container);
+        initCoursesSwiper(container);
+        return;
+    }
+
     showSkeletons('coursesContainer', 'skeleton-course-wrapper');
 
     try {
         const result = await API.get('/public/courses');
         const courses = result.data || [];
 
-        const container = document.getElementById('coursesContainer');
-        if (!container) return;
-
         container.setAttribute('aria-busy', 'false');
         const loadingRoot = container.closest('.coursesSwiper');
         if (loadingRoot) loadingRoot.classList.remove('coursesSwiper--loading');
 
         if (courses.length === 0) {
-            const swiperRoot = container.closest('.coursesSwiper');
-            if (swiperRoot) swiperRoot.classList.add('coursesSwiper--disabled');
+            if (loadingRoot) loadingRoot.classList.add('coursesSwiper--disabled');
             container.innerHTML = '<div class="famo-empty-message">در حال حاضر دوره‌ای ثبت نشده است</div>';
             return;
         }
@@ -268,45 +312,13 @@ async function loadCoursesFromAPI() {
         container.innerHTML = homeCourses.map((course, i) => buildCourseSlide(course, i)).join('');
         if (window.refreshLucideIcons) window.refreshLucideIcons(container);
 
-        // حالت ۰/۱/۲ دوره: بدون سوایپر (گرید ساده)؛ در غیر این صورت سوایپر ساخته می‌شود
-        const swiperRoot = container.closest('.coursesSwiper');
-        if (homeCourses.length > 2 && window.Swiper) {
-            if (swiperRoot) swiperRoot.classList.remove('coursesSwiper--disabled');
-            if (!coursesSwiper) {
-                coursesSwiper = new Swiper('.coursesSwiper', {
-                    slidesPerView: 1.15,
-                    spaceBetween: 16,
-                    grabCursor: true,
-                    loop: homeCourses.length > 4,
-                    pagination: {
-                        el: '.coursesSwiper .swiper-pagination',
-                        clickable: true,
-                    },
-                    navigation: {
-                        nextEl: '.coursesSwiper .swiper-button-next',
-                        prevEl: '.coursesSwiper .swiper-button-prev',
-                    },
-                    breakpoints: {
-                        640: { slidesPerView: 2 },
-                        1024: { slidesPerView: 3 },
-                        1280: { slidesPerView: 4 },
-                    },
-                });
-            } else {
-                coursesSwiper.update();
-            }
-        } else if (swiperRoot) {
-            swiperRoot.classList.add('coursesSwiper--disabled');
-        }
+        initCoursesSwiper(container);
     } catch (error) {
         console.error('Error loading courses:', error);
-        const container = document.getElementById('coursesContainer');
-        if (container) {
-            container.setAttribute('aria-busy', 'false');
-            const swiperRoot = container.closest('.coursesSwiper');
-            if (swiperRoot) swiperRoot.classList.remove('coursesSwiper--loading');
-            container.innerHTML = '<div class="famo-empty-message">خطا در بارگذاری دوره‌ها</div>';
-        }
+        container.setAttribute('aria-busy', 'false');
+        const swiperRoot = container.closest('.coursesSwiper');
+        if (swiperRoot) swiperRoot.classList.remove('coursesSwiper--loading');
+        container.innerHTML = '<div class="famo-empty-message">خطا در بارگذاری دوره‌ها</div>';
     }
 }
 
@@ -791,10 +803,60 @@ class TeamCurveCarousel {
     }
 }
 
-// Load instructors + supporters into one shared team carousel.
-async function loadTeamFromAPI() {
-    showSkeletons('instructorsContainer', 'skeleton-instructor-wrapper');
+// Wire TeamCurveCarousel and prev/next/dots controls onto an existing rendered track (shared by SSR and CSR paths).
+function mountTeamCarousel(root, total, { dotsEl, prevBtn, nextBtn }) {
+    if (teamCarousel) {
+        teamCarousel.destroy();
+        teamCarousel = null;
+    }
 
+    const useCarousel = total >= 3 && root;
+    if (!useCarousel) {
+        if (root) root.classList.add('curve-carousel--off-mode');
+        if (dotsEl) dotsEl.hidden = true;
+        if (prevBtn) prevBtn.hidden = true;
+        if (nextBtn) nextBtn.hidden = true;
+        return;
+    }
+
+    root.classList.remove('curve-carousel--off-mode');
+    if (dotsEl) dotsEl.hidden = false;
+    if (prevBtn) prevBtn.hidden = false;
+    if (nextBtn) nextBtn.hidden = false;
+
+    teamCarousel = new TeamCurveCarousel(root, {
+        total,
+        onIndex: (idx) => {
+            if (!dotsEl) return;
+            dotsEl.querySelectorAll('[data-curve-dot]').forEach(d => {
+                d.classList.toggle('is-active', Number(d.dataset.curveDot) === idx);
+            });
+        },
+    });
+
+    if (prevBtn) {
+        prevBtn.disabled = false;
+        prevBtn.onclick = () => teamCarousel && teamCarousel.prev();
+    }
+    if (nextBtn) {
+        nextBtn.disabled = false;
+        nextBtn.onclick = () => teamCarousel && teamCarousel.next();
+    }
+    if (dotsEl) {
+        dotsEl.onclick = (e) => {
+            const dot = e.target.closest('[data-curve-dot]');
+            if (dot && teamCarousel) {
+                const targetIdx = Number(dot.dataset.curveDot);
+                const currentMod = teamCarousel.activeIdx;
+                const delta = teamCarousel.wrapDiff(targetIdx - currentMod, teamCarousel.total);
+                teamCarousel.goTo(Math.round(teamCarousel.targetPos) + delta);
+            }
+        };
+    }
+}
+
+// Load instructors + supporters into one shared team carousel (or hydrate SSR markup when data-ssr="1" is present).
+async function loadTeamFromAPI() {
     const container = document.getElementById('instructorsContainer');
     if (!container) return;
 
@@ -802,6 +864,15 @@ async function loadTeamFromAPI() {
     const dotsEl = document.getElementById('instCarouselDots');
     const prevBtn = document.getElementById('instCarouselPrev');
     const nextBtn = document.getElementById('instCarouselNext');
+
+    if (container.dataset.ssr === '1') {
+        if (window.refreshLucideIcons) window.refreshLucideIcons(container);
+        const total = Number.parseInt(container.dataset.ssrTotal || '0', 10) || 0;
+        mountTeamCarousel(root, total, { dotsEl, prevBtn, nextBtn });
+        return;
+    }
+
+    showSkeletons('instructorsContainer', 'skeleton-instructor-wrapper');
 
     try {
         const [instructorsResult, supportersResult] = await Promise.allSettled([
@@ -844,6 +915,15 @@ async function loadTeamFromAPI() {
 
         // حلقه بی‌درز مثل مرجع: کپی‌های لازم برای پوشش wrap (حداقل ~۷ کارت)
         const total = list.length;
+        const useCarousel = total >= 3 && root;
+
+        if (!useCarousel) {
+            container.innerHTML = list.map(person => `<div class="curve-carousel__card" data-person-role="${esc(person.role)}">${personCardHtml(person)}</div>`).join('');
+            if (window.refreshLucideIcons) window.refreshLucideIcons(container);
+            mountTeamCarousel(root, total, { dotsEl, prevBtn, nextBtn });
+            return;
+        }
+
         const repeatMultiplier = total < 5 ? Math.ceil(7 / total) : 1;
         const renderCount = Math.max(total * repeatMultiplier, 7);
 
@@ -857,24 +937,6 @@ async function loadTeamFromAPI() {
         container.innerHTML = cards.join('');
         if (window.refreshLucideIcons) window.refreshLucideIcons(container);
 
-        const useCarousel = total >= 3 && root;
-        if (!useCarousel) {
-            if (root) root.classList.add('curve-carousel--off-mode');
-            container.innerHTML = list.map(person => `<div class="curve-carousel__card" data-person-role="${esc(person.role)}">${personCardHtml(person)}</div>`).join('');
-            if (window.refreshLucideIcons) window.refreshLucideIcons(container);
-            dotsEl && (dotsEl.hidden = true);
-            prevBtn && (prevBtn.hidden = true);
-            nextBtn && (nextBtn.hidden = true);
-            return;
-        }
-
-        root.classList.remove('curve-carousel--off-mode');
-        dotsEl && (dotsEl.hidden = false);
-        prevBtn && (prevBtn.hidden = false);
-        nextBtn && (nextBtn.hidden = false);
-
-        if (teamCarousel) { teamCarousel.destroy(); teamCarousel = null; }
-
         // نقاط: طبق مرجع حداکثر ۱۲ تا
         if (dotsEl) {
             dotsEl.innerHTML = total > 1 && total <= 12
@@ -882,29 +944,7 @@ async function loadTeamFromAPI() {
                 : '';
         }
 
-        teamCarousel = new TeamCurveCarousel(root, {
-            total,
-            onIndex: (idx) => {
-                if (!dotsEl) return;
-                dotsEl.querySelectorAll('[data-curve-dot]').forEach(d => {
-                    d.classList.toggle('is-active', Number(d.dataset.curveDot) === idx);
-                });
-            },
-        });
-
-        prevBtn.disabled = false;
-        nextBtn.disabled = false;
-        prevBtn && prevBtn.addEventListener('click', () => teamCarousel.prev());
-        nextBtn && nextBtn.addEventListener('click', () => teamCarousel.next());
-        dotsEl && dotsEl.addEventListener('click', (e) => {
-            const dot = e.target.closest('[data-curve-dot]');
-            if (dot && teamCarousel) {
-                const targetIdx = Number(dot.dataset.curveDot);
-                const currentMod = teamCarousel.activeIdx;
-                const delta = teamCarousel.wrapDiff(targetIdx - currentMod, teamCarousel.total);
-                teamCarousel.goTo(Math.round(teamCarousel.targetPos) + delta);
-            }
-        });
+        mountTeamCarousel(root, total, { dotsEl, prevBtn, nextBtn });
     } catch (error) {
         console.error('Error loading team members:', error);
         hideSkeletons('instructorsContainer', 'skeleton-instructor-wrapper');
