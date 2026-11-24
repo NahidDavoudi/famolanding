@@ -264,19 +264,20 @@ async function loadCoursesFromAPI() {
             return;
         }
 
-        container.innerHTML = courses.map((course, i) => buildCourseSlide(course, i)).join('');
+        const homeCourses = courses.slice(0, 4);
+        container.innerHTML = homeCourses.map((course, i) => buildCourseSlide(course, i)).join('');
         if (window.refreshLucideIcons) window.refreshLucideIcons(container);
 
         // حالت ۰/۱/۲ دوره: بدون سوایپر (گرید ساده)؛ در غیر این صورت سوایپر ساخته می‌شود
         const swiperRoot = container.closest('.coursesSwiper');
-        if (courses.length > 2 && window.Swiper) {
+        if (homeCourses.length > 2 && window.Swiper) {
             if (swiperRoot) swiperRoot.classList.remove('coursesSwiper--disabled');
             if (!coursesSwiper) {
                 coursesSwiper = new Swiper('.coursesSwiper', {
                     slidesPerView: 1.15,
                     spaceBetween: 16,
                     grabCursor: true,
-                    loop: courses.length > 3,
+                    loop: homeCourses.length > 4,
                     pagination: {
                         el: '.coursesSwiper .swiper-pagination',
                         clickable: true,
@@ -1019,8 +1020,8 @@ function initScrollAnimations() {
     gsap.registerPlugin(ScrollTrigger);
     ScrollTrigger.config({ ignoreMobileResize: true });
 
-    // #home حذف شده: هیرو بالای صفحه است و محو کردنش به LCP لطمه می‌زند
-    document.querySelectorAll('section[id]:not(#home)').forEach((section) => {
+    // #home و #cta-final حذف شده‌اند: هیرو بالای صفحه است (LCP) و بخش نهایی نزدیک انتهای صفحه نباید در opacity: 0 بماند
+    document.querySelectorAll('section[id]:not(#home):not(#cta-final)').forEach((section) => {
         const target = section.querySelector(':scope > .container') || section;
         gsap.from(target, {
             opacity: 0,
@@ -1030,7 +1031,7 @@ function initScrollAnimations() {
             clearProps: 'opacity,transform',
             scrollTrigger: {
                 trigger: section,
-                start: 'top 90%',
+                start: 'top 96%',
                 once: true,
             },
         });

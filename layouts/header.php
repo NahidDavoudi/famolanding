@@ -18,8 +18,8 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
                     </a>
                 </div>
                 <div>
-                    <a href="<?= $homeHref ?>" class="block text-white text-lg sm:text-xl font-bold leading-tight">آموزشگاه <span class="text-[#E2D9C6]">فامو</span></a>
-                    <p class="text-white/80 text-xs sm:text-sm leading-snug">آموزش شخصی، با نگاهی هوشمند</p>
+                    <a href="<?= $homeHref ?>" class="block text-white text-lg sm:text-xl font-bold leading-tight">آموزشگاه <span class="famo-on-dark-cream">فامو</span></a>
+                    <p class="famo-on-dark-soft text-xs sm:text-sm leading-snug">آموزش شخصی، با نگاهی هوشمند</p>
                 </div>
             </div>
 
@@ -28,48 +28,48 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
                 <ul class="famo-desktop-nav">
                     <li>
                         <a href="<?= $homeHref ?>"
-                            class="text-white font-medium text-sm py-2 px-2.5 rounded-lg hover:text-[#E2D9C6] transition duration-300 flex items-center">
+                            class="famo-nav-link font-medium text-sm py-2 px-2.5 rounded-lg transition duration-300 flex items-center">
                             خانه
                         </a>
                     </li>
                     <li>
                         <a href="<?= $baseEsc ?>pages/course.php"
-                            class="text-white font-medium text-sm py-2 px-2.5 rounded-lg hover:text-[#E2D9C6] transition duration-300 flex items-center">
+                            class="famo-nav-link font-medium text-sm py-2 px-2.5 rounded-lg transition duration-300 flex items-center">
                             دوره‌ها
                         </a>
                     </li>
                     <li>
                         <a href="<?= $baseEsc ?>pages/services.php"
-                            class="text-white font-medium text-sm py-2 px-2.5 rounded-lg hover:text-[#E2D9C6] transition duration-300 flex items-center">
+                            class="famo-nav-link font-medium text-sm py-2 px-2.5 rounded-lg transition duration-300 flex items-center">
                             خدمات
                         </a>
                     </li>
                     <li>
                         <a href="<?= $baseEsc ?>pages/team.php"
-                            class="text-white font-medium text-sm py-2 px-2.5 rounded-lg hover:text-[#E2D9C6] transition duration-300 flex items-center">
+                            class="famo-nav-link font-medium text-sm py-2 px-2.5 rounded-lg transition duration-300 flex items-center">
                             اساتید
                         </a>
                     </li>
                     <li>
-                        <a href="<?= $baseEsc ?>#smart-platform"
-                            class="text-white font-medium text-sm py-2 px-2.5 rounded-lg hover:text-[#E2D9C6] transition duration-300 flex items-center">
+                        <a href="<?= $baseEsc ?>pages/services.php#smart-platform"
+                            class="famo-nav-link font-medium text-sm py-2 px-2.5 rounded-lg transition duration-300 flex items-center">
                             سامانه هوشمند
                         </a>
                     </li>
                     <li>
                         <a href="<?= $baseEsc ?>pages/blog.php"
-                            class="text-white font-medium text-sm py-2 px-2.5 rounded-lg hover:text-[#E2D9C6] transition duration-300 flex items-center">
+                            class="famo-nav-link font-medium text-sm py-2 px-2.5 rounded-lg transition duration-300 flex items-center">
                             مقالات
                         </a>
                     </li>
                     <li class="famo-nav-dropdown" data-famo-dropdown>
                         <button type="button"
-                            class="famo-nav-dropdown__trigger text-white font-medium text-sm py-2 px-2.5 rounded-lg hover:text-[#E2D9C6] transition duration-300 flex items-center gap-1"
+                            class="famo-nav-dropdown__trigger famo-nav-link font-medium text-sm py-2 px-2.5 rounded-lg transition duration-300 flex items-center gap-1"
                             data-famo-dropdown-trigger
                             aria-expanded="false"
                             aria-haspopup="true">
                             نتایج و تجربه‌ها
-                            <i class="icon icon--sm opacity-80" data-lucide="chevron-down" aria-hidden="true"></i>
+                            <i class="icon icon--sm" data-lucide="chevron-down" aria-hidden="true"></i>
                         </button>
                         <ul class="famo-nav-dropdown__menu" data-famo-dropdown-menu hidden>
                             <li>
@@ -94,7 +94,7 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
                     </li>
                     <li>
                         <a href="<?= $baseEsc ?>pages/contact.php"
-                            class="text-white font-medium text-sm py-2 px-2.5 rounded-lg hover:text-[#E2D9C6] transition duration-300 flex items-center">
+                            class="famo-nav-link font-medium text-sm py-2 px-2.5 rounded-lg transition duration-300 flex items-center">
                             تماس با ما
                         </a>
                     </li>
@@ -103,7 +103,7 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
                 <!-- Independent Primary & Portal CTAs -->
                 <div class="famo-header-actions">
                     <a href="<?= $baseEsc ?>pages/contact.php#consultation"
-                        class="bg-[#E2D9C6] text-[#445D84] text-sm font-bold px-4 py-2 rounded-full hover:bg-white transition duration-300 shadow-md flex items-center gap-1.5 whitespace-nowrap">
+                        class="famo-btn-cream text-sm font-bold px-4 py-2 rounded-full transition duration-300 shadow-md flex items-center gap-1.5 whitespace-nowrap">
                         <i class="icon icon--sm" data-lucide="phone" aria-hidden="true"></i>
                         درخواست مشاوره
                     </a>
@@ -118,7 +118,7 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
             <!-- Mobile Menu Button -->
             <button id="mobileMenuBtn"
                 type="button"
-                class="famo-header-mobile-btn text-white text-2xl hover:text-[#E2D9C6] hover:cursor-pointer transition duration-300 p-1.5"
+                class="famo-header-mobile-btn famo-nav-link text-2xl hover:cursor-pointer transition duration-300 p-1.5"
                 aria-label="باز کردن منوی موبایل" aria-expanded="false">
                 <i class="icon icon--lg" data-lucide="menu" aria-hidden="true"></i>
             </button>
@@ -137,7 +137,7 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
                         class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">اساتید</a></li>
                 <li><a href="<?= $baseEsc ?>pages/team.php#support"
                         class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">پشتیبانان آموزشی</a></li>
-                <li><a href="<?= $baseEsc ?>#smart-platform"
+                <li><a href="<?= $baseEsc ?>pages/services.php#smart-platform"
                         class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">سامانه هوشمند</a></li>
                 <li><a href="<?= $baseEsc ?>pages/blog.php"
                         class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">مقالات</a></li>
@@ -149,7 +149,7 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
                         class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">تماس با ما</a></li>
                 <li class="pt-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <a href="<?= $baseEsc ?>pages/contact.php#consultation"
-                        class="block bg-[#E2D9C6] text-[#445D84] font-bold text-center py-3 px-4 rounded-xl hover:bg-white transition duration-300">
+                        class="block famo-btn-cream font-bold text-center py-3 px-4 rounded-xl transition duration-300">
                         درخواست مشاوره
                     </a>
                     <a href="<?= $loginUrlEsc ?>"

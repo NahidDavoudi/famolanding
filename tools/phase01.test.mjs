@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { getAfterPairs, evaluatePairs } from './contrast-audit.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -170,3 +171,90 @@ test('Phase 0/1 HTTP: AVIF & WebP service assets serve with correct MIME types',
   assert.equal(webp.status, 200);
   assert.equal(webp.headers['content-type'], 'image/webp');
 });
+
+test('Home declutter: section order, preserved JS IDs, 5 course chips, and removed heavy sections on /', async () => {
+  const res = await fetchRaw('/');
+  assert.equal(res.status, 200);
+  const html = res.body;
+
+  const expectedOrder = [
+    'id="home"',
+    'id="team"',
+    'id="about-summary"',
+    'id="courses"',
+    'id="achievements-testimonials"',
+    'id="faq-contact"',
+    'id="cta-final"',
+  ];
+  let prevIdx = -1;
+  for (const marker of expectedOrder) {
+    const idx = html.indexOf(marker);
+    assert.ok(idx > prevIdx, `Expected ${marker} to appear after previous section (idx=${idx}, prev=${prevIdx})`);
+    prevIdx = idx;
+  }
+
+  for (const removed of ['id="advantages"', 'id="process"', 'id="smart-platform"', 'id="services"', 'famo-programs-grid']) {
+    assert.ok(!html.includes(removed), `Removed homepage section/grid still present on /: ${removed}`);
+  }
+
+  for (const jsId of [
+    'id="instructorsContainer"',
+    'id="instCarouselPrev"',
+    'id="instCarouselNext"',
+    'id="instCarouselDots"',
+    'id="coursesContainer"',
+    'id="homeAdmissionsExcerpt"',
+    'id="homeTestimonialsExcerpt"',
+  ]) {
+    assert.ok(html.includes(jsId), `Required JS hook missing on /: ${jsId}`);
+  }
+
+  for (const chipHref of [
+    'pages/course.php#elementary',
+    'pages/course.php#middle-school',
+    'pages/course.php#high-school',
+    'pages/course.php#konkur',
+    'pages/course.php#tizhooshan',
+  ]) {
+    assert.ok(html.includes(chipHref), `Missing course chip link on /: ${chipHref}`);
+  }
+
+  assert.doesNotMatch(html, /href="#smart-platform"/, 'Header/Home must link to pages/services.php#smart-platform, not #smart-platform');
+  assert.match(html, /href="pages\/services\.php#smart-platform"/);
+  assert.match(html, /href="pages\/services\.php#process"/);
+});
+
+test('Home declutter: migrated sections (#advantages, #process, #smart-platform) live cleanly on /pages/services.php', async () => {
+  const res = await fetchRaw('/pages/services.php');
+  assert.equal(res.status, 200);
+  const html = res.body;
+
+  for (const anchorId of [
+    'id="advantages"',
+    'id="private-classes"',
+    'id="personalized-exams"',
+    'id="tutoring"',
+    'id="counseling"',
+    'id="performance-tracking"',
+    'id="weekly-report"',
+    'id="process"',
+    'id="smart-platform"',
+  ]) {
+    assert.ok(html.includes(anchorId), `Missing expected anchor ${anchorId} on /pages/services.php`);
+  }
+
+  // Ensure no duplicated #services block and zero broken relative links
+  assert.ok(!html.includes('id="services"'), 'services.php must not duplicate homepage #services grid');
+  assert.doesNotMatch(html, /<\?(=|php)/, 'PHP tag leaked in /pages/services.php');
+});
+
+test('WCAG AA Contrast Audit: all audited AFTER color pairs pass minimum ratios', () => {
+  const results = evaluatePairs(getAfterPairs());
+  const failed = results.filter((r) => !r.pass);
+  assert.equal(
+    failed.length,
+    0,
+    `WCAG AA contrast failures:\n${failed.map((f) => `- ${f.id}: ${f.ratio}:1 < ${f.min}:1 (${f.fg} on ${f.worstBg})`).join('\n')}`,
+  );
+});
+

@@ -1,6 +1,20 @@
 /* Home page: custom styles only. Layout/colors via shared Tailwind CSS. */
 :root {
     --ds-font-sans: "Vazirmatn", "Vazirmatn Fallback", system-ui, sans-serif;
+
+    /* Centralized WCAG AA brand color tokens (preserves #445D84 / #E2D9C6 / #f9f7f3 identity) */
+    --famo-brand: #445D84;
+    --famo-brand-dark: #334869;
+    --famo-brand-grad-start: #354B6E;
+    --famo-brand-grad-end: #445D84;
+    --famo-cream: #E2D9C6;
+    --famo-cream-light: #F9F7F3;
+    --famo-cream-on-dark: #F3ECDD;
+    --famo-ink-on-cream: #2F4261;
+    --famo-text-on-dark: #FFFFFF;
+    --famo-text-on-dark-soft: #F1F5F9;
+    --famo-muted-on-light: #4B5563;
+    --famo-accent-on-light: #63534B;
 }
 
 html {
@@ -311,17 +325,17 @@ html {
 
 /* Gradient / glass / hover (home-specific) */
 .gradient-bg {
-    background: linear-gradient(135deg, var(--ds-color-primary) 0%, #55719b 100%);
+    background: linear-gradient(135deg, var(--famo-brand-grad-start) 0%, var(--famo-brand-grad-end) 100%);
 }
 
 .gradient-bg-light {
     background: linear-gradient(135deg, var(--ds-color-border) 0%, var(--ds-color-primary-light-100) 100%);
 }
 
-/* ==================== Hero (بخش خانه): تصویر ← تیتر ← توضیح ← کارت آمار ← دکمه‌ها ====================
+/* ==================== Hero (بخش خانه): تصویر ← تیتر ← توضیح ← دکمه‌ها ====================
    همه اندازه‌های جدید این بخش با کلاس اختصاصی آمده تا به rebuild شدن Tailwind (output.css) وابسته نباشد. */
 .hero-section {
-    background: linear-gradient(135deg, var(--ds-color-primary) 0%, #55719b 100%);
+    background: linear-gradient(135deg, var(--famo-brand-grad-start) 0%, var(--famo-brand-grad-end) 100%);
     /* فضای نوبار fixed: موبایل ~۹۰px و از sm به بالا ~۱۱۲px */
     padding-top: 6.75rem;
     padding-bottom: 2.75rem;
@@ -347,9 +361,9 @@ html {
     aspect-ratio: 16 / 9;
     border-radius: 1.25rem;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    border: 1px solid rgba(255, 255, 255, 0.24);
     box-shadow: 0 20px 44px -16px rgba(30, 44, 68, 0.45);
-    background: var(--ds-color-primary);
+    background: var(--famo-brand-dark);
 }
 
 @media (min-width: 768px) {
@@ -370,19 +384,19 @@ html {
 /* ۲) تیتر */
 .hero-title {
     margin: 1.25rem 0 0;
-    font-size: clamp(1.5rem, 1.1rem + 1.8vw, 2.5rem);
+    font-size: clamp(1.45rem, 1.1rem + 1.8vw, 2.5rem);
     line-height: 1.4;
     font-weight: 800;
     text-align: center;
     text-wrap: balance;
-    color: #ffffff;
+    color: var(--famo-text-on-dark);
 }
 
 .hero-title-accent {
     display: block;
     margin-top: 0.25rem;
     font-size: 0.85em;
-    color: var(--ds-color-border, #E2D9C6);
+    color: var(--famo-cream-on-dark);
 }
 
 /* ۳) توضیح */
@@ -392,7 +406,7 @@ html {
     font-size: clamp(0.95rem, 0.9rem + 0.3vw, 1.1rem);
     line-height: 1.9;
     text-align: center;
-    color: rgba(255, 255, 255, 0.88);
+    color: var(--famo-text-on-dark-soft);
 }
 
 /* ۴) کارت آمار */
@@ -418,20 +432,20 @@ html {
 }
 
 .hero-stat-number {
-    color: #ffffff;
+    color: var(--famo-text-on-dark);
     line-height: 1.3;
     font-variant-numeric: tabular-nums;
     text-shadow: 0 1px 10px rgba(31, 45, 68, 0.32);
 }
 
 .hero-stat-plus {
-    color: var(--ds-color-border, #E2D9C6);
+    color: var(--famo-cream-on-dark);
     margin-inline-start: 0.125rem;
 }
 
 .hero-stat-label {
     margin-top: 0.25rem;
-    color: rgba(255, 255, 255, 0.86);
+    color: var(--famo-text-on-dark-soft);
     line-height: 1.7;
     font-weight: 500;
 }
@@ -451,11 +465,51 @@ html {
     justify-content: center;
 }
 
+/* موبایل (<= 640px): خلوت‌سازی هیرو تا دکمه «درخواست مشاوره» بالای خط تا و کاروسل اساتید در دسترس باشد */
+@media (max-width: 640px) {
+    .hero-section {
+        padding-top: 5.5rem;
+        padding-bottom: 1.75rem;
+    }
+
+    .hero-media {
+        aspect-ratio: 16 / 9;
+        max-height: 195px;
+        border-radius: 1rem;
+    }
+
+    .hero-section .famo-eyebrow {
+        margin-top: 0.85rem;
+        margin-bottom: 0.5rem;
+        padding: 0.25rem 0.85rem;
+        font-size: 0.78rem;
+    }
+
+    .hero-title {
+        font-size: 1.35rem;
+        line-height: 1.45;
+    }
+
+    .hero-desc {
+        display: none;
+    }
+
+    .hero-ctas {
+        margin-top: 0.9rem;
+        gap: 0.55rem;
+        width: 100%;
+    }
+
+    .hero-cta {
+        padding: 0.65rem 1.25rem;
+        font-size: 0.9rem;
+    }
+}
+
 /* صفحه‌های خیلی کوچک: دکمه‌ها زیر هم و هم‌عرض */
 @media (max-width: 380px) {
     .hero-ctas {
         flex-direction: column;
-        width: 100%;
         max-width: 18rem;
     }
 
@@ -512,24 +566,24 @@ body>header.fixed>div {
     position: relative;
     isolation: isolate;
     border-radius: 24px;
-    border: 1px solid rgba(255, 255, 255, 0.34);
-    -webkit-backdrop-filter: blur(24px) saturate(180%) brightness(1.04);
-    backdrop-filter: blur(24px) saturate(180%) brightness(1.04);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    backdrop-filter: blur(22px) saturate(160%);
     background: linear-gradient(180deg,
-            rgba(85, 113, 155, 0.68) 0%,
-            rgba(68, 93, 132, 0.62) 52%,
-            rgba(56, 78, 112, 0.72) 100%) !important;
+            rgba(51, 72, 105, 0.90) 0%,
+            rgba(46, 65, 96, 0.88) 52%,
+            rgba(40, 57, 84, 0.93) 100%) !important;
     box-shadow:
-        0 14px 38px -10px rgba(31, 45, 68, 0.34),
-        inset 0 1.5px 0 rgba(255, 255, 255, 0.62),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.16);
+        0 14px 38px -10px rgba(24, 36, 56, 0.42),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.12);
 }
 
 body>header.fixed>div :is(h1, p) {
-    text-shadow: 0 1px 4px rgba(31, 45, 68, 0.35);
+    text-shadow: 0 1px 3px rgba(20, 31, 50, 0.32);
 }
 
-/* بازتاب نور اسپیکولار نرم روی سطح بالایی شیشه هدر */
+/* بازتاب نور اسپیکولار ملایم (بدون کاهش کنتراست متن روی پس‌زمینه سفید) */
 body>header.fixed>div::before {
     content: '';
     position: absolute;
@@ -538,8 +592,7 @@ body>header.fixed>div::before {
     z-index: -1;
     pointer-events: none;
     background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.28) 0%, rgba(255, 255, 255, 0.06) 28%, transparent 58%),
-        radial-gradient(120% 70% at 50% 0%, rgba(255, 255, 255, 0.22) 0%, transparent 55%);
+        linear-gradient(180deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.02) 22%, transparent 45%);
 }
 
 /* لبه شیشه‌ای براق (Refraction Rim) در پیرامون هدر با رنگ سفید و کرم فامو */
@@ -552,10 +605,10 @@ body>header.fixed>div::after {
     z-index: -1;
     pointer-events: none;
     background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.78) 0%,
-            rgba(255, 255, 255, 0.18) 35%,
+            rgba(255, 255, 255, 0.55) 0%,
+            rgba(255, 255, 255, 0.16) 35%,
             rgba(255, 255, 255, 0.08) 65%,
-            rgba(226, 217, 198, 0.5) 100%);
+            rgba(226, 217, 198, 0.45) 100%);
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
@@ -565,7 +618,7 @@ body>header.fixed>div::after {
 /* فالبک برای مرورگرهای بدون backdrop-filter */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     body>header.fixed>div {
-        background: rgba(68, 93, 132, 0.92) !important;
+        background: rgba(46, 65, 96, 0.96) !important;
     }
 }
 
@@ -894,7 +947,7 @@ body>header.fixed>div::after {
     margin: 0.25rem 1.25rem 0;
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--ds-color-accent-600);
+    color: var(--famo-accent-on-light);
 }
 
 .inst-bio {
@@ -1369,7 +1422,7 @@ body>header.fixed>div::after {
     display: inline-flex;
     align-items: center;
     background: var(--ds-color-primary-light-100);
-    color: var(--ds-color-primary);
+    color: var(--famo-ink-on-cream);
     font-size: 0.7rem;
     font-weight: 600;
     padding: 0.15rem 0.6rem;
@@ -1380,7 +1433,7 @@ body>header.fixed>div::after {
     margin: 0;
     font-size: 1rem;
     font-weight: 700;
-    color: var(--ds-color-primary);
+    color: var(--famo-brand);
     line-height: 1.8;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -1391,7 +1444,7 @@ body>header.fixed>div::after {
 .famo-course-desc {
     margin: 0.5rem 0 0;
     font-size: 0.8125rem;
-    color: var(--ds-color-muted-foreground);
+    color: var(--famo-muted-on-light);
     line-height: 1.9;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -1419,13 +1472,13 @@ body>header.fixed>div::after {
 
 .famo-course-price-label {
     font-size: 0.6875rem;
-    color: var(--ds-color-muted-foreground);
+    color: var(--famo-muted-on-light);
 }
 
 .famo-course-price-value {
     font-size: 1rem;
     font-weight: 700;
-    color: var(--ds-color-primary);
+    color: var(--famo-brand);
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
 }
@@ -1433,7 +1486,7 @@ body>header.fixed>div::after {
 .famo-course-price-unit {
     font-size: 0.6875rem;
     font-weight: 500;
-    color: var(--ds-color-accent-600);
+    color: var(--famo-accent-on-light);
     margin-inline-start: 0.25rem;
 }
 
@@ -1443,8 +1496,8 @@ body>header.fixed>div::after {
     justify-content: center;
     gap: 0.3rem;
     flex-shrink: 0;
-    background: var(--ds-color-primary);
-    color: var(--ds-color-white);
+    background: var(--famo-brand);
+    color: var(--famo-text-on-dark);
     font-size: 0.8125rem;
     font-weight: 700;
     padding: 0.5rem 0.9rem;
@@ -1454,7 +1507,7 @@ body>header.fixed>div::after {
 }
 
 .famo-course-card:hover .famo-course-cta {
-    background: var(--ds-color-primary-hover);
+    background: var(--famo-brand-dark);
 }
 
 /* پیام‌های حالت خالی / خطا */
@@ -1462,7 +1515,7 @@ body>header.fixed>div::after {
     grid-column: 1 / -1;
     width: 100%;
     text-align: center;
-    color: var(--ds-color-muted-foreground);
+    color: var(--famo-muted-on-light);
     padding: 3rem 1rem;
     background: var(--ds-color-primary-light-100);
     border-radius: 18px;
@@ -2736,13 +2789,15 @@ address {
 }
 
 .famo-portal-btn {
-    border: 1.5px solid rgba(255, 255, 255, 0.45);
-    background: rgba(255, 255, 255, 0.1);
+    border: 1.5px solid rgba(243, 236, 221, 0.55);
+    background: rgba(24, 36, 56, 0.30);
+    color: var(--famo-text-on-dark);
 }
 
 .famo-portal-btn:hover {
-    background: rgba(255, 255, 255, 0.22);
-    border-color: rgba(226, 217, 198, 0.85);
+    background: rgba(24, 36, 56, 0.50);
+    border-color: var(--famo-cream-on-dark);
+    color: var(--famo-cream-on-dark);
 }
 
 .famo-nav-dropdown {
@@ -2809,9 +2864,9 @@ address {
     font-size: 0.85rem;
     font-weight: 700;
     letter-spacing: 0.01em;
-    background: rgba(226, 217, 198, 0.18);
-    border: 1px solid rgba(226, 217, 198, 0.42);
-    color: #E2D9C6;
+    background: rgba(24, 36, 56, 0.34);
+    border: 1px solid rgba(243, 236, 221, 0.45);
+    color: var(--famo-cream-on-dark);
     margin-bottom: 0.9rem;
 }
 
@@ -2861,8 +2916,8 @@ address {
     width: 3.25rem;
     height: 3.25rem;
     border-radius: 1rem;
-    background: linear-gradient(135deg, #445D84 0%, #55719b 100%);
-    color: #E2D9C6;
+    background: linear-gradient(135deg, var(--famo-brand-grad-start) 0%, var(--famo-brand-grad-end) 100%);
+    color: var(--famo-cream-on-dark);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -3036,7 +3091,7 @@ address {
     padding: 0.2rem 0.65rem;
     border-radius: 9999px;
     background: #EFE9DD;
-    color: #445D84;
+    color: var(--famo-ink-on-cream);
 }
 
 .famo-mock-bars {
@@ -3069,7 +3124,7 @@ address {
 .famo-mock-fill {
     height: 100%;
     border-radius: 9999px;
-    background: linear-gradient(90deg, #445D84 0%, #6482ad 100%);
+    background: linear-gradient(90deg, var(--famo-brand-grad-start) 0%, var(--famo-brand-grad-end) 100%);
 }
 
 .famo-mock-note {
@@ -3079,14 +3134,14 @@ address {
     background: #f9f7f3;
     border: 1px solid #E2D9C6;
     font-size: 0.84rem;
-    color: #4b5563;
+    color: var(--famo-muted-on-light);
     line-height: 1.8;
 }
 
 .famo-mock-caption {
     margin: 0.75rem 0 0;
     font-size: 0.75rem;
-    color: #6b7280;
+    color: var(--famo-muted-on-light);
     text-align: center;
 }
 
@@ -3410,21 +3465,23 @@ address {
     gap: 0.5rem;
     padding: 0.65rem 1rem;
     border-radius: 0.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.38);
-    color: #ffffff;
+    border: 1.5px solid rgba(243, 236, 221, 0.55);
+    background: rgba(24, 36, 56, 0.24);
+    color: var(--famo-text-on-dark);
     font-size: 0.875rem;
     font-weight: 700;
-    transition: background-color 0.25s ease, border-color 0.25s ease;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
 }
 
 .famo-footer-consult-btn:hover {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(226, 217, 198, 0.8);
+    background: rgba(24, 36, 56, 0.44);
+    border-color: var(--famo-cream-on-dark);
+    color: var(--famo-cream-on-dark);
 }
 
 .famo-footer-map-card {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(24, 36, 56, 0.28);
+    border: 1px solid rgba(243, 236, 221, 0.28);
     border-radius: 0.85rem;
     padding: 0.95rem;
     text-align: center;
@@ -3470,11 +3527,17 @@ button {
     font-size: 0.9rem;
     text-decoration: none;
     box-shadow: 0 12px 28px rgba(15, 23, 42, 0.3);
+    opacity: 0;
+    pointer-events: none;
+    clip-path: inset(50%);
     transform: translateY(-200%);
-    transition: transform 0.16s ease;
+    transition: transform 0.16s ease, opacity 0.16s ease;
 }
 
 .famo-skip-link:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+    clip-path: none;
     transform: translateY(0);
     outline: 3px solid #445D84;
     outline-offset: 2px;
@@ -3505,13 +3568,13 @@ footer button:focus-visible,
 
 .famo-desktop-nav > li > a[aria-current="page"],
 .famo-nav-dropdown.is-active-group .famo-nav-dropdown__trigger {
-    color: #E2D9C6;
-    background: rgba(255, 255, 255, 0.14);
+    color: var(--famo-cream-on-dark);
+    background: rgba(24, 36, 56, 0.36);
 }
 
 .famo-nav-dropdown__link[aria-current="page"] {
     background: #EFE9DD;
-    color: #2f4261;
+    color: var(--famo-ink-on-cream);
     font-weight: 700;
 }
 
@@ -3522,9 +3585,163 @@ footer button:focus-visible,
 }
 
 #mobileMenu a[aria-current="page"] {
-    background: rgba(226, 217, 198, 0.22);
-    color: #E2D9C6;
+    background: rgba(24, 36, 56, 0.42);
+    color: var(--famo-cream-on-dark);
     font-weight: 700;
+}
+
+/* ==================== خلوت‌سازی صفحه اصلی و کلاس‌های کنتراست متمرکز (WCAG AA) ==================== */
+#advantages,
+#process,
+#smart-platform,
+#team,
+#about-summary,
+#courses,
+#achievements-testimonials,
+#faq-contact {
+    scroll-margin-top: 6.5rem;
+}
+
+.famo-home-section {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+}
+
+@media (min-width: 640px) {
+    .famo-home-section {
+        padding-top: 5rem;
+        padding-bottom: 5rem;
+    }
+}
+
+/* گرید ۳ کارت خلاصه (#about-summary) */
+.famo-summary-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.15rem;
+}
+
+@media (min-width: 768px) {
+    .famo-summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1.5rem;
+    }
+}
+
+.famo-summary-grid .famo-advantage-card {
+    padding: 1.4rem;
+    gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+    .famo-summary-grid .famo-advantage-card {
+        padding: 1.65rem;
+    }
+}
+
+/* ردیف چیپ‌های مقاطع در #courses */
+.famo-course-chips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.55rem;
+    margin-bottom: 2.25rem;
+}
+
+.famo-course-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-height: 40px;
+    padding: 0.45rem 1rem;
+    border-radius: 9999px;
+    background: #ffffff;
+    border: 1px solid #d4c9b2;
+    color: var(--famo-ink-on-cream);
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 4px 12px -6px rgba(68, 93, 132, 0.16);
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.famo-course-chip:hover {
+    background: var(--famo-brand);
+    border-color: var(--famo-brand);
+    color: var(--famo-text-on-dark);
+    transform: translateY(-1px);
+}
+
+/* کلاس‌های کنتراست متمرکز برای متن‌ها و دکمه‌ها (مستقل از CDN output.css) */
+.famo-on-dark-soft {
+    color: var(--famo-text-on-dark-soft);
+}
+
+.famo-on-dark-cream {
+    color: var(--famo-cream-on-dark);
+}
+
+.famo-nav-link {
+    color: var(--famo-text-on-dark);
+}
+
+.famo-nav-link:hover {
+    color: var(--famo-cream-on-dark);
+}
+
+.famo-btn-cream {
+    background-color: var(--famo-cream);
+    color: var(--famo-ink-on-cream);
+}
+
+.famo-btn-cream:hover {
+    background-color: #ffffff;
+    color: var(--famo-ink-on-cream);
+}
+
+.famo-btn-outline-cream {
+    border: 2px solid var(--famo-cream-on-dark);
+    color: var(--famo-cream-on-dark);
+    background-color: transparent;
+}
+
+.famo-btn-outline-cream:hover {
+    background-color: var(--famo-cream);
+    border-color: var(--famo-cream);
+    color: var(--famo-ink-on-cream);
+}
+
+.famo-footer-link {
+    color: var(--famo-text-on-dark-soft);
+}
+
+.famo-footer-link:hover {
+    color: var(--famo-cream-on-dark);
+}
+
+.famo-social-btn {
+    background: rgba(24, 36, 56, 0.30);
+    border: 1px solid rgba(243, 236, 221, 0.28);
+    color: var(--famo-text-on-dark);
+}
+
+.famo-social-btn:hover {
+    background: var(--famo-cream);
+    border-color: var(--famo-cream);
+    color: var(--famo-ink-on-cream);
+}
+
+.famo-muted-text {
+    color: var(--famo-muted-on-light);
+}
+
+.famo-accent-text {
+    color: var(--famo-accent-on-light);
+}
+
+.faq-icon {
+    color: var(--famo-accent-on-light);
 }
 
 /* حداقل اندازه هدف لمسی استاندارد و جلوگیری از سرریز متن‌های طولانی */
@@ -3556,7 +3773,8 @@ a[href^="tel:"],
 @media (max-width: 639px) {
     .famo-anchor-pill,
     .famo-inline-link,
-    .famo-footer-consult-btn {
+    .famo-footer-consult-btn,
+    .famo-course-chip {
         min-height: 44px;
     }
 }
