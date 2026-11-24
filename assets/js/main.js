@@ -1,4 +1,4 @@
-const { default: API, onReady } = await import(`${window.APP_CONFIG.assetUrl}/js/api.js`);
+import API, { onReady } from './api.js';
 
 const UPLOADS_BASE = (window.APP_CONFIG && window.APP_CONFIG.uploadsUrl) || 'https://api.famoacademy.ir/uploads';
 

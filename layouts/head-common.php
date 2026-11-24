@@ -39,7 +39,7 @@ $seoPageType = isset($webPageType) && is_string($webPageType) && trim($webPageTy
     ? trim($webPageType)
     : 'WebPage';
 
-$logoAssetUrl = famo_asset('images/logo.png', $base . '../shared/images/logo.png');
+$logoAssetUrl = $siteUrl . '/assets/images/logo.png';
 
 // Build connected Schema.org @graph (Organization + WebSite + WebPage + BreadcrumbList + page-specific entities)
 $orgId = $siteUrl . '/#organization';
@@ -180,12 +180,12 @@ if ($jsonLdGraph === false) {
     $jsonLdGraph = '{}';
 }
 
-$fontRegularWoff2 = htmlspecialchars(famo_asset('fonts/Vazirmatn-Regular.subset.woff2', $base . '../shared/fonts/Vazirmatn-Regular.subset.woff2'), ENT_QUOTES, 'UTF-8');
-$fontRegularTtf   = htmlspecialchars(famo_asset('fonts/Vazirmatn-Regular.ttf', $base . '../shared/fonts/Vazirmatn-Regular.ttf'), ENT_QUOTES, 'UTF-8');
-$fontMediumWoff2  = htmlspecialchars(famo_asset('fonts/Vazirmatn-Medium.subset.woff2', $base . '../shared/fonts/Vazirmatn-Medium.subset.woff2'), ENT_QUOTES, 'UTF-8');
-$fontMediumTtf    = htmlspecialchars(famo_asset('fonts/Vazirmatn-Medium.ttf', $base . '../shared/fonts/Vazirmatn-Medium.ttf'), ENT_QUOTES, 'UTF-8');
-$fontBoldWoff2    = htmlspecialchars(famo_asset('fonts/Vazirmatn-Bold.subset.woff2', $base . '../shared/fonts/Vazirmatn-Bold.subset.woff2'), ENT_QUOTES, 'UTF-8');
-$fontBoldTtf      = htmlspecialchars(famo_asset('fonts/Vazirmatn-Bold.ttf', $base . '../shared/fonts/Vazirmatn-Bold.ttf'), ENT_QUOTES, 'UTF-8');
+$fontRegularWoff2 = htmlspecialchars(famo_local_asset('assets/fonts/Vazirmatn-Regular.woff2', $base), ENT_QUOTES, 'UTF-8');
+$fontRegularTtf   = htmlspecialchars(famo_local_asset('assets/fonts/Vazirmatn-Regular.ttf', $base), ENT_QUOTES, 'UTF-8');
+$fontMediumWoff2  = htmlspecialchars(famo_local_asset('assets/fonts/Vazirmatn-Medium.woff2', $base), ENT_QUOTES, 'UTF-8');
+$fontMediumTtf    = htmlspecialchars(famo_local_asset('assets/fonts/Vazirmatn-Medium.ttf', $base), ENT_QUOTES, 'UTF-8');
+$fontBoldWoff2    = htmlspecialchars(famo_local_asset('assets/fonts/Vazirmatn-Bold.woff2', $base), ENT_QUOTES, 'UTF-8');
+$fontBoldTtf      = htmlspecialchars(famo_local_asset('assets/fonts/Vazirmatn-Bold.ttf', $base), ENT_QUOTES, 'UTF-8');
 ?>
 <!-- Shared head: included by every page inside its own <head>. Requires $base. Optional SEO vars & $page_libs opt-out array. -->
 <title><?= htmlspecialchars($seoTitle, ENT_QUOTES, 'UTF-8') ?></title>
@@ -253,11 +253,11 @@ $fontBoldTtf      = htmlspecialchars(famo_asset('fonts/Vazirmatn-Bold.ttf', $bas
 </style>
 
 <!-- Stylesheets: tokens -> Tailwind output -> icons -> conditional Swiper -> local style -->
-<link rel="stylesheet" href="<?= htmlspecialchars(famo_asset('css/tokens.css', $base . '../shared/css/tokens.css'), ENT_QUOTES, 'UTF-8') ?>">
-<link rel="stylesheet" href="<?= htmlspecialchars(famo_asset('css/output.css', $base . '../shared/css/output.css'), ENT_QUOTES, 'UTF-8') ?>">
+<link rel="stylesheet" href="<?= htmlspecialchars(famo_local_asset('assets/css/tokens.css', $base), ENT_QUOTES, 'UTF-8') ?>">
+<link rel="stylesheet" href="<?= htmlspecialchars(famo_local_asset('assets/css/output.css', $base), ENT_QUOTES, 'UTF-8') ?>">
 <link rel="stylesheet" href="<?= htmlspecialchars(famo_local_asset('assets/css/icons.css', $base), ENT_QUOTES, 'UTF-8') ?>">
 <?php if (!empty($libs['swiper'])): ?>
-<link rel="stylesheet" href="<?= htmlspecialchars(famo_asset('css/libs/swiper-bundle.min.css', $base . '../shared/css/libs/swiper-bundle.min.css'), ENT_QUOTES, 'UTF-8') ?>">
+<link rel="stylesheet" href="<?= htmlspecialchars(famo_local_asset('assets/css/libs/swiper-bundle.min.css', $base), ENT_QUOTES, 'UTF-8') ?>">
 <?php endif; ?>
 <link rel="stylesheet" href="<?= htmlspecialchars(famo_local_asset('assets/css/style.css', $base), ENT_QUOTES, 'UTF-8') ?>">
 
@@ -269,20 +269,20 @@ $fontBoldTtf      = htmlspecialchars(famo_asset('fonts/Vazirmatn-Bold.ttf', $bas
 
 <!-- Deferred Scripts (order preserved; gated by $page_libs) -->
 <?php if (!empty($libs['gsap'])): ?>
-<script defer src="<?= htmlspecialchars(famo_asset('js/libs/gsap.min.js', $base . '../shared/js/libs/gsap.min.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+<script defer src="<?= htmlspecialchars(famo_local_asset('assets/js/libs/gsap.min.js', $base), ENT_QUOTES, 'UTF-8') ?>"></script>
 <?php if (!empty($libs['scroll_trigger'])): ?>
-<script defer src="<?= htmlspecialchars(famo_asset('js/libs/ScrollTrigger.min.js', $base . '../shared/js/libs/ScrollTrigger.min.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+<script defer src="<?= htmlspecialchars(famo_local_asset('assets/js/libs/ScrollTrigger.min.js', $base), ENT_QUOTES, 'UTF-8') ?>"></script>
 <?php endif; ?>
 <?php if (!empty($libs['scroll_to'])): ?>
-<script defer src="<?= htmlspecialchars(famo_asset('js/libs/ScrollToPlugin.min.js', $base . '../shared/js/libs/ScrollToPlugin.min.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+<script defer src="<?= htmlspecialchars(famo_local_asset('assets/js/libs/ScrollToPlugin.min.js', $base), ENT_QUOTES, 'UTF-8') ?>"></script>
 <?php endif; ?>
 <?php endif; ?>
 <?php if (!empty($libs['swiper'])): ?>
-<script defer src="<?= htmlspecialchars(famo_asset('js/libs/swiper-bundle.min.js', $base . '../shared/js/libs/swiper-bundle.min.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+<script defer src="<?= htmlspecialchars(famo_local_asset('assets/js/libs/swiper-bundle.min.js', $base), ENT_QUOTES, 'UTF-8') ?>"></script>
 <?php endif; ?>
 <?php if (!empty($libs['lucide'])): ?>
-<script defer src="<?= htmlspecialchars(famo_asset('js/libs/lucide.min.js', $base . '../shared/js/libs/lucide.min.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
-<script defer src="<?= htmlspecialchars(famo_asset('js/lucide-adapter.js', $base . '../shared/js/lucide-adapter.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+<script defer src="<?= htmlspecialchars(famo_local_asset('assets/js/libs/lucide.min.js', $base), ENT_QUOTES, 'UTF-8') ?>"></script>
+<script defer src="<?= htmlspecialchars(famo_local_asset('assets/js/lucide-adapter.js', $base), ENT_QUOTES, 'UTF-8') ?>"></script>
 <?php endif; ?>
 <?php if (!empty($libs['animation'])): ?>
 <script defer src="<?= htmlspecialchars(famo_local_asset('assets/js/animation.js', $base), ENT_QUOTES, 'UTF-8') ?>"></script>
@@ -290,6 +290,6 @@ $fontBoldTtf      = htmlspecialchars(famo_asset('fonts/Vazirmatn-Bold.ttf', $bas
 <script defer src="<?= htmlspecialchars(famo_local_asset('assets/js/nav.js', $base), ENT_QUOTES, 'UTF-8') ?>"></script>
 
 <!-- Favicon Multi-size -->
-<link rel="icon" type="image/png" sizes="16x16" href="<?= htmlspecialchars(famo_asset('images/favicon-16.png', $base . '../shared/images/favicon-16.png'), ENT_QUOTES, 'UTF-8') ?>">
-<link rel="icon" type="image/png" sizes="32x32" href="<?= htmlspecialchars(famo_asset('images/favicon-32.png', $base . '../shared/images/favicon-32.png'), ENT_QUOTES, 'UTF-8') ?>">
-<link rel="icon" type="image/png" sizes="96x96" href="<?= htmlspecialchars(famo_asset('images/favicon-96.png', $base . '../shared/images/favicon-96.png'), ENT_QUOTES, 'UTF-8') ?>">
+<link rel="icon" type="image/png" sizes="16x16" href="<?= htmlspecialchars(famo_local_asset('assets/images/favicon-16.png', $base), ENT_QUOTES, 'UTF-8') ?>">
+<link rel="icon" type="image/png" sizes="32x32" href="<?= htmlspecialchars(famo_local_asset('assets/images/favicon-32.png', $base), ENT_QUOTES, 'UTF-8') ?>">
+<link rel="icon" type="image/png" sizes="96x96" href="<?= htmlspecialchars(famo_local_asset('assets/images/favicon-96.png', $base), ENT_QUOTES, 'UTF-8') ?>">

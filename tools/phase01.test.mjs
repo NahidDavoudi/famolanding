@@ -258,3 +258,89 @@ test('WCAG AA Contrast Audit: all audited AFTER color pairs pass minimum ratios'
   );
 });
 
+test('Local assets: all required shared assets exist locally and zero external assets.famoacademy.ir refs remain', () => {
+  const requiredFiles = [
+    'assets/css/tokens.css',
+    'assets/css/output.css',
+    'assets/css/libs/swiper-bundle.min.css',
+    'assets/fonts/Vazirmatn-Regular.woff2',
+    'assets/fonts/Vazirmatn-Regular.ttf',
+    'assets/fonts/Vazirmatn-Medium.woff2',
+    'assets/fonts/Vazirmatn-Medium.ttf',
+    'assets/fonts/Vazirmatn-Bold.woff2',
+    'assets/fonts/Vazirmatn-Bold.ttf',
+    'assets/images/logo.png',
+    'assets/images/logo.webp',
+    'assets/images/favicon-16.png',
+    'assets/images/favicon-32.png',
+    'assets/images/favicon-96.png',
+    'assets/js/api.js',
+    'assets/js/lucide-adapter.js',
+    'assets/js/libs/gsap.min.js',
+    'assets/js/libs/ScrollTrigger.min.js',
+    'assets/js/libs/ScrollToPlugin.min.js',
+    'assets/js/libs/swiper-bundle.min.js',
+    'assets/js/libs/lucide.min.js',
+  ];
+  for (const rel of requiredFiles) {
+    const p = path.join(ROOT, rel);
+    assert.ok(fs.existsSync(p) && fs.statSync(p).size > 0, `Missing or empty local asset: ${rel}`);
+  }
+  for (const w of ['Regular', 'Medium', 'Bold']) {
+    const hdr = fs.readFileSync(path.join(ROOT, `assets/fonts/Vazirmatn-${w}.woff2`)).subarray(0, 4).toString('ascii');
+    assert.equal(hdr, 'wOF2', `Vazirmatn-${w}.woff2 must have valid wOF2 header`);
+  }
+
+  const appFiles = [
+    'config.php',
+    'index.php',
+    '404.php',
+    'r.php',
+    'layouts/head-common.php',
+    'layouts/header.php',
+    'layouts/footer.php',
+    'assets/js/main.js',
+    'assets/js/courses.js',
+    'assets/js/team.js',
+    'assets/js/blog.js',
+  ];
+  for (const rel of appFiles) {
+    const content = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+    assert.doesNotMatch(content, /assets\.famoacademy\.ir/, `External assets subdomain still referenced in ${rel}`);
+    assert.doesNotMatch(content, /\.\.\/shared\//, `Legacy ../shared/ path still referenced in ${rel}`);
+    assert.doesNotMatch(content, /\.subset\.woff2/, `Missing .subset.woff2 still referenced in ${rel}`);
+  }
+});
+
+test('Local assets HTTP: pages emit zero assets.famoacademy.ir URLs and serve local WOFF2/CSS/JS/images with 200', async () => {
+  for (const route of ['/', '/pages/course.php', '/pages/services.php', '/pages/team.php', '/pages/blog.php', '/r/invalidtoken']) {
+    const res = await fetchRaw(route);
+    assert.doesNotMatch(res.body, /assets\.famoacademy\.ir/, `Rendered ${route} still contains assets.famoacademy.ir`);
+    assert.doesNotMatch(res.body, /<\?(=|php)/, `Raw PHP tag leaked in ${route}`);
+  }
+
+  const mimeChecks = [
+    ['/assets/fonts/Vazirmatn-Regular.woff2', 'font/woff2'],
+    ['/assets/fonts/Vazirmatn-Bold.woff2', 'font/woff2'],
+    ['/assets/fonts/Vazirmatn-Regular.ttf', 'font/ttf'],
+    ['/assets/css/tokens.css', 'text/css'],
+    ['/assets/css/output.css', 'text/css'],
+    ['/assets/css/libs/swiper-bundle.min.css', 'text/css'],
+    ['/assets/js/api.js', 'application/javascript'],
+    ['/assets/js/lucide-adapter.js', 'application/javascript'],
+    ['/assets/js/libs/lucide.min.js', 'application/javascript'],
+    ['/assets/images/logo.webp', 'image/webp'],
+    ['/assets/images/logo.png', 'image/png'],
+    ['/assets/images/favicon-32.png', 'image/png'],
+  ];
+  for (const [assetPath, expectedMime] of mimeChecks) {
+    const res = await fetchRaw(assetPath);
+    assert.equal(res.status, 200, `${assetPath} returned ${res.status}`);
+    assert.ok(
+      String(res.headers['content-type'] || '').includes(expectedMime),
+      `${assetPath} content-type mismatch: ${res.headers['content-type']}`,
+    );
+  }
+});
+
+

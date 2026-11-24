@@ -234,12 +234,12 @@ http_response_code($statusCode);
     <meta name="color-scheme" content="light">
     <title>کارنامه آزمون | آموزشگاه فامو</title>
 <?php
-$rFontRegularWoff2 = famo_e(famo_asset('fonts/Vazirmatn-Regular.subset.woff2', '../shared/fonts/Vazirmatn-Regular.subset.woff2'));
-$rFontRegularTtf   = famo_e(famo_asset('fonts/Vazirmatn-Regular.ttf', '../shared/fonts/Vazirmatn-Regular.ttf'));
-$rFontMediumWoff2  = famo_e(famo_asset('fonts/Vazirmatn-Medium.subset.woff2', '../shared/fonts/Vazirmatn-Medium.subset.woff2'));
-$rFontMediumTtf    = famo_e(famo_asset('fonts/Vazirmatn-Medium.ttf', '../shared/fonts/Vazirmatn-Medium.ttf'));
-$rFontBoldWoff2    = famo_e(famo_asset('fonts/Vazirmatn-Bold.subset.woff2', '../shared/fonts/Vazirmatn-Bold.subset.woff2'));
-$rFontBoldTtf      = famo_e(famo_asset('fonts/Vazirmatn-Bold.ttf', '../shared/fonts/Vazirmatn-Bold.ttf'));
+$rFontRegularWoff2 = famo_e(famo_local_asset('assets/fonts/Vazirmatn-Regular.woff2', '/'));
+$rFontRegularTtf   = famo_e(famo_local_asset('assets/fonts/Vazirmatn-Regular.ttf', '/'));
+$rFontMediumWoff2  = famo_e(famo_local_asset('assets/fonts/Vazirmatn-Medium.woff2', '/'));
+$rFontMediumTtf    = famo_e(famo_local_asset('assets/fonts/Vazirmatn-Medium.ttf', '/'));
+$rFontBoldWoff2    = famo_e(famo_local_asset('assets/fonts/Vazirmatn-Bold.woff2', '/'));
+$rFontBoldTtf      = famo_e(famo_local_asset('assets/fonts/Vazirmatn-Bold.ttf', '/'));
 ?>
     <link rel="preload" as="font" type="font/woff2" href="<?= $rFontRegularWoff2 ?>" crossorigin>
     <link rel="preload" as="font" type="font/woff2" href="<?= $rFontBoldWoff2 ?>" crossorigin>
@@ -277,8 +277,8 @@ $rFontBoldTtf      = famo_e(famo_asset('fonts/Vazirmatn-Bold.ttf', '../shared/fo
             line-gap-override: 0%;
         }
     </style>
-    <link rel="stylesheet" href="<?= famo_e(famo_asset('css/tokens.css', '../shared/css/tokens.css')) ?>">
-    <link rel="icon" type="image/png" sizes="32x32" href="<?= famo_e(famo_asset('images/favicon-32.png', '/favicon.ico')) ?>">
+    <link rel="stylesheet" href="<?= famo_e(famo_local_asset('assets/css/tokens.css', '/')) ?>">
+    <link rel="icon" type="image/png" sizes="32x32" href="<?= famo_e(famo_local_asset('assets/images/favicon-32.png', '/')) ?>">
     <style>
         *, *::before, *::after {
             box-sizing: border-box;
@@ -595,8 +595,8 @@ $rFontBoldTtf      = famo_e(famo_asset('fonts/Vazirmatn-Bold.ttf', '../shared/fo
         <div class="exam-header-inner">
             <div class="exam-brand">
                 <picture>
-                    <source srcset="<?= famo_e(famo_asset('images/logo.webp', '../shared/images/logo.webp')) ?>" type="image/webp">
-                    <img src="<?= famo_e(famo_asset('images/logo.png', '../shared/images/logo.png')) ?>" alt="آموزشگاه فامو" width="40" height="40" decoding="async" class="exam-logo">
+                    <source srcset="<?= famo_e(famo_local_asset('assets/images/logo.webp', '/')) ?>" type="image/webp">
+                    <img src="<?= famo_e(famo_local_asset('assets/images/logo.png', '/')) ?>" alt="آموزشگاه فامو" width="40" height="40" decoding="async" class="exam-logo">
                 </picture>
                 <div>
                     <div class="exam-brand-title">آموزشگاه فامو</div>

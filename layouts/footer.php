@@ -14,8 +14,8 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
                 <div class="flex items-center gap-3.5 mb-5">
                     <div class="bg-[#445D84] w-12 h-12 rounded-full flex items-center justify-center shrink-0">
                         <picture>
-                            <source srcset="<?= htmlspecialchars(famo_asset('images/logo.webp', $base . '../shared/images/logo.webp'), ENT_QUOTES, 'UTF-8') ?>" type="image/webp">
-                            <img src="<?= htmlspecialchars(famo_asset('images/logo.png', $base . '../shared/images/logo.png'), ENT_QUOTES, 'UTF-8') ?>" alt="لوگوی آموزشگاه فامو" width="40" height="40" loading="lazy" decoding="async" class="w-10 h-10 object-contain">
+                            <source srcset="<?= htmlspecialchars(famo_local_asset('assets/images/logo.webp', $base), ENT_QUOTES, 'UTF-8') ?>" type="image/webp">
+                            <img src="<?= htmlspecialchars(famo_local_asset('assets/images/logo.png', $base), ENT_QUOTES, 'UTF-8') ?>" alt="لوگوی آموزشگاه فامو" width="40" height="40" loading="lazy" decoding="async" class="w-10 h-10 object-contain">
                         </picture>
                     </div>
                     <div>

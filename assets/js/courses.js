@@ -1,4 +1,4 @@
-const { default: API, onReady } = await import(`${window.APP_CONFIG.assetUrl}/js/api.js`);
+import API, { onReady } from './api.js';
 
 // Escape dynamic text before injecting into HTML: & < > " '
 function esc(value) {

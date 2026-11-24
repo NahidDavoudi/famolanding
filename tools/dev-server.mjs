@@ -51,7 +51,7 @@ function famoEnv(key, fallback = '') {
 }
 
 function famoAssetBase() {
-  return famoEnv('ASSET_URL', 'https://assets.famoacademy.ir').replace(/\/+$/, '');
+  return '/assets';
 }
 
 function famoAssetVersion() {
@@ -65,8 +65,9 @@ function famoAppendVersion(url, version) {
 }
 
 function famoAsset(assetPath) {
-  const url = `${famoAssetBase()}/${String(assetPath).replace(/^\/+/, '')}`;
-  return famoAppendVersion(url, famoAssetVersion());
+  const clean = String(assetPath).replace(/^\/+/, '');
+  const rel = clean.startsWith('assets/') ? clean : `assets/${clean}`;
+  return famoLocalAsset(rel, '/');
 }
 
 function famoLocalAsset(relPath, base = '') {
@@ -129,6 +130,7 @@ const MIME_TYPES = {
   '.txt': 'text/plain; charset=utf-8',
   '.html': 'text/html; charset=utf-8',
   '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
 };
 
 function parsePageLibsFromPreamble(preamble) {
@@ -194,7 +196,7 @@ function buildPreviewGraph(relPath, seo) {
     name: 'آموزشگاه فامو',
     alternateName: 'Famo Academy',
     url: `${siteUrl}/`,
-    logo: { '@type': 'ImageObject', url: famoAsset('images/logo.png') },
+    logo: { '@type': 'ImageObject', url: `${siteUrl}/assets/images/logo.png` },
     image: seo.ogImage,
     email: 'info@famoacademy.ir',
     telephone: '+98-901-440-2300',
@@ -405,12 +407,12 @@ function renderPhpPreviewFile(relPath, base, vars = {}) {
     .replace(/<\?=\s*htmlspecialchars\(\$seoOgType[^)]+\)\s*\?>/g, escapeHtml(seo.ogType))
     .replace(/<\?=\s*htmlspecialchars\(\$seoOgImage[^)]+\)\s*\?>/g, escapeHtml(seo.ogImage))
     .replace(/<\?=\s*htmlspecialchars\(\$seoOgImageAlt[^)]+\)\s*\?>/g, escapeHtml(seo.ogImageAlt))
-    .replace(/<\?=\s*\$fontRegularWoff2\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Regular.subset.woff2')))
-    .replace(/<\?=\s*\$fontRegularTtf\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Regular.ttf')))
-    .replace(/<\?=\s*\$fontMediumWoff2\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Medium.subset.woff2')))
-    .replace(/<\?=\s*\$fontMediumTtf\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Medium.ttf')))
-    .replace(/<\?=\s*\$fontBoldWoff2\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Bold.subset.woff2')))
-    .replace(/<\?=\s*\$fontBoldTtf\s*\?>/g, escapeHtml(famoAsset('fonts/Vazirmatn-Bold.ttf')))
+    .replace(/<\?=\s*\$fontRegularWoff2\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Regular.woff2', base)))
+    .replace(/<\?=\s*\$fontRegularTtf\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Regular.ttf', base)))
+    .replace(/<\?=\s*\$fontMediumWoff2\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Medium.woff2', base)))
+    .replace(/<\?=\s*\$fontMediumTtf\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Medium.ttf', base)))
+    .replace(/<\?=\s*\$fontBoldWoff2\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Bold.woff2', base)))
+    .replace(/<\?=\s*\$fontBoldTtf\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Bold.ttf', base)))
     .replace(/<\?=\s*htmlspecialchars\(\$pageTitle[^)]+\)\s*\?>/g, escapeHtml(seo.title))
     .replace(/<\?=\s*htmlspecialchars\(\$metaDescription[^)]+\)\s*\?>/g, escapeHtml(seo.description))
     .replace(/<\?=\s*htmlspecialchars\(\$base,\s*ENT_QUOTES,\s*'UTF-8'\)\s*\?>/g, base)
@@ -526,8 +528,9 @@ function fetchUpstream(apiUrl, clientIp) {
 
 function renderExamPreviewHtml(state, data) {
   const rPhp = fs.readFileSync(path.join(ROOT_DIR, 'r.php'), 'utf8');
-  const styleMatch = rPhp.match(/<style>[\s\S]*?<\/style>/);
-  const inlineStyle = styleMatch ? styleMatch[0] : '';
+  const styleMatches = [...rPhp.matchAll(/<style>[\s\S]*?<\/style>/g)];
+  const inlineStyle = (styleMatches.length > 1 ? styleMatches[1][0] : (styleMatches[0]?.[0] || ''))
+    .replace(/<\?[\s\S]*?\?>/g, '');
 
   let bodyInner = '';
   if (state === 'not_found') {
@@ -567,7 +570,8 @@ function renderExamPreviewHtml(state, data) {
     bodyInner = `<section class="exam-card exam-summary"><div class="exam-summary-inner"><div><h1 class="exam-student-name">${escapeHtml(data.student_name)}</h1><div class="exam-badges">${badges}</div></div><div class="exam-avg-box"><div class="exam-avg-label">میانگین درصد کل</div><div class="exam-avg-value" dir="ltr">${escapeHtml(faDigits(data.avg_percentage.toFixed(1)))}%</div></div></div></section><section class="exam-mobile-list">${cards}</section><section class="exam-card exam-table-wrap"><table class="exam-table"><thead><tr><th>درس / مبحث</th><th class="exam-text-center">تعداد سوال</th><th class="exam-text-center">صحیح</th><th class="exam-text-center">غلط</th><th class="exam-text-center">نزده</th><th class="exam-text-center">درصد</th></tr></thead><tbody>${rows}</tbody></table></section>${commentsHtml}`;
   }
 
-  return `<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex, nofollow"><meta name="referrer" content="no-referrer"><meta name="color-scheme" content="light"><title>کارنامه آزمون | آموزشگاه فامو</title><link rel="stylesheet" href="${escapeHtml(famoAsset('css/tokens.css'))}"><link rel="stylesheet" href="${escapeHtml(famoAsset('css/fonts.css'))}"><link rel="icon" type="image/png" sizes="32x32" href="${escapeHtml(famoAsset('images/favicon-32.png'))}">${inlineStyle}</head><body><header class="exam-header"><div class="exam-header-inner"><div class="exam-brand"><img src="${escapeHtml(famoAsset('images/logo.png'))}" alt="آموزشگاه فامو" width="40" height="40" class="exam-logo"><div><div class="exam-brand-title">آموزشگاه فامو</div><div class="exam-brand-sub">گزارش اختصاصی نتیجه آزمون</div></div></div>${data ? '<button type="button" onclick="window.print()" class="no-print exam-print-btn">چاپ کارنامه</button>' : ''}</div></header><main class="exam-main">${bodyInner}</main><footer class="exam-footer">آموزشگاه فامو — مشاوره تخصصی کنکور و تیزهوشان</footer></body></html>`;
+  const fontStyle = `<style>@font-face{font-family:'Vazirmatn';src:url('${escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Regular.woff2', '/'))}') format('woff2'),url('${escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Regular.ttf', '/'))}') format('truetype');font-weight:400;font-style:normal;font-display:swap;}@font-face{font-family:'Vazirmatn';src:url('${escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Medium.woff2', '/'))}') format('woff2'),url('${escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Medium.ttf', '/'))}') format('truetype');font-weight:500;font-style:normal;font-display:swap;}@font-face{font-family:'Vazirmatn';src:url('${escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Bold.woff2', '/'))}') format('woff2'),url('${escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Bold.ttf', '/'))}') format('truetype');font-weight:700;font-style:normal;font-display:swap;}</style>`;
+  return `<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex, nofollow"><meta name="referrer" content="no-referrer"><meta name="color-scheme" content="light"><title>کارنامه آزمون | آموزشگاه فامو</title><link rel="preload" as="font" type="font/woff2" href="${escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Regular.woff2', '/'))}" crossorigin><link rel="preload" as="font" type="font/woff2" href="${escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Bold.woff2', '/'))}" crossorigin>${fontStyle}<link rel="stylesheet" href="${escapeHtml(famoLocalAsset('assets/css/tokens.css', '/'))}"><link rel="icon" type="image/png" sizes="32x32" href="${escapeHtml(famoLocalAsset('assets/images/favicon-32.png', '/'))}">${inlineStyle}</head><body><header class="exam-header"><div class="exam-header-inner"><div class="exam-brand"><picture><source srcset="${escapeHtml(famoLocalAsset('assets/images/logo.webp', '/'))}" type="image/webp"><img src="${escapeHtml(famoLocalAsset('assets/images/logo.png', '/'))}" alt="آموزشگاه فامو" width="40" height="40" decoding="async" class="exam-logo"></picture><div><div class="exam-brand-title">آموزشگاه فامو</div><div class="exam-brand-sub">گزارش اختصاصی نتیجه آزمون</div></div></div>${data ? '<button type="button" onclick="window.print()" class="no-print exam-print-btn">چاپ کارنامه</button>' : ''}</div></header><main class="exam-main">${bodyInner}</main><footer class="exam-footer">آموزشگاه فامو — مشاوره تخصصی کنکور و تیزهوشان</footer></body></html>`;
 }
 
 const server = http.createServer(async (req, res) => {

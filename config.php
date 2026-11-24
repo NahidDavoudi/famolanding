@@ -88,12 +88,17 @@ function famo_append_version(string $url, string $version): string
     return $url . $sep . 'v=' . rawurlencode($version);
 }
 
-function famo_asset(string $assetPath, string $fallback): string
+function famo_asset(string $assetPath, string $fallback = ''): string
 {
-    $defaultBase = famo_is_dev() ? '' : 'https://assets.famoacademy.ir';
-    $base = rtrim(famo_env('ASSET_URL', $defaultBase), '/');
-    $url = $base === '' ? $fallback : $base . '/' . ltrim($assetPath, '/');
-    return famo_append_version($url, famo_asset_version());
+    $cleanPath = ltrim($assetPath, '/');
+    $rel = str_starts_with($cleanPath, 'assets/') ? $cleanPath : 'assets/' . $cleanPath;
+    if (is_file(__DIR__ . '/' . $rel)) {
+        return famo_local_asset($rel, '/');
+    }
+    if ($fallback !== '') {
+        return famo_append_version($fallback, famo_asset_version());
+    }
+    return famo_append_version('/' . $rel, famo_asset_version());
 }
 
 function famo_local_asset(string $relativePath, string $base = ''): string
@@ -112,7 +117,7 @@ function famo_local_asset(string $relativePath, string $base = ''): string
 
 function famo_asset_base(): string
 {
-    return rtrim(famo_env('ASSET_URL', 'https://assets.famoacademy.ir'), '/');
+    return '/assets';
 }
 
 function famo_api_url(): string

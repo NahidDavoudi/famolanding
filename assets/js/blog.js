@@ -1,11 +1,9 @@
 // blog.js - Blog module (pages/blog.php, pages/post.php)
 import { formatJalaliLong } from './jalali.js';
-const { default: API, onReady } = await import(`${window.APP_CONFIG.assetUrl}/js/api.js`);
+import API, { onReady } from './api.js';
 
 const SITE_URL = ((window.APP_CONFIG && window.APP_CONFIG.publicUrl) || window.location.origin).replace(/\/+$/, '');
-
-// Asset base is injected from this panel's ASSET_URL.
-const ASSET_BASE = (window.APP_CONFIG && window.APP_CONFIG.assetUrl) || '';
+const ASSET_BASE = (window.APP_CONFIG && window.APP_CONFIG.assetUrl) || '/assets';
 const asset = (path) => `${ASSET_BASE.replace(/\/$/, '')}/${String(path).replace(/^\//, '')}`;
 
 // Categories loaded from API
@@ -390,7 +388,7 @@ function updatePostSEO(post) {
             '@type': 'EducationalOrganization',
             '@id': `${SITE_URL}/#organization`,
             name: 'آموزشگاه فامو',
-            logo: { '@type': 'ImageObject', url: asset('images/logo.png') },
+            logo: { '@type': 'ImageObject', url: `${SITE_URL}/assets/images/logo.png` },
         },
         mainEntityOfPage: { '@type': 'WebPage', '@id': `${canonical}#webpage` },
     };

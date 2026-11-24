@@ -14,7 +14,7 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
             <div class="flex items-center gap-3 shrink-0">
                 <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0">
                     <a href="<?= $homeHref ?>" aria-label="صفحه اصلی آموزشگاه فامو" class="inline-flex items-center justify-center w-11 h-11">
-                        <img src="<?= htmlspecialchars(famo_asset('images/logo.webp', $base . '../shared/images/logo.webp'), ENT_QUOTES, 'UTF-8') ?>" alt="لوگوی آموزشگاه فامو" width="44" height="44" decoding="async" class="w-11 h-11 object-contain">
+                        <img src="<?= htmlspecialchars(famo_local_asset('assets/images/logo.webp', $base), ENT_QUOTES, 'UTF-8') ?>" alt="لوگوی آموزشگاه فامو" width="44" height="44" decoding="async" class="w-11 h-11 object-contain">
                     </a>
                 </div>
                 <div>
