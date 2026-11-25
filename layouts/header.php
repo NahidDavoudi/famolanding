@@ -3,7 +3,7 @@ $base = $base ?? '';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
 $homeHref = $base === '' ? './' : $baseEsc;
 $loginUrlRaw = famo_login_url();
-$loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'https://login.famoacademy.ir/'), ENT_QUOTES, 'UTF-8');
+$loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'https://auth.famoacademy.ir/'), ENT_QUOTES, 'UTF-8');
 ?>
 <!-- Header fragment: parent page owns the document shell and includes layouts/head-common.php. Requires $base. -->
 <a href="#main-content" class="famo-skip-link">رفتن به محتوای اصلی</a>

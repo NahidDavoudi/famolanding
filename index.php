@@ -7,7 +7,7 @@ $base = '';
 $baseEsc = '';
 $siteUrl = famo_public_site_url();
 $loginUrlRaw = famo_login_url();
-$loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'https://login.famoacademy.ir/'), ENT_QUOTES, 'UTF-8');
+$loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'https://auth.famoacademy.ir/'), ENT_QUOTES, 'UTF-8');
 
 $homeData = famo_home_data();
 $ssrCoursesRaw = is_array($homeData['courses'])
