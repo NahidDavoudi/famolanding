@@ -293,3 +293,10 @@ $fontBoldTtf      = htmlspecialchars(famo_local_asset('assets/fonts/Vazirmatn-Bo
 <link rel="icon" type="image/png" sizes="16x16" href="<?= htmlspecialchars(famo_local_asset('assets/images/favicon-16.png', $base), ENT_QUOTES, 'UTF-8') ?>">
 <link rel="icon" type="image/png" sizes="32x32" href="<?= htmlspecialchars(famo_local_asset('assets/images/favicon-32.png', $base), ENT_QUOTES, 'UTF-8') ?>">
 <link rel="icon" type="image/png" sizes="96x96" href="<?= htmlspecialchars(famo_local_asset('assets/images/favicon-96.png', $base), ENT_QUOTES, 'UTF-8') ?>">
+
+<script async src="https://www.googletagmanager.com/gtm.js?id=G-4NHPK2145Z"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+</script>
