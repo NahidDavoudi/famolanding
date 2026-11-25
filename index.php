@@ -3,8 +3,8 @@ declare(strict_types=1);
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/layouts/home-data.php';
 require_once __DIR__ . '/layouts/home-render.php';
-$base = '';
-$baseEsc = '';
+$base = '/';
+$baseEsc = '/';
 $siteUrl = famo_public_site_url();
 $loginUrlRaw = famo_login_url();
 $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'https://auth.famoacademy.ir/'), ENT_QUOTES, 'UTF-8');
@@ -90,7 +90,7 @@ $page_libs = [
         <div class="container mx-auto max-w-6xl hero-inner">
             <!-- تصویر اصلی هیرو: تمام‌عرض، بدون lazy load -->
             <div class="hero-media">
-                <img src="assets/images/poster_hero.webp" alt="محیط آموزشی و کلاس‌های خصوصی آموزشگاه فامو در بابل" width="2816" height="1584" decoding="async" fetchpriority="high" class="hero-media-img">
+                <img src="/assets/images/poster_hero.webp" alt="محیط آموزشی و کلاس‌های خصوصی آموزشگاه فامو در بابل" width="2816" height="1584" decoding="async" fetchpriority="high" class="hero-media-img">
             </div>
 
             <p class="famo-eyebrow mt-5">آموزشگاه فامو | بابل</p>
@@ -105,12 +105,12 @@ $page_libs = [
             </p>
 
             <div class="hero-ctas">
-                <a href="pages/contact.php#consultation"
+                <a href="/contact/#consultation"
                     class="hero-cta famo-btn-cream font-bold px-8 py-3 rounded-full transition duration-300 shadow-lg hover:shadow-xl">
                     <i class="icon ml-2" data-lucide="phone" aria-hidden="true"></i>
                     درخواست مشاوره
                 </a>
-                <a href="pages/course.php"
+                <a href="/courses/"
                     class="hero-cta famo-btn-outline-cream font-bold px-8 py-3 rounded-full transition duration-300">
                     <i class="icon ml-2" data-lucide="book-open" aria-hidden="true"></i>
                     مشاهده برنامه‌های آموزشی
@@ -192,12 +192,12 @@ $page_libs = [
             </div>
 
             <div class="flex flex-wrap justify-center gap-3 mt-10">
-                <a href="pages/team.php"
+                <a href="/team/"
                     class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-8 py-3 rounded-full hover:bg-[#344868] transition duration-300 shadow-lg hover:shadow-xl">
                     مشاهده تمام اساتید
                     <i class="icon icon--sm mr-1" data-lucide="chevron-left" aria-hidden="true"></i>
                 </a>
-                <a href="pages/team.php#support"
+                <a href="/team/#support"
                     class="inline-flex items-center gap-2 border-2 border-[#445D84] text-[#445D84] font-bold px-7 py-3 rounded-full hover:bg-[#445D84] hover:text-white transition duration-300">
                     آشنایی با پشتیبانان
                 </a>
@@ -221,7 +221,7 @@ $page_libs = [
                     <p class="famo-advantage-text">
                         کلاس، آزمون و رفع اشکال انفرادی، متناسب با نیاز هر دانش‌آموز.
                     </p>
-                    <a href="pages/services.php" class="famo-inline-link">
+                    <a href="/services/" class="famo-inline-link">
                         آشنایی با خدمات آموزشی
                         <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
                     </a>
@@ -235,7 +235,7 @@ $page_libs = [
                     <p class="famo-advantage-text">
                         نتایج آزمون‌ها و روند دروس، با اطلاع‌رسانی پیامکی به خانواده.
                     </p>
-                    <a href="pages/services.php#smart-platform" class="famo-inline-link">
+                    <a href="/services/smart-platform/" class="famo-inline-link">
                         آشنایی با سامانه هوشمند
                         <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
                     </a>
@@ -249,7 +249,7 @@ $page_libs = [
                     <p class="famo-advantage-text">
                         از بررسی وضعیت دانش‌آموز تا ثبت و بررسی عملکرد.
                     </p>
-                    <a href="pages/services.php#process" class="famo-inline-link">
+                    <a href="/services/#process" class="famo-inline-link">
                         مشاهده مراحل آموزش
                         <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
                     </a>
@@ -258,7 +258,7 @@ $page_libs = [
         </div>
     </section>
 
-    <!-- ۴) برنامه‌های آموزشی و دوره‌های فعال (خلاصه با چیپ‌های مقاطع + حداکثر ۴ دوره) -->
+    <!-- ۴) برنامه‌های آموزشی و دوره‌های فعال (لینک مستقیم به صفحات مستقل مقاطع و دروس + حداکثر ۴ دوره) -->
     <section id="courses" class="famo-home-section py-12 sm:py-20 px-4 bg-gradient-to-b from-[#f9f7f3] to-white">
         <div class="container mx-auto max-w-6xl">
             <div class="text-center mb-7">
@@ -271,13 +271,23 @@ $page_libs = [
                 </p>
             </div>
 
-            <!-- ۵ چیپ دسترسی سریع به مقاطع در صفحه دوره‌ها -->
+            <!-- ۵ چیپ دسترسی مستقیم به صفحات مستقل مقاطع -->
             <div class="famo-course-chips" aria-label="مقاطع و اهداف تحصیلی">
-                <a href="pages/course.php#elementary" class="famo-course-chip">ابتدایی</a>
-                <a href="pages/course.php#middle-school" class="famo-course-chip">متوسطه اول</a>
-                <a href="pages/course.php#high-school" class="famo-course-chip">متوسطه دوم</a>
-                <a href="pages/course.php#konkur" class="famo-course-chip">آمادگی کنکور</a>
-                <a href="pages/course.php#tizhooshan" class="famo-course-chip">آمادگی تیزهوشان</a>
+                <a href="/courses/elementary-babol/" class="famo-course-chip">ابتدایی</a>
+                <a href="/courses/middle-school-babol/" class="famo-course-chip">متوسطه اول</a>
+                <a href="/courses/high-school-babol/" class="famo-course-chip">متوسطه دوم</a>
+                <a href="/courses/konkur-babol/" class="famo-course-chip">آمادگی کنکور</a>
+                <a href="/courses/tizhooshan-babol/" class="famo-course-chip">آمادگی تیزهوشان</a>
+            </div>
+
+            <!-- دسترسی سریع به صفحات تخصصی دروس و مشاوره در بابل -->
+            <div class="flex flex-wrap justify-center gap-2 mb-8 text-xs sm:text-sm" aria-label="دروس تخصصی و مشاوره در بابل">
+                <a href="/courses/math-babol/" class="px-3.5 py-1.5 rounded-full bg-white border border-[#E2D9C6] text-[#445D84] font-semibold hover:bg-[#EFE9DD] transition">ریاضی بابل</a>
+                <a href="/courses/physics-babol/" class="px-3.5 py-1.5 rounded-full bg-white border border-[#E2D9C6] text-[#445D84] font-semibold hover:bg-[#EFE9DD] transition">فیزیک بابل</a>
+                <a href="/courses/chemistry-babol/" class="px-3.5 py-1.5 rounded-full bg-white border border-[#E2D9C6] text-[#445D84] font-semibold hover:bg-[#EFE9DD] transition">شیمی بابل</a>
+                <a href="/courses/biology-babol/" class="px-3.5 py-1.5 rounded-full bg-white border border-[#E2D9C6] text-[#445D84] font-semibold hover:bg-[#EFE9DD] transition">زیست بابل</a>
+                <a href="/courses/rafa-eshkal-babol/" class="px-3.5 py-1.5 rounded-full bg-white border border-[#E2D9C6] text-[#445D84] font-semibold hover:bg-[#EFE9DD] transition">رفع اشکال</a>
+                <a href="/counseling-babol/" class="px-3.5 py-1.5 rounded-full bg-white border border-[#E2D9C6] text-[#445D84] font-semibold hover:bg-[#EFE9DD] transition">مشاوره تحصیلی</a>
             </div>
 
             <div class="swiper coursesSwiper<?= $hasCoursesSsr ? '' : ' coursesSwiper--loading' ?> relative pb-12">
@@ -347,7 +357,7 @@ $page_libs = [
             </div>
 
             <div class="text-center mt-8">
-                <a href="pages/course.php"
+                <a href="/courses/"
                     class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-8 py-3 rounded-full hover:bg-[#344868] transition duration-300 shadow-lg hover:shadow-xl">
                     مشاهده همه برنامه‌ها و جزئیات دوره‌ها
                     <i class="icon icon--sm mr-1" data-lucide="chevron-left" aria-hidden="true"></i>
@@ -384,7 +394,7 @@ $page_libs = [
                         <div id="homeAdmissionsExcerpt" class="famo-excerpt-list" aria-live="polite"></div>
                     </div>
                     <div>
-                        <a href="pages/admissions.php"
+                        <a href="/results/"
                             class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-6 py-2.5 rounded-full hover:bg-[#344868] transition duration-300 shadow-md">
                             مشاهده قبولی‌ها
                             <i class="icon icon--sm mr-1" data-lucide="chevron-left" aria-hidden="true"></i>
@@ -406,7 +416,7 @@ $page_libs = [
                         <div id="homeTestimonialsExcerpt" class="famo-excerpt-list" aria-live="polite"></div>
                     </div>
                     <div>
-                        <a href="pages/testimonials.php"
+                        <a href="/results/#testimonials"
                             class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-6 py-2.5 rounded-full hover:bg-[#344868] transition duration-300 shadow-md">
                             مشاهده و ثبت نظر
                             <i class="icon icon--sm mr-1" data-lucide="chevron-left" aria-hidden="true"></i>
@@ -478,12 +488,12 @@ $page_libs = [
             </div>
 
             <div class="flex flex-wrap items-center justify-center gap-4 mt-8 text-sm font-bold">
-                <a href="pages/contact.php" class="text-[#445D84] hover:underline inline-flex items-center gap-1">
+                <a href="/contact/" class="text-[#445D84] hover:underline inline-flex items-center gap-1">
                     سؤال دیگری دارید؟ تماس با فامو
                     <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
                 </a>
                 <span class="text-gray-400" aria-hidden="true">|</span>
-                <a href="pages/blog.php" class="text-[#445D84] hover:underline inline-flex items-center gap-1">
+                <a href="/blog/" class="text-[#445D84] hover:underline inline-flex items-center gap-1">
                     مطالعه مقالات و راهنمای آموزشی
                     <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
                 </a>
@@ -502,12 +512,12 @@ $page_libs = [
                     برای بررسی نیازهای آموزشی دانش‌آموز و آشنایی با برنامه‌ها و خدمات آموزشگاه فامو در بابل، با ما در ارتباط باشید.
                 </p>
                 <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-                    <a href="pages/contact.php#consultation"
+                    <a href="/contact/#consultation"
                         class="inline-flex items-center gap-2 famo-btn-cream font-bold px-8 py-3 rounded-full transition duration-300 shadow-lg">
                         <i class="icon icon--sm" data-lucide="phone" aria-hidden="true"></i>
                         درخواست مشاوره
                     </a>
-                    <a href="pages/contact.php"
+                    <a href="/contact/"
                         class="inline-flex items-center gap-2 famo-btn-outline-cream font-bold px-8 py-3 rounded-full transition duration-300">
                         <i class="icon icon--sm" data-lucide="map-pin" aria-hidden="true"></i>
                         تماس با فامو

@@ -145,12 +145,37 @@ export function svgIcon(name, cls = '') {
   return `<i class="icon${escHtml(c)}" data-lucide="${escHtml(lucideName(name))}" aria-hidden="true"></i>`;
 }
 
+export function courseCleanUrl(course) {
+  const name = strVal(course?.name);
+  const grades = strVal(course?.target_grades);
+  const haystack = `${name} ${grades}`;
+  const map = [
+    ['رفع اشکال', '/courses/rafa-eshkal-babol/'],
+    ['تیزهوشان', '/courses/tizhooshan-babol/'],
+    ['مشاوره', '/counseling-babol/'],
+    ['زیست', '/courses/biology-babol/'],
+    ['تجربی', '/courses/biology-babol/'],
+    ['شیمی', '/courses/chemistry-babol/'],
+    ['فیزیک', '/courses/physics-babol/'],
+    ['ریاضی', '/courses/math-babol/'],
+    ['حسابان', '/courses/math-babol/'],
+    ['ابتدایی', '/courses/elementary-babol/'],
+    ['متوسطه اول', '/courses/middle-school-babol/'],
+    ['متوسطه دوم', '/courses/high-school-babol/'],
+    ['کنکور', '/courses/konkur-babol/'],
+  ];
+  for (const [kw, url] of map) {
+    if (haystack.includes(kw)) return url;
+  }
+  return '/courses/';
+}
+
 export function renderCourseSlide(course, index) {
   const from = safeHex(course.gradient_color_from, '#445D84');
   const to = safeHex(course.gradient_color_to, '#6D8B9E');
   const gradient = `linear-gradient(135deg, ${from}, ${to})`;
   const imageUrl = safeUrl(resolveImageUrl(course.background_image_url));
-  const courseId = strVal(course.id);
+  const courseHref = courseCleanUrl(course);
   const courseName = strVal(course.name);
   const badgeLabel = strVal(course.badge_label);
   const targetGrades = strVal(course.target_grades);
@@ -169,7 +194,44 @@ export function renderCourseSlide(course, index) {
     : `<div class="course-image-fallback">${svgIcon(faToSvg(course.icon), 'icon--3xl text-white/90')}</div>`;
   const descBlock = description ? `<p class="famo-course-desc">${escHtml(description)}</p>` : '';
 
-  return `<div class="swiper-slide"><a class="famo-course-card" href="pages/course.php#course-${escHtml(courseId)}" aria-label="${escHtml(courseName)} - مشاهده جزئیات دوره"><div class="famo-course-media" style="background-image: ${gradient};">${mediaInner}${badgeBlock}</div><div class="famo-course-body"><h3 class="famo-course-name">${escHtml(courseName)}</h3>${metaBlock}${descBlock}<div class="famo-course-footer"><span class="famo-course-cta">جزئیات دوره <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i></span></div></div></a></div>`;
+  return `<div class="swiper-slide"><a class="famo-course-card" href="${escHtml(courseHref)}" aria-label="${escHtml(courseName)} - مشاهده جزئیات دوره"><div class="famo-course-media" style="background-image: ${gradient};">${mediaInner}${badgeBlock}</div><div class="famo-course-body"><h3 class="famo-course-name">${escHtml(courseName)}</h3>${metaBlock}${descBlock}<div class="famo-course-footer"><span class="famo-course-cta">جزئیات دوره <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i></span></div></div></a></div>`;
+}
+
+export function renderCourseGridCard(course) {
+  const from = safeHex(course.gradient_color_from, '#445D84');
+  const to = safeHex(course.gradient_color_to, '#6D8B9E');
+  const rawImg = strVal(course.background_image_url) || strVal(course.image_url) || strVal(course.image);
+  const imageUrl = safeUrl(resolveImageUrl(rawImg));
+  const courseId = strVal(course.id);
+  const courseName = strVal(course.name);
+  const badgeLabel = strVal(course.badge_label);
+  const targetGrades = strVal(course.target_grades);
+  const format = strVal(course.format);
+  const bodyText = strVal(course.full_description) || strVal(course.description);
+  const detailUrl = courseCleanUrl(course);
+
+  const badgeBlock = badgeLabel ? `<span class="course-badge">${escHtml(badgeLabel)}</span>` : '';
+  const metaItems = [
+    targetGrades ? `<span>${escHtml(targetGrades)}</span>` : '',
+    format ? `<span>${escHtml(format)}</span>` : '',
+  ].filter(Boolean).join('');
+  const metaBlock = metaItems ? `<div class="course-meta">${metaItems}</div>` : '';
+  const featuresHtml = Array.isArray(course.features)
+    ? course.features
+      .map((f) => strVal(f).trim())
+      .filter(Boolean)
+      .map((f) => `<li>${svgIcon('icon-check', 'icon--sm text-[#445D84]')}<span>${escHtml(f)}</span></li>`)
+      .join('')
+    : '';
+  const featuresBlock = featuresHtml ? `<ul class="course-features">${featuresHtml}</ul>` : '';
+  const mediaInner = imageUrl
+    ? `<img src="${escHtml(imageUrl)}" alt="${escHtml(courseName)}" loading="lazy" decoding="async" class="course-image">`
+    : `<div class="course-image-fallback">${svgIcon(faToSvg(course.icon), 'icon--3xl text-white/90')}</div>`;
+  const detailLink = detailUrl !== '/courses/'
+    ? `<a href="${escHtml(detailUrl)}" class="text-sm font-bold text-[#445D84] hover:underline inline-flex items-center gap-1">جزئیات بیشتر ${svgIcon('icon-chevron-left', 'icon--sm')}</a>`
+    : '';
+
+  return `<article id="course-${escHtml(courseId)}" class="course-card"><div class="course-image-wrapper" style="background: linear-gradient(135deg, ${from}, ${to});">${mediaInner}${badgeBlock}</div><div class="course-body"><h3 class="course-name">${escHtml(courseName)}</h3>${metaBlock}${bodyText ? `<p class="course-desc">${escHtml(bodyText)}</p>` : ''}${featuresBlock}<div class="course-footer"><a href="/contact/#consultation" class="course-cta">درخواست مشاوره</a>${detailLink}</div></div></article>`;
 }
 
 export function renderSocialLinks(links) {

@@ -353,14 +353,19 @@ function renderListError(container, message) {
     container.replaceChildren(box);
 }
 
-async function loadTestimonials(shouldScroll = false) {
+async function loadTestimonials(shouldScroll = false, isInitial = false) {
     const listEl = document.getElementById('testimonialsList');
     const paginationEl = document.getElementById('testimonialsPagination');
     if (!listEl) return;
 
+    const isFiltered = listState.role !== 'all' || listState.page > 1;
+    const preserveFallback = isInitial && !isFiltered && listEl.dataset.hasFallback === '1';
+
     listEl.setAttribute('aria-busy', 'true');
-    listEl.replaceChildren(buildSkeletons());
-    if (paginationEl) paginationEl.replaceChildren();
+    if (!preserveFallback) {
+        listEl.replaceChildren(buildSkeletons());
+        if (paginationEl) paginationEl.replaceChildren();
+    }
 
     const params = new URLSearchParams();
     params.set('page', String(listState.page));
@@ -385,8 +390,10 @@ async function loadTestimonials(shouldScroll = false) {
         }
 
         if (!res.ok || !payload || payload.success === false) {
-            const msg = payload?.error?.message || 'دریافت نظرات با خطا مواجه شد.';
-            renderListError(listEl, msg);
+            if (!preserveFallback) {
+                const msg = payload?.error?.message || 'دریافت نظرات با خطا مواجه شد.';
+                renderListError(listEl, msg);
+            }
             return;
         }
 
@@ -397,7 +404,9 @@ async function loadTestimonials(shouldScroll = false) {
 
         const items = Array.isArray(data.items) ? data.items : [];
         if (items.length === 0) {
-            renderListEmpty(listEl, listState.role !== 'all');
+            if (!preserveFallback) {
+                renderListEmpty(listEl, listState.role !== 'all');
+            }
             return;
         }
 
@@ -415,7 +424,9 @@ async function loadTestimonials(shouldScroll = false) {
             }
         }
     } catch {
-        renderListError(listEl, 'ارتباط با سرور برقرار نشد. لطفاً اتصال اینترنت خود را بررسی کرده و دوباره تلاش کنید.');
+        if (!preserveFallback) {
+            renderListError(listEl, 'ارتباط با سرور برقرار نشد. لطفاً اتصال اینترنت خود را بررسی کرده و دوباره تلاش کنید.');
+        }
     } finally {
         listEl.setAttribute('aria-busy', 'false');
     }
@@ -643,5 +654,9 @@ onDomReady(() => {
     initPageChrome();
     renderRoleFilters();
     initTestimonialForm();
-    loadTestimonials();
+    const listEl = document.getElementById('testimonialsList');
+    if (listEl && listEl.dataset.ssr === '1') {
+        return;
+    }
+    loadTestimonials(false, true);
 });

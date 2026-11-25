@@ -7,7 +7,11 @@ import { fileURLToPath } from 'node:url';
 import {
   famoHomeData,
   renderCourseSlide,
+  renderCourseGridCard,
+  normalizeInstructor,
+  normalizeSupporter,
   buildTeamList,
+  renderPersonCard,
   renderTeamCards,
   renderTeamDots,
 } from './home-ssr-preview.mjs';
@@ -54,10 +58,6 @@ function famoAssetBase() {
   return '/assets';
 }
 
-function famoAssetVersion() {
-  return famoEnv('ASSET_VERSION', '').trim();
-}
-
 function famoAppendVersion(url, version) {
   if (!version) return url;
   const sep = url.includes('?') ? '&' : '?';
@@ -70,7 +70,7 @@ function famoAsset(assetPath) {
   return famoLocalAsset(rel, '/');
 }
 
-function famoLocalAsset(relPath, base = '') {
+function famoLocalAsset(relPath, base = '/') {
   const cleanRel = String(relPath).replace(/^\/+/, '');
   const fullPath = path.join(ROOT_DIR, cleanRel);
   const url = `${base}${cleanRel}`;
@@ -133,6 +133,31 @@ const MIME_TYPES = {
   '.ttf': 'font/ttf',
 };
 
+function loadSeoPagesMap() {
+  const jsonPath = path.join(ROOT_DIR, 'layouts', 'seo-pages.json');
+  try {
+    const parsed = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+    const map = new Map();
+    if (Array.isArray(parsed)) {
+      for (const item of parsed) {
+        if (item && typeof item.slug === 'string' && item.slug.trim()) {
+          map.set(item.slug.trim().replace(/^\/+|\/+$/g, ''), item);
+        }
+      }
+    } else if (parsed && typeof parsed === 'object') {
+      for (const [key, item] of Object.entries(parsed)) {
+        if (item && typeof item === 'object') {
+          const slug = String(item.slug || key).trim().replace(/^\/+|\/+$/g, '');
+          if (slug) map.set(slug, { ...item, slug });
+        }
+      }
+    }
+    return map;
+  } catch {
+    return new Map();
+  }
+}
+
 function parsePageLibsFromPreamble(preamble) {
   const libs = {
     gsap: true,
@@ -155,15 +180,11 @@ function parsePageLibsFromPreamble(preamble) {
 function evalLibsConditionals(html, libs) {
   let out = html;
   let prev;
-  // Evaluate innermost <?php if (!empty($libs['key'])): ?> ... <?php endif; ?> blocks first
-  const innerIf = /<\?php\s+if\s*\(!empty\(\$libs\['([a-z_]+)'\]\)\):\s*\?>([\s\S]*?)<\?php\s+endif;\s*\?>/g;
-  // Use a non-greedy parser that only matches blocks without nested <?php if
   const leafIf = /<\?php\s+if\s*\(!empty\(\$libs\['([a-z_]+)'\]\)\):\s*\?>((?:(?!<\?php\s+if\b)[\s\S])*?)<\?php\s+endif;\s*\?>/g;
   do {
     prev = out;
     out = out.replace(leafIf, (_m, key, body) => (libs[key] ? body : ''));
   } while (out !== prev);
-  void innerIf;
   return out;
 }
 
@@ -183,60 +204,84 @@ function parsePhpStringVar(preamble, varName) {
   return m ? m[1].replace(/\\'/g, "'") : '';
 }
 
-function buildPreviewGraph(relPath, seo) {
-  const siteUrl = famoPublicSiteUrl();
+function escapeHtml(val) {
+  return String(val ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function buildOrgAndWebsite(siteUrl, ogImage) {
   const orgId = `${siteUrl}/#organization`;
   const websiteId = `${siteUrl}/#website`;
+  return {
+    orgId,
+    websiteId,
+    org: {
+      '@type': ['EducationalOrganization', 'Organization'],
+      '@id': orgId,
+      name: 'آموزشگاه فامو',
+      alternateName: 'Famo Academy',
+      url: `${siteUrl}/`,
+      logo: { '@type': 'ImageObject', url: `${siteUrl}/assets/images/logo.png` },
+      image: ogImage,
+      email: 'info@famoacademy.ir',
+      telephone: '+98-901-440-2300',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'بابل',
+        addressRegion: 'مازندران',
+        addressCountry: 'IR',
+        streetAddress: 'میدان باغ فردوس، جنب بیمارستان بابل کلینیک، مدرسه بهارستان',
+      },
+      sameAs: ['https://t.me/famoacademy'],
+    },
+    website: {
+      '@type': 'WebSite',
+      '@id': websiteId,
+      url: `${siteUrl}/`,
+      name: 'آموزشگاه فامو',
+      inLanguage: 'fa-IR',
+      publisher: { '@id': orgId },
+    },
+  };
+}
+
+function buildPreviewGraph(relPath, seo, extraSchemas = [], customCrumbs = null) {
+  const siteUrl = famoPublicSiteUrl();
+  const { orgId, websiteId, org, website } = buildOrgAndWebsite(siteUrl, seo.ogImage);
   const webpageId = `${seo.canonical}#webpage`;
   const breadcrumbId = `${seo.canonical}#breadcrumb`;
 
-  const org = {
-    '@type': ['EducationalOrganization', 'Organization'],
-    '@id': orgId,
-    name: 'آموزشگاه فامو',
-    alternateName: 'Famo Academy',
-    url: `${siteUrl}/`,
-    logo: { '@type': 'ImageObject', url: `${siteUrl}/assets/images/logo.png` },
-    image: seo.ogImage,
-    email: 'info@famoacademy.ir',
-    telephone: '+98-901-440-2300',
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: 'بابل',
-      addressRegion: 'مازندران',
-      addressCountry: 'IR',
-      streetAddress: 'میدان باغ فردوس، جنب بیمارستان بابل کلینیک، مدرسه بهارستان',
-    },
-    sameAs: ['https://t.me/famoacademy'],
-  };
-
-  const website = {
-    '@type': 'WebSite',
-    '@id': websiteId,
-    url: `${siteUrl}/`,
-    name: 'آموزشگاه فامو',
-    inLanguage: 'fa-IR',
-    publisher: { '@id': orgId },
-  };
-
-  const crumbs = [{ '@type': 'ListItem', position: 1, name: 'خانه', item: famoCanonicalUrl('') }];
-  const pageLabels = {
-    'pages/course.php': 'دوره‌ها و مقاطع آموزشی',
-    'pages/services.php': 'خدمات آموزشی فامو',
-    'pages/team.php': 'اساتید و مشاوران',
-    'pages/admissions.php': 'قبولی‌های سال‌های قبل',
-    'pages/testimonials.php': 'نظرات شاگردان و اولیا',
-    'pages/blog.php': 'وبلاگ و مقالات',
-    'pages/post.php': 'وبلاگ و مقالات',
-    'pages/contact.php': 'تماس با ما و درخواست مشاوره',
-  };
-  if (pageLabels[relPath]) {
-    crumbs.push({
+  let crumbs;
+  if (Array.isArray(customCrumbs) && customCrumbs.length > 0) {
+    crumbs = customCrumbs.map((c, idx) => ({
       '@type': 'ListItem',
-      position: 2,
-      name: pageLabels[relPath],
-      item: relPath === 'pages/post.php' ? famoCanonicalUrl('pages/blog.php') : seo.canonical,
-    });
+      position: idx + 1,
+      name: c.name,
+      item: c.url,
+    }));
+  } else {
+    crumbs = [{ '@type': 'ListItem', position: 1, name: 'خانه', item: famoCanonicalUrl('') }];
+    const pageLabels = {
+      'pages/course.php': 'دوره‌های آموزشی',
+      'pages/services.php': 'خدمات آموزشی فامو',
+      'pages/team.php': 'اساتید و پشتیبانان',
+      'pages/results.php': 'نتایج، قبولی‌ها و نظرات',
+      'pages/blog.php': 'وبلاگ و مقالات',
+      'pages/post.php': 'وبلاگ و مقالات',
+      'pages/contact.php': 'تماس با ما و درخواست مشاوره',
+    };
+    if (pageLabels[relPath]) {
+      crumbs.push({
+        '@type': 'ListItem',
+        position: 2,
+        name: pageLabels[relPath],
+        item: relPath === 'pages/post.php' ? famoCanonicalUrl('blog/') : seo.canonical,
+      });
+    }
   }
 
   const webpage = {
@@ -287,50 +332,203 @@ function buildPreviewGraph(relPath, seo) {
     });
   }
 
+  for (const extra of extraSchemas) {
+    graph.push(extra);
+  }
+
   return JSON.stringify({ '@context': 'https://schema.org', '@graph': graph });
 }
 
+const COURSE_HUB_SUBJECT_LANDINGS = [
+  {
+    name: 'آموزشگاه و کلاس خصوصی ریاضی بابل',
+    desc: 'تدریس مفهومی ریاضی، حسابان، هندسه و آمار از پایه چهارم تا دوازدهم و کنکور با آزمون مبحثی.',
+    level: 'ابتدایی تا کنکور',
+    url: '/courses/math-babol/',
+    icon: 'chart-column',
+  },
+  {
+    name: 'کلاس خصوصی فیزیک بابل',
+    desc: 'آموزش شهودی و حل مسائل تشریحی امتحان نهایی و تست‌های کنکور فیزیک دهم تا دوازدهم.',
+    level: 'متوسطه دوم و کنکور',
+    url: '/courses/physics-babol/',
+    icon: 'star',
+  },
+  {
+    name: 'کلاس خصوصی شیمی بابل',
+    desc: 'تسلط هم‌زمان بر مسائل استوکیومتری، شیمی آلی و متن کتاب درسی ویژه نهایی و کنکور.',
+    level: 'متوسطه دوم و کنکور',
+    url: '/courses/chemistry-babol/',
+    icon: 'file-chart-column',
+  },
+  {
+    name: 'کلاس خصوصی زیست بابل',
+    desc: 'تحلیل خط‌به‌خط کتاب درسی، شکل‌ها و تست‌های ترکیبی زیست‌شناسی رشته تجربی.',
+    level: 'دهم تا دوازدهم تجربی',
+    url: '/courses/biology-babol/',
+    icon: 'book-open',
+  },
+  {
+    name: 'کلاس رفع اشکال بابل',
+    desc: 'جلسات انفرادی رفع اشکال ریاضی و دروس تخصصی پیش از امتحانات مدرسه، نهایی و آزمون‌ها.',
+    level: 'تمام مقاطع تحصیلی',
+    url: '/courses/rafa-eshkal-babol/',
+    icon: 'circle-help',
+  },
+  {
+    name: 'مشاوره تحصیلی و کنکور بابل',
+    desc: 'برنامه‌ریزی فردی، انتخاب منابع، تحلیل آزمون و پایش هفتگی وضعیت تحصیلی دانش‌آموز.',
+    level: 'متوسطه، تیزهوشان و کنکور',
+    url: '/counseling-babol/',
+    icon: 'compass',
+  },
+];
+
+const COURSE_HUB_GRADE_PROGRAMS = [
+  {
+    badge: 'مقطع ابتدایی',
+    title: 'کلاس تقویتی ابتدایی بابل (چهارم، پنجم و ششم)',
+    desc: 'تقویت مفاهیم پایه ریاضی و علوم، تمرین حل مسئله و رفع اشکال انفرادی با ریتم متناسب با یادگیری دانش‌آموز.',
+    points: ['تقویت مفاهیم پایه درسی', 'رفع اشکال مباحث', 'افزایش تسلط و دقت', 'آماده‌سازی تدریجی مسیر تیزهوشان'],
+    url: '/courses/elementary-babol/',
+    cta: 'صفحه دوره ابتدایی',
+  },
+  {
+    badge: 'متوسطه اول',
+    title: 'کلاس تقویتی متوسطه اول بابل (هفتم، هشتم و نهم)',
+    desc: 'تثبیت پایه‌های ریاضی و علوم، آموزش مفهومی و شناسایی نقاط ضعف پیش از هدایت تحصیلی و ورود به دبیرستان.',
+    points: ['تقویت پایه‌های درسی', 'آموزش مفهومی ریاضی و علوم', 'رفع اشکال تخصصی', 'آمادگی آزمون‌های ورودی مدارس'],
+    url: '/courses/middle-school-babol/',
+    cta: 'صفحه دوره متوسطه اول',
+  },
+  {
+    badge: 'متوسطه دوم',
+    title: 'کلاس تقویتی متوسطه دوم بابل (دهم، یازدهم و دوازدهم)',
+    desc: 'آموزش دروس تخصصی و عمومی با تمرکز هم‌زمان بر نمرات امتحانات نهایی (سوابق تحصیلی) و زیربنای کنکور.',
+    points: ['آمادگی امتحان نهایی', 'آموزش دروس تخصصی و عمومی', 'رفع اشکال موضوعی', 'پایش هفتگی روند نمرات'],
+    url: '/courses/high-school-babol/',
+    cta: 'صفحه دوره متوسطه دوم',
+  },
+  {
+    badge: 'کنکور سراسری',
+    title: 'آموزشگاه کنکور بابل (تجربی، ریاضی و انسانی)',
+    desc: 'کلاس خصوصی دروس کنکور، آزمون‌های شخصی‌سازی‌شده، تحلیل درصدها و گزارش هفتگی وضعیت آموزشی داوطلبان.',
+    points: ['کلاس خصوصی دروس کنکور', 'آزمون شخصی‌سازی‌شده', 'تحلیل نتایج و درصدها', 'گزارش هفتگی پیامکی به اولیا'],
+    url: '/courses/konkur-babol/',
+    cta: 'صفحه آمادگی کنکور',
+  },
+  {
+    badge: 'مدارس استعدادهای درخشان',
+    title: 'آموزشگاه تیزهوشان بابل (شهید بهشتی و فرزانگان)',
+    desc: 'تقویت استدلال تحلیلی، سرعت و دقت در مسائل هوش و تسلط بر دروس استعداد تحصیلی ویژه ششم و نهم.',
+    points: ['هوش تحلیلی و ریاضی-منطقی', 'تمرین سرعت و دقت', 'استعداد تحصیلی نهم به دهم', 'آزمون‌های شبیه‌ساز زمان‌دار'],
+    url: '/courses/tizhooshan-babol/',
+    cta: 'صفحه آمادگی تیزهوشان',
+  },
+];
+
 function buildPreviewCourseSchema() {
   const siteUrl = famoPublicSiteUrl();
-  const pageUrl = famoCanonicalUrl('pages/course.php');
+  const pageUrl = famoCanonicalUrl('courses/');
+  const orgRef = {
+    '@type': 'EducationalOrganization',
+    '@id': `${siteUrl}/#organization`,
+    name: 'آموزشگاه فامو',
+    url: `${siteUrl}/`,
+  };
+  let pos = 1;
+  const items = [
+    ...COURSE_HUB_GRADE_PROGRAMS.map((gp) => ({
+      '@type': 'ListItem',
+      position: pos++,
+      item: {
+        '@type': 'Course',
+        name: gp.title,
+        description: gp.desc,
+        url: famoCanonicalUrl(gp.url.replace(/^\/+/, '')),
+        inLanguage: 'fa-IR',
+        provider: orgRef,
+      },
+    })),
+    ...COURSE_HUB_SUBJECT_LANDINGS.map((sl) => ({
+      '@type': 'ListItem',
+      position: pos++,
+      item: {
+        '@type': 'Course',
+        name: sl.name,
+        description: sl.desc,
+        url: famoCanonicalUrl(sl.url.replace(/^\/+/, '')),
+        inLanguage: 'fa-IR',
+        educationalLevel: sl.level,
+        provider: orgRef,
+      },
+    })),
+  ];
   return JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     '@id': `${pageUrl}#courses`,
-    name: 'دوره‌های آموزشی فامو بابل',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        item: {
-          '@type': 'Course',
-          name: 'دوره‌های تخصصی کنکور تجربی، ریاضی و انسانی',
-          description: 'آموزش مفهومی، تست‌زنی هدفمند و برنامه‌ریزی شخصی‌سازی‌شده در بابل.',
-          url: pageUrl,
-          inLanguage: 'fa-IR',
-          provider: { '@type': 'EducationalOrganization', '@id': `${siteUrl}/#organization`, name: 'آموزشگاه فامو', url: `${siteUrl}/` },
-        },
-      },
-    ],
+    name: 'دوره‌های آموزشی و تقویتی آموزشگاه فامو بابل',
+    itemListElement: items,
   });
 }
 
-function renderPhpPreviewFile(relPath, base, vars = {}) {
+function applyCommonReplacements(content, { relPath, base, seo, extraSchemas = [], customCrumbs = null }) {
+  const loginBase = famoEnv('LOGIN_URL', 'https://login.famoacademy.ir').replace(/\/+$/, '');
+  const loginUrl = `${loginBase}/`;
+  const homeHref = base === '' ? './' : base;
+
+  return content
+    .replace(/<\?=\s*famo_config_script\(\)\s*\?>/g, famoConfigScript())
+    .replace(/<\?=\s*\$jsonLdGraph\s*\?>/g, buildPreviewGraph(relPath, seo, extraSchemas, customCrumbs))
+    .replace(/<\?=\s*\$courseSchemaJson\s*\?>/g, buildPreviewCourseSchema())
+    .replace(/<\?=\s*\$homeHref\s*\?>/g, homeHref)
+    .replace(/<\?=\s*\$base\s*===\s*''\s*\?\s*'\.\/'\s*:\s*\$baseEsc\s*\?>/g, homeHref)
+    .replace(/<\?=\s*htmlspecialchars\(\$seoTitle[^)]+\)\s*\?>/g, escapeHtml(seo.title))
+    .replace(/<\?=\s*htmlspecialchars\(\$seoDescription[^)]+\)\s*\?>/g, escapeHtml(seo.description))
+    .replace(/<\?=\s*htmlspecialchars\(\$seoCanonical[^)]+\)\s*\?>/g, escapeHtml(seo.canonical))
+    .replace(/<\?=\s*htmlspecialchars\(\$seoRobots[^)]+\)\s*\?>/g, escapeHtml(seo.robots))
+    .replace(/<\?=\s*htmlspecialchars\(\$seoOgType[^)]+\)\s*\?>/g, escapeHtml(seo.ogType))
+    .replace(/<\?=\s*htmlspecialchars\(\$seoOgImage[^)]+\)\s*\?>/g, escapeHtml(seo.ogImage))
+    .replace(/<\?=\s*htmlspecialchars\(\$seoOgImageAlt[^)]+\)\s*\?>/g, escapeHtml(seo.ogImageAlt))
+    .replace(/<\?=\s*\$fontRegularWoff2\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Regular.woff2', base)))
+    .replace(/<\?=\s*\$fontRegularTtf\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Regular.ttf', base)))
+    .replace(/<\?=\s*\$fontMediumWoff2\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Medium.woff2', base)))
+    .replace(/<\?=\s*\$fontMediumTtf\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Medium.ttf', base)))
+    .replace(/<\?=\s*\$fontBoldWoff2\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Bold.woff2', base)))
+    .replace(/<\?=\s*\$fontBoldTtf\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Bold.ttf', base)))
+    .replace(/<\?=\s*htmlspecialchars\(\$pageTitle[^)]+\)\s*\?>/g, escapeHtml(seo.title))
+    .replace(/<\?=\s*htmlspecialchars\(\$metaDescription[^)]+\)\s*\?>/g, escapeHtml(seo.description))
+    .replace(/<\?=\s*htmlspecialchars\(\$base,\s*ENT_QUOTES,\s*'UTF-8'\)\s*\?>/g, base)
+    .replace(/<\?=\s*\$baseEsc\s*\?>/g, base)
+    .replace(/<\?=\s*\$loginUrlEsc\s*\?>/g, loginUrl)
+    .replace(/<\?=\s*htmlspecialchars\(famo_login_url\(\)\s*\.\s*'\/'[^)]+\)\s*\?>/g, loginUrl)
+    .replace(/<\?=\s*json_encode\(famo_public_url\(\)[^)]+\)\s*\?>/g, JSON.stringify(famoEnv('PUBLIC_URL', '').replace(/\/+$/, '')))
+    .replace(/<\?=\s*htmlspecialchars\(famo_local_asset\('([^']+)',\s*\$base\),\s*ENT_QUOTES,\s*'UTF-8'\)\s*\?>/g, (_m, p) => escapeHtml(famoLocalAsset(p, base)))
+    .replace(/<\?=\s*htmlspecialchars\(famo_asset\('([^']+)'[^)]+\),\s*ENT_QUOTES,\s*'UTF-8'\)\s*\?>/g, (_m, p) => escapeHtml(famoAsset(p)));
+}
+
+function renderPhpPreviewFile(relPath, base = '/', vars = {}) {
   const fullPath = path.join(ROOT_DIR, relPath);
   let content = fs.readFileSync(fullPath, 'utf8');
 
-  // Parse $page_libs and SEO variables from leading PHP preamble before stripping it
   const preambleMatch = content.match(/^<\?php([\s\S]*?)\?>\s*/m);
   const preamble = preambleMatch ? preambleMatch[1] : '';
   const libs = parsePageLibsFromPreamble(preamble);
 
   const siteUrl = famoPublicSiteUrl();
+  const parsedCanonical = parsePhpStringVar(preamble, 'canonicalPath');
+  const effectiveCanonicalRel =
+    vars.canonicalPath !== undefined
+      ? vars.canonicalPath
+      : (parsedCanonical || (relPath === 'index.php' ? '' : relPath));
+
   const seo = {
-    title: parsePhpStringVar(preamble, 'pageTitle') || vars.pageTitle || 'آموزشگاه فامو بابل | آموزش شخصی، با نگاهی هوشمند',
-    description: parsePhpStringVar(preamble, 'metaDescription') || vars.metaDescription || 'آموزشگاه فامو در بابل؛ آموزش شخصی‌سازی‌شده، کلاس خصوصی، آزمون شخصی، مشاوره و پایش عملکرد از ابتدایی تا کنکور و تیزهوشان.',
-    canonical: famoCanonicalUrl(parsePhpStringVar(preamble, 'canonicalPath') || (relPath === 'index.php' ? '' : relPath)),
-    robots: parsePhpStringVar(preamble, 'robots') || 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
-    ogType: parsePhpStringVar(preamble, 'ogType') || 'website',
+    title: vars.pageTitle || parsePhpStringVar(preamble, 'pageTitle') || 'آموزشگاه فامو بابل | آموزش شخصی، با نگاهی هوشمند',
+    description: vars.metaDescription || parsePhpStringVar(preamble, 'metaDescription') || 'آموزشگاه فامو در بابل؛ آموزش شخصی‌سازی‌شده، کلاس خصوصی، آزمون شخصی، مشاوره و پایش عملکرد از ابتدایی تا کنکور و تیزهوشان.',
+    canonical: famoCanonicalUrl(effectiveCanonicalRel),
+    robots: vars.robots || parsePhpStringVar(preamble, 'robots') || 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+    ogType: vars.ogType || parsePhpStringVar(preamble, 'ogType') || 'website',
     ogImage: relPath === 'pages/course.php'
       ? `${siteUrl}/assets/images/courses_banner.webp`
       : relPath === 'pages/team.php'
@@ -355,7 +553,7 @@ function renderPhpPreviewFile(relPath, base, vars = {}) {
   // Evaluate $libs conditionals from head-common.php
   content = evalLibsConditionals(content, libs);
 
-  // Evaluate Homepage SSR blocks for index.php (mirrors layouts/home-data.php + layouts/home-render.php)
+  // Page-specific PHP block evaluation
   if (relPath === 'index.php') {
     const homeData = vars.homeData || { courses: null, instructors: null, supporters: null };
     const ssrCoursesRaw = Array.isArray(homeData.courses)
@@ -387,50 +585,394 @@ function renderPhpPreviewFile(relPath, base, vars = {}) {
           ? ssrCourses.map((c, idx) => renderCourseSlide(c, idx)).join('\n')
           : fallbackHtml
       ));
+  } else if (relPath === 'pages/course.php') {
+    const homeData = vars.homeData || { courses: null };
+    const rawCourses = Array.isArray(homeData.courses)
+      ? homeData.courses.filter((c) => c && typeof c === 'object')
+      : [];
+    const hasCoursesSsr = rawCourses.length > 0;
+
+    const subjectCardsHtml = COURSE_HUB_SUBJECT_LANDINGS.map((sl) => `
+            <article class="famo-advantage-card hover-lift">
+                <span class="famo-advantage-icon" aria-hidden="true">
+                    <i class="icon icon--lg" data-lucide="${escapeHtml(sl.icon)}" aria-hidden="true"></i>
+                </span>
+                <h3 class="famo-advantage-title">${escapeHtml(sl.name)}</h3>
+                <p class="text-xs font-bold text-[#736158] mb-2">${escapeHtml(sl.level)}</p>
+                <p class="famo-advantage-text">${escapeHtml(sl.desc)}</p>
+                <a href="${escapeHtml(sl.url)}" class="famo-inline-link">
+                    مشاهده صفحه اختصاصی
+                    <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+                </a>
+            </article>`).join('\n');
+
+    const gradeProgramsHtml = COURSE_HUB_GRADE_PROGRAMS.map((gp) => `
+        <article class="famo-detail-block">
+            <span class="famo-eyebrow famo-eyebrow--light">${escapeHtml(gp.badge)}</span>
+            <h2 class="text-2xl sm:text-3xl font-bold text-[#445D84] mb-3">${escapeHtml(gp.title)}</h2>
+            <p class="text-gray-600 leading-relaxed mb-4">${escapeHtml(gp.desc)}</p>
+            <ul class="famo-bullet-grid">
+                ${gp.points.map((pt) => `<li><span class="famo-feature-check" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span>${escapeHtml(pt)}</li>`).join('\n')}
+            </ul>
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="${escapeHtml(gp.url)}" class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-6 py-2.5 rounded-full hover:bg-[#344868] transition text-sm">
+                    ${escapeHtml(gp.cta)}
+                    <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+                </a>
+                <a href="/contact/#consultation" class="inline-flex items-center gap-2 border-2 border-[#445D84] text-[#445D84] font-bold px-5 py-2 rounded-full hover:bg-[#445D84] hover:text-white transition text-sm">
+                    درخواست مشاوره
+                </a>
+            </div>
+        </article>`).join('\n');
+
+    const fallbackCoursesHtml = COURSE_HUB_SUBJECT_LANDINGS.slice(0, 3).map((fb) => `
+            <article class="course-card">
+                <div class="course-image-wrapper" style="background: linear-gradient(135deg, #445D84, #6D8B9E);">
+                    <div class="course-image-fallback">
+                        <i class="icon icon--3xl text-white/90" data-lucide="${escapeHtml(fb.icon)}" aria-hidden="true"></i>
+                    </div>
+                    <span class="course-badge">برنامه فعال بابل</span>
+                </div>
+                <div class="course-body">
+                    <h3 class="course-name">${escapeHtml(fb.name)}</h3>
+                    <div class="course-meta"><span>${escapeHtml(fb.level)}</span><span>خصوصی و انفرادی</span></div>
+                    <p class="course-desc">${escapeHtml(fb.desc)}</p>
+                    <div class="course-footer">
+                        <a href="/contact/#consultation" class="course-cta">درخواست مشاوره</a>
+                        <a href="${escapeHtml(fb.url)}" class="text-sm font-bold text-[#445D84] hover:underline inline-flex items-center gap-1">
+                            جزئیات بیشتر
+                            <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+                        </a>
+                    </div>
+                </div>
+            </article>`).join('\n');
+
+    content = content
+      .replace(/<\?php foreach \(\$subjectLandings as \$sl\): \?>[\s\S]*?<\/article>\s*<\?php endforeach; \?>/, subjectCardsHtml)
+      .replace(/<\?php foreach \(\$gradePrograms as \$gp\): \?>[\s\S]*?<\/article>\s*<\?php endforeach; \?>/, gradeProgramsHtml)
+      .replace(/<\?=\s*\$hasCoursesSsr\s*\?\s*' data-ssr="1"'\s*:\s*' data-has-fallback="1"'\s*\?>/g, hasCoursesSsr ? ' data-ssr="1"' : ' data-has-fallback="1"')
+      .replace(/<\?php if \(\$hasCoursesSsr\): \?>[\s\S]*?<\?php else: \?>[\s\S]*?<\?php endif; \?>/, hasCoursesSsr ? rawCourses.map((c) => renderCourseGridCard(c)).join('\n') : fallbackCoursesHtml);
+  } else if (relPath === 'pages/team.php') {
+    const homeData = vars.homeData || { instructors: null, supporters: null };
+    const ssrInstructors = Array.isArray(homeData.instructors)
+      ? homeData.instructors.filter((x) => x && typeof x === 'object').map(normalizeInstructor)
+      : [];
+    const ssrSupporters = Array.isArray(homeData.supporters)
+      ? homeData.supporters.filter((x) => x && typeof x === 'object').map(normalizeSupporter)
+      : [];
+    const hasInstructorsSsr = ssrInstructors.length > 0;
+    const hasSupportersSsr = ssrSupporters.length > 0;
+
+    content = content
+      .replace(/<\?=\s*\$hasInstructorsSsr\s*\?\s*' data-ssr="1"'\s*:\s*' data-has-fallback="1"'\s*\?>/g, hasInstructorsSsr ? ' data-ssr="1"' : ' data-has-fallback="1"')
+      .replace(/<\?php if \(\$hasInstructorsSsr\): \?>[\s\S]*?<\?php else: \?>([\s\S]*?)<\?php endif; \?>/, (_m, fb) => (hasInstructorsSsr ? ssrInstructors.map((p) => renderPersonCard(p)).join('\n') : fb))
+      .replace(/<\?=\s*\$hasSupportersSsr\s*\?\s*' data-ssr="1"'\s*:\s*' data-has-fallback="1"'\s*\?>/g, hasSupportersSsr ? ' data-ssr="1"' : ' data-has-fallback="1"')
+      .replace(/<\?php if \(\$hasSupportersSsr\): \?>[\s\S]*?<\?php else: \?>([\s\S]*?)<\?php endif; \?>/, (_m, fb) => (hasSupportersSsr ? ssrSupporters.map((p) => renderPersonCard(p)).join('\n') : fb));
+  } else if (relPath === 'pages/results.php') {
+    content = content
+      .replace(/<\?=\s*\$hasAdmSsr\s*\?\s*' data-ssr="1"'\s*:\s*' data-has-fallback="1"'\s*\?>/g, ' data-has-fallback="1"')
+      .replace(/<\?php if \(\$hasAdmSsr\): \?>[\s\S]*?<\?php else: \?>([\s\S]*?)<\?php endif; \?>/, (_m, fb) => fb)
+      .replace(/<\?=\s*\$testiSummary\s*\?[\s\S]*?:\s*'ثبت‌شده'\s*\?>/g, 'ثبت‌شده')
+      .replace(/<\?=\s*\(\$testiSummary[\s\S]*?:\s*'شفاف'\s*\?>/g, 'شفاف')
+      .replace(/<\?=\s*\$hasTestiSsr\s*\?\s*' data-ssr="1"'\s*:\s*' data-has-fallback="1"'\s*\?>/g, ' data-has-fallback="1"')
+      .replace(/<\?php if \(\$hasTestiSsr\): \?>[\s\S]*?<\?php else: \?>([\s\S]*?)<\?php endif; \?>/, (_m, fb) => fb);
+  } else if (relPath === 'pages/blog.php') {
+    content = content
+      .replace(/<\?=\s*\$hasPostsSsr\s*\?\s*' data-ssr="1"'\s*:\s*' data-has-fallback="1"'\s*\?>/g, ' data-has-fallback="1"')
+      .replace(/<\?php if \(\$hasPostsSsr\): \?>[\s\S]*?<\?php else: \?>([\s\S]*?)<\?php endif; \?>/, (_m, fb) => fb);
+  } else if (relPath === 'pages/post.php') {
+    const isNotFound = !vars.blogSlug;
+    content = content
+      .replace(/<\?=\s*is_array\(\$ssrPost\)\s*\?[\s\S]*?\?>/g, isNotFound ? ' data-not-found="1"' : ' data-has-fallback="1"')
+      .replace(/<\?php if \(is_array\(\$ssrPost\)\):[\s\S]*?<\?php elseif \(\$isNotFound\): \?>([\s\S]*?)<\?php else: \?>([\s\S]*?)<\?php endif; \?>/, (_m, nfHtml, fbHtml) => (isNotFound ? nfHtml : fbHtml));
   }
 
-  const loginBase = famoEnv('LOGIN_URL', 'https://login.famoacademy.ir').replace(/\/+$/, '');
-  const loginUrl = `${loginBase}/`;
-  const homeHref = base === '' ? './' : base;
-
-  // Evaluate standard echo expressions used across the PHP pages for preview
-  return content
-    .replace(/<\?=\s*famo_config_script\(\)\s*\?>/g, famoConfigScript())
-    .replace(/<\?=\s*\$jsonLdGraph\s*\?>/g, buildPreviewGraph(relPath, seo))
-    .replace(/<\?=\s*\$courseSchemaJson\s*\?>/g, buildPreviewCourseSchema())
-    .replace(/<\?=\s*\$homeHref\s*\?>/g, homeHref)
-    .replace(/<\?=\s*\$base\s*===\s*''\s*\?\s*'\.\/'\s*:\s*\$baseEsc\s*\?>/g, homeHref)
-    .replace(/<\?=\s*htmlspecialchars\(\$seoTitle[^)]+\)\s*\?>/g, escapeHtml(seo.title))
-    .replace(/<\?=\s*htmlspecialchars\(\$seoDescription[^)]+\)\s*\?>/g, escapeHtml(seo.description))
-    .replace(/<\?=\s*htmlspecialchars\(\$seoCanonical[^)]+\)\s*\?>/g, escapeHtml(seo.canonical))
-    .replace(/<\?=\s*htmlspecialchars\(\$seoRobots[^)]+\)\s*\?>/g, escapeHtml(seo.robots))
-    .replace(/<\?=\s*htmlspecialchars\(\$seoOgType[^)]+\)\s*\?>/g, escapeHtml(seo.ogType))
-    .replace(/<\?=\s*htmlspecialchars\(\$seoOgImage[^)]+\)\s*\?>/g, escapeHtml(seo.ogImage))
-    .replace(/<\?=\s*htmlspecialchars\(\$seoOgImageAlt[^)]+\)\s*\?>/g, escapeHtml(seo.ogImageAlt))
-    .replace(/<\?=\s*\$fontRegularWoff2\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Regular.woff2', base)))
-    .replace(/<\?=\s*\$fontRegularTtf\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Regular.ttf', base)))
-    .replace(/<\?=\s*\$fontMediumWoff2\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Medium.woff2', base)))
-    .replace(/<\?=\s*\$fontMediumTtf\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Medium.ttf', base)))
-    .replace(/<\?=\s*\$fontBoldWoff2\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Bold.woff2', base)))
-    .replace(/<\?=\s*\$fontBoldTtf\s*\?>/g, escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Bold.ttf', base)))
-    .replace(/<\?=\s*htmlspecialchars\(\$pageTitle[^)]+\)\s*\?>/g, escapeHtml(seo.title))
-    .replace(/<\?=\s*htmlspecialchars\(\$metaDescription[^)]+\)\s*\?>/g, escapeHtml(seo.description))
-    .replace(/<\?=\s*htmlspecialchars\(\$base,\s*ENT_QUOTES,\s*'UTF-8'\)\s*\?>/g, base)
-    .replace(/<\?=\s*\$baseEsc\s*\?>/g, base)
-    .replace(/<\?=\s*\$loginUrlEsc\s*\?>/g, loginUrl)
-    .replace(/<\?=\s*htmlspecialchars\(famo_login_url\(\)\s*\.\s*'\/'[^)]+\)\s*\?>/g, loginUrl)
-    .replace(/<\?=\s*json_encode\(famo_public_url\(\)[^)]+\)\s*\?>/g, JSON.stringify(famoEnv('PUBLIC_URL', '').replace(/\/+$/, '')))
-    .replace(/<\?=\s*htmlspecialchars\(famo_local_asset\('([^']+)',\s*\$base\),\s*ENT_QUOTES,\s*'UTF-8'\)\s*\?>/g, (_m, p) => escapeHtml(famoLocalAsset(p, base)))
-    .replace(/<\?=\s*htmlspecialchars\(famo_asset\('([^']+)'[^)]+\),\s*ENT_QUOTES,\s*'UTF-8'\)\s*\?>/g, (_m, p) => escapeHtml(famoAsset(p)));
+  return applyCommonReplacements(content, { relPath, base, seo });
 }
 
-function escapeHtml(val) {
-  return String(val ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+function renderLandingPreviewPage(pageData) {
+  const base = '/';
+  const siteUrl = famoPublicSiteUrl();
+  const slug = String(pageData.slug || '').replace(/^\/+|\/+$/g, '');
+  const canonicalPath = `${slug}/`;
+  const pageCanonicalUrl = famoCanonicalUrl(canonicalPath);
+  const pageTitle = String(pageData.pageTitle || 'آموزشگاه فامو بابل');
+  const metaDescription = String(pageData.metaDescription || '');
+  const heroImage = String(pageData.heroImage || '/assets/images/courses_banner.webp');
+  const ogImage = heroImage.startsWith('http') ? heroImage : `${siteUrl}${heroImage}`;
+  const ogImageAlt = String(pageData.heroImageAlt || pageTitle);
+
+  const rawCrumbs = Array.isArray(pageData.breadcrumbs) ? pageData.breadcrumbs : [];
+  const breadcrumbs = rawCrumbs
+    .filter((c) => c && c.name)
+    .map((c) => ({
+      name: String(c.name),
+      path: String(c.path || ''),
+      url: famoCanonicalUrl(String(c.path || '')),
+    }));
+
+  const orgRef = {
+    '@type': 'EducationalOrganization',
+    '@id': `${siteUrl}/#organization`,
+    name: 'آموزشگاه فامو',
+    url: `${siteUrl}/`,
+  };
+
+  const schemaType = String(pageData.schemaType || 'Course');
+  const extraSchemas = [];
+  if (schemaType === 'Course') {
+    const courseEntity = {
+      '@type': 'Course',
+      '@id': `${pageCanonicalUrl}#course`,
+      name: String(pageData.h1 || pageTitle),
+      description: metaDescription,
+      url: pageCanonicalUrl,
+      inLanguage: 'fa-IR',
+      provider: orgRef,
+      hasCourseInstance: {
+        '@type': 'CourseInstance',
+        courseMode: 'onsite',
+        location: {
+          '@type': 'Place',
+          name: 'آموزشگاه فامو بابل',
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: 'بابل',
+            addressRegion: 'مازندران',
+            addressCountry: 'IR',
+            streetAddress: 'میدان باغ فردوس، جنب بیمارستان بابل کلینیک، مدرسه بهارستان',
+          },
+        },
+      },
+    };
+    if (pageData.educationalLevel) courseEntity.educationalLevel = String(pageData.educationalLevel);
+    extraSchemas.push(courseEntity);
+  } else if (schemaType === 'Service') {
+    extraSchemas.push({
+      '@type': 'Service',
+      '@id': `${pageCanonicalUrl}#service`,
+      name: String(pageData.h1 || pageTitle),
+      description: metaDescription,
+      url: pageCanonicalUrl,
+      provider: orgRef,
+      areaServed: [
+        { '@type': 'City', name: 'بابل' },
+        { '@type': 'AdministrativeArea', name: 'مازندران' },
+      ],
+    });
+  } else {
+    extraSchemas.push({
+      '@type': 'LocalBusiness',
+      '@id': `${pageCanonicalUrl}#local`,
+      name: 'آموزشگاه فامو بابل',
+      description: metaDescription,
+      url: pageCanonicalUrl,
+      telephone: '+98-901-440-2300',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'بابل',
+        addressRegion: 'مازندران',
+        addressCountry: 'IR',
+        streetAddress: 'میدان باغ فردوس، جنب بیمارستان بابل کلینیک، مدرسه بهارستان',
+      },
+      areaServed: [
+        { '@type': 'City', name: 'بابل' },
+        { '@type': 'City', name: 'امیرکلا' },
+        { '@type': 'City', name: 'بابلسر' },
+        { '@type': 'City', name: 'آمل' },
+        { '@type': 'City', name: 'قائمشهر' },
+      ],
+    });
+  }
+
+  const faqs = Array.isArray(pageData.faqs) ? pageData.faqs : [];
+  if (faqs.length > 0) {
+    extraSchemas.push({
+      '@type': 'FAQPage',
+      '@id': `${pageCanonicalUrl}#faq`,
+      inLanguage: 'fa-IR',
+      mainEntity: faqs
+        .filter((f) => f && f.q && f.a)
+        .map((f) => ({
+          '@type': 'Question',
+          name: String(f.q),
+          acceptedAnswer: { '@type': 'Answer', text: String(f.a) },
+        })),
+    });
+  }
+
+  const libs = {
+    gsap: false,
+    scroll_trigger: false,
+    scroll_to: false,
+    swiper: false,
+    lucide: true,
+    animation: false,
+  };
+
+  const readLayout = (name) => fs.readFileSync(path.join(ROOT_DIR, 'layouts', name), 'utf8').replace(/^<\?php[\s\S]*?\?>\s*/m, '');
+  const headHtml = evalLibsConditionals(readLayout('head-common.php'), libs);
+  const headerHtml = readLayout('header.php');
+  const footerHtml = readLayout('footer.php');
+
+  const crumbsNavHtml = breadcrumbs.length > 1
+    ? `<nav aria-label="مسیر صفحه" class="flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm famo-on-dark-soft mb-4">${breadcrumbs
+        .map((c, idx) => {
+          const sep = idx > 0 ? '<span aria-hidden="true">/</span>' : '';
+          if (idx < breadcrumbs.length - 1) {
+            const href = `/${c.path.replace(/^\/+/, '')}`;
+            return `${sep}<a href="${escapeHtml(href)}" class="hover:text-white transition underline-offset-4 hover:underline">${escapeHtml(c.name)}</a>`;
+          }
+          return `${sep}<span class="famo-on-dark-cream font-bold" aria-current="page">${escapeHtml(c.name)}</span>`;
+        })
+        .join('')}</nav>`
+    : '';
+
+  const highlights = Array.isArray(pageData.highlights) ? pageData.highlights : [];
+  const highlightsSection = highlights.length > 0
+    ? `<section class="py-12 sm:py-16 px-4 bg-white border-b border-[#E2D9C6]">
+        <div class="container mx-auto max-w-6xl">
+            <div class="text-center mb-10">
+                <span class="famo-eyebrow famo-eyebrow--light">ویژگی‌های برنامه در فامو</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-[#445D84]">شیوه اجرا و پیگیری آموزشی</h2>
+            </div>
+            <div class="famo-summary-grid">
+                ${highlights.map((item) => `
+                <article class="famo-advantage-card hover-lift">
+                    <span class="famo-advantage-icon" aria-hidden="true"><i class="icon icon--lg" data-lucide="check" aria-hidden="true"></i></span>
+                    <h3 class="famo-advantage-title">${escapeHtml(item.title || '')}</h3>
+                    <p class="famo-advantage-text">${escapeHtml(item.text || '')}</p>
+                </article>`).join('')}
+            </div>
+        </div>
+    </section>`
+    : '';
+
+  const audience = Array.isArray(pageData.audience) ? pageData.audience : [];
+  const syllabus = Array.isArray(pageData.syllabus) ? pageData.syllabus : [];
+  const related = Array.isArray(pageData.related) ? pageData.related : [];
+
+  const faqsSection = faqs.length > 0
+    ? `<section class="py-12 sm:py-16 px-4 bg-white border-t border-[#E2D9C6]">
+        <div class="container mx-auto max-w-4xl">
+            <div class="text-center mb-8">
+                <span class="famo-eyebrow famo-eyebrow--light">پرسش‌های پرتکرار</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-[#445D84]">سؤالات متداول خانواده‌ها و دانش‌آموزان</h2>
+            </div>
+            <div class="space-y-4">
+                ${faqs.map((faq) => `
+                <div class="faq-item bg-[#f9f7f3] rounded-xl shadow-sm border border-[#E2D9C6] overflow-hidden">
+                    <div class="faq-question cursor-pointer p-5 flex justify-between items-center gap-4" tabindex="0" role="button" aria-expanded="false">
+                        <h3 class="text-base sm:text-lg font-bold text-[#445D84] m-0">${escapeHtml(faq.q || '')}</h3>
+                        <span class="faq-icon transform transition-transform duration-300 shrink-0"><i class="icon icon--sm" data-lucide="chevron-down" aria-hidden="true"></i></span>
+                    </div>
+                    <div class="faq-answer px-5">
+                        <p class="pb-5 text-gray-700 leading-relaxed m-0">${escapeHtml(faq.a || '')}</p>
+                    </div>
+                </div>`).join('')}
+            </div>
+        </div>
+    </section>`
+    : '';
+
+  const relatedBlock = related.length > 0
+    ? `<div class="famo-detail-block">
+            <h2 class="text-xl font-bold text-[#445D84] mb-4">مسیرها و صفحات مرتبط در آموزشگاه فامو</h2>
+            <div class="flex flex-wrap gap-3">
+                ${related.map((rel) => `<a href="/${escapeHtml(String(rel.path || '').replace(/^\/+/, ''))}" class="famo-anchor-pill">${escapeHtml(rel.label || '')}</a>`).join('')}
+            </div>
+        </div>`
+    : '';
+
+  const doc = `<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    ${headHtml}
+</head>
+<body class="font-family text-gray-800 bg-[#f9f7f3]" data-static-nav="1">
+${headerHtml}
+<main id="main-content">
+    <section class="famo-page-hero gradient-bg text-white text-center">
+        <div class="container mx-auto px-4 max-w-4xl">
+            ${crumbsNavHtml}
+            <p class="famo-eyebrow">${escapeHtml(pageData.eyebrow || 'آموزشگاه فامو | بابل')}</p>
+            <h1 class="text-2xl sm:text-4xl font-bold mb-5 text-white leading-snug">${escapeHtml(pageData.h1 || pageTitle)}</h1>
+            <p class="famo-on-dark-soft text-base sm:text-lg leading-relaxed max-w-3xl mx-auto mb-7">${escapeHtml(pageData.lead || '')}</p>
+            <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+                <a href="/contact/#consultation" class="inline-flex items-center gap-2 famo-btn-cream font-bold px-7 py-3 rounded-full transition duration-300 shadow-lg">
+                    <i class="icon icon--sm" data-lucide="phone" aria-hidden="true"></i>
+                    درخواست مشاوره و تعیین سطح
+                </a>
+                <a href="/courses/" class="inline-flex items-center gap-2 famo-btn-outline-cream font-bold px-6 py-3 rounded-full transition duration-300">
+                    <i class="icon icon--sm" data-lucide="book-open" aria-hidden="true"></i>
+                    همه دوره‌ها و مقاطع
+                </a>
+            </div>
+        </div>
+    </section>
+    ${highlightsSection}
+    <section class="py-12 sm:py-16 px-4">
+        <div class="container mx-auto max-w-6xl famo-two-col">
+            <article class="famo-detail-block">
+                <span class="famo-eyebrow famo-eyebrow--light">مخاطبان این برنامه</span>
+                <h2 class="text-xl sm:text-2xl font-bold text-[#445D84] mb-4">این برنامه برای چه دانش‌آموزانی مناسب است؟</h2>
+                <ul class="space-y-3 text-gray-700 leading-relaxed list-none p-0 m-0">
+                    ${audience.map((line) => `<li class="flex items-start gap-2.5"><span class="famo-feature-check mt-1 shrink-0" aria-hidden="true"><i class="icon icon--sm" data-lucide="check" aria-hidden="true"></i></span><span>${escapeHtml(line)}</span></li>`).join('')}
+                </ul>
+            </article>
+            <article class="famo-detail-block">
+                <span class="famo-eyebrow famo-eyebrow--light">سرفصل‌ها و محورهای کلیدی</span>
+                <h2 class="text-xl sm:text-2xl font-bold text-[#445D84] mb-4">آنچه در این مسیر پوشش داده می‌شود</h2>
+                <ul class="space-y-3 text-gray-700 leading-relaxed list-none p-0 m-0">
+                    ${syllabus.map((topic) => `<li class="flex items-start gap-2.5"><span class="famo-feature-check mt-1 shrink-0" aria-hidden="true"><i class="icon icon--sm" data-lucide="book-open" aria-hidden="true"></i></span><span>${escapeHtml(topic)}</span></li>`).join('')}
+                </ul>
+            </article>
+        </div>
+    </section>
+    ${faqsSection}
+    <section class="py-12 sm:py-16 px-4">
+        <div class="container mx-auto max-w-6xl space-y-10">
+            ${relatedBlock}
+            <div class="gradient-bg rounded-3xl p-8 sm:p-10 text-center text-white shadow-xl">
+                <h2 class="text-2xl sm:text-3xl font-bold mb-3">آماده شروع برنامه شخصی‌سازی‌شده هستید؟</h2>
+                <p class="famo-on-dark-soft max-w-2xl mx-auto leading-relaxed mb-7">
+                    برای بررسی پایه تحصیلی، انتخاب استاد مناسب و هماهنگی جلسه مشاوره حضوری در میدان باغ فردوس بابل با واحد مشاوره فامو در تماس باشید.
+                </p>
+                <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+                    <a href="/contact/#consultation" class="inline-flex items-center gap-2 famo-btn-cream font-bold px-8 py-3 rounded-full transition duration-300 shadow-lg">
+                        <i class="icon icon--sm" data-lucide="phone" aria-hidden="true"></i>
+                        درخواست مشاوره
+                    </a>
+                    <a href="tel:+989014402300" dir="ltr" class="inline-flex items-center gap-2 famo-btn-outline-cream font-bold px-7 py-3 rounded-full transition duration-300">
+                        0901-440-2300
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+${footerHtml}
+</body>
+</html>`;
+
+  return applyCommonReplacements(doc, {
+    relPath: 'pages/landing.php',
+    base,
+    seo: {
+      title: pageTitle,
+      description: metaDescription,
+      canonical: pageCanonicalUrl,
+      robots: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+      ogType: 'website',
+      ogImage,
+      ogImageAlt,
+      webPageType: 'WebPage',
+    },
+    extraSchemas,
+    customCrumbs: breadcrumbs,
+  });
 }
 
 function faDigits(str) {
@@ -574,9 +1116,31 @@ function renderExamPreviewHtml(state, data) {
   return `<!DOCTYPE html><html lang="fa" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex, nofollow"><meta name="referrer" content="no-referrer"><meta name="color-scheme" content="light"><title>کارنامه آزمون | آموزشگاه فامو</title><link rel="preload" as="font" type="font/woff2" href="${escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Regular.woff2', '/'))}" crossorigin><link rel="preload" as="font" type="font/woff2" href="${escapeHtml(famoLocalAsset('assets/fonts/Vazirmatn-Bold.woff2', '/'))}" crossorigin>${fontStyle}<link rel="stylesheet" href="${escapeHtml(famoLocalAsset('assets/css/tokens.css', '/'))}"><link rel="icon" type="image/png" sizes="32x32" href="${escapeHtml(famoLocalAsset('assets/images/favicon-32.png', '/'))}">${inlineStyle}</head><body><header class="exam-header"><div class="exam-header-inner"><div class="exam-brand"><picture><source srcset="${escapeHtml(famoLocalAsset('assets/images/logo.webp', '/'))}" type="image/webp"><img src="${escapeHtml(famoLocalAsset('assets/images/logo.png', '/'))}" alt="آموزشگاه فامو" width="40" height="40" decoding="async" class="exam-logo"></picture><div><div class="exam-brand-title">آموزشگاه فامو</div><div class="exam-brand-sub">گزارش اختصاصی نتیجه آزمون</div></div></div>${data ? '<button type="button" onclick="window.print()" class="no-print exam-print-btn">چاپ کارنامه</button>' : ''}</div></header><main class="exam-main">${bodyInner}</main><footer class="exam-footer">آموزشگاه فامو — مشاوره تخصصی کنکور و تیزهوشان</footer></body></html>`;
 }
 
+const LEGACY_PHP_REDIRECTS = {
+  '/index.php': { dest: '/', keepQs: true },
+  '/pages/course.php': { dest: '/courses/', keepQs: false },
+  '/pages/services.php': { dest: '/services/', keepQs: false },
+  '/pages/team.php': { dest: '/team/', keepQs: false },
+  '/pages/admissions.php': { dest: '/results/', keepQs: false },
+  '/pages/testimonials.php': { dest: '/results/', keepQs: false },
+  '/pages/results.php': { dest: '/results/', keepQs: false },
+  '/pages/contact.php': { dest: '/contact/', keepQs: false },
+  '/pages/blog.php': { dest: '/blog/', keepQs: true },
+};
+
+const CLEAN_STATIC_ROUTES = {
+  '/courses/': 'pages/course.php',
+  '/services/': 'pages/services.php',
+  '/team/': 'pages/team.php',
+  '/results/': 'pages/results.php',
+  '/contact/': 'pages/contact.php',
+  '/blog/': 'pages/blog.php',
+};
+
 const server = http.createServer(async (req, res) => {
   const reqUrl = new URL(req.url || '/', `http://${req.headers.host || '127.0.0.1'}`);
   const pathname = reqUrl.pathname;
+  const qs = reqUrl.search || '';
 
   // Mirror .htaccess Phase 0 hardening: block internal/config files & directories
   if (
@@ -588,14 +1152,22 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Mirror .htaccess Phase 0 canonical redirect: /index.php -> /
-  if (pathname === '/index.php') {
-    const qs = reqUrl.search || '';
-    res.writeHead(301, { Location: `/${qs}` });
+  // Mirror .htaccess 301 redirects for legacy .php URLs
+  if (Object.prototype.hasOwnProperty.call(LEGACY_PHP_REDIRECTS, pathname)) {
+    const cfg = LEGACY_PHP_REDIRECTS[pathname];
+    res.writeHead(301, { Location: cfg.keepQs ? `${cfg.dest}${qs}` : cfg.dest });
+    res.end();
+    return;
+  }
+  if (pathname === '/pages/post.php') {
+    const slug = String(reqUrl.searchParams.get('slug') || '').trim();
+    const dest = slug ? `/blog/${encodeURIComponent(slug)}/` : '/blog/';
+    res.writeHead(301, { Location: dest });
     res.end();
     return;
   }
 
+  // Static assets, robots.txt, sitemap.xml
   if (pathname.startsWith('/assets/') || pathname === '/robots.txt' || pathname === '/sitemap.xml') {
     const safeRel = path.normalize(pathname).replace(/^(\.\.(\/|\\|$))+/, '');
     const filePath = path.join(ROOT_DIR, safeRel);
@@ -610,54 +1182,71 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  const seoPagesMap = loadSeoPagesMap();
+
+  // Trailing-slash 301 normalization for clean URLs
+  if (pathname.length > 1 && !pathname.endsWith('/')) {
+    const withSlash = `${pathname}/`;
+    const candidateSlug = pathname.replace(/^\/+/, '');
+    if (
+      Object.prototype.hasOwnProperty.call(CLEAN_STATIC_ROUTES, withSlash) ||
+      seoPagesMap.has(candidateSlug) ||
+      /^\/blog\/[^/]+$/.test(pathname)
+    ) {
+      res.writeHead(301, { Location: `${withSlash}${qs}` });
+      res.end();
+      return;
+    }
+  }
+
+  // Homepage
   if (pathname === '/') {
     const homeData = await famoHomeData();
-    const html = renderPhpPreviewFile('index.php', '', { homeData });
+    const html = renderPhpPreviewFile('index.php', '/', { homeData });
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(html);
     return;
   }
 
-  if (pathname === '/pages/course.php') {
+  // Clean hub pages (/courses/, /services/, /team/, /results/, /contact/, /blog/)
+  if (Object.prototype.hasOwnProperty.call(CLEAN_STATIC_ROUTES, pathname)) {
+    const targetFile = CLEAN_STATIC_ROUTES[pathname];
+    const vars = {};
+    if (targetFile === 'pages/course.php' || targetFile === 'pages/team.php') {
+      vars.homeData = await famoHomeData();
+    }
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(renderPhpPreviewFile('pages/course.php', '../'));
+    res.end(renderPhpPreviewFile(targetFile, '/', vars));
     return;
   }
-  if (pathname === '/pages/services.php') {
+
+  // Dedicated SEO landing pages (14 slugs from layouts/seo-pages.json)
+  if (pathname.endsWith('/')) {
+    const slugKey = pathname.replace(/^\/+|\/+$/g, '');
+    if (seoPagesMap.has(slugKey)) {
+      const html = renderLandingPreviewPage(seoPagesMap.get(slugKey));
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(html);
+      return;
+    }
+  }
+
+  // Clean dynamic blog post route (/blog/{slug}/)
+  const blogMatch = /^\/blog\/([^/]+)\/$/.exec(pathname);
+  if (blogMatch) {
+    let decodedSlug = blogMatch[1];
+    try {
+      decodedSlug = decodeURIComponent(blogMatch[1]);
+    } catch {}
+    const html = renderPhpPreviewFile('pages/post.php', '/', {
+      blogSlug: decodedSlug,
+      canonicalPath: `blog/${encodeURIComponent(decodedSlug)}/`,
+    });
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(renderPhpPreviewFile('pages/services.php', '../'));
+    res.end(html);
     return;
   }
-  if (pathname === '/pages/contact.php') {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(renderPhpPreviewFile('pages/contact.php', '../'));
-    return;
-  }
-  if (pathname === '/pages/team.php') {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(renderPhpPreviewFile('pages/team.php', '../'));
-    return;
-  }
-  if (pathname === '/pages/admissions.php') {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(renderPhpPreviewFile('pages/admissions.php', '../'));
-    return;
-  }
-  if (pathname === '/pages/testimonials.php') {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(renderPhpPreviewFile('pages/testimonials.php', '../'));
-    return;
-  }
-  if (pathname === '/pages/blog.php') {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(renderPhpPreviewFile('pages/blog.php', '../'));
-    return;
-  }
-  if (pathname === '/pages/post.php') {
-    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    res.end(renderPhpPreviewFile('pages/post.php', '../'));
-    return;
-  }
+
   if (pathname === '/404.php') {
     res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(renderPhpPreviewFile('404.php', '/'));

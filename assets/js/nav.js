@@ -1,11 +1,19 @@
-// Shared lightweight navigation script loaded across all public pages.
-// Always handles desktop dropdowns ([data-famo-dropdown]); handles mobile menu & footer year on static pages (data-static-nav="1").
+// Shared lightweight navigation & static FAQ script loaded across all public pages.
+// Handles active nav highlighting, desktop dropdowns ([data-famo-dropdown]), static mobile menu, and static FAQ accordions.
 
 (function () {
     function svgIcon(name, cls) {
         var suffix = cls ? ' ' + cls : '';
         var icon = window.famoLucideName ? window.famoLucideName(name) : name.replace(/^icon-/, '');
         return '<i class="icon' + suffix + '" data-lucide="' + icon + '" aria-hidden="true"></i>';
+    }
+
+    function normalizePath(pathname) {
+        var clean = (pathname || '/').replace(/\/index\.php$/i, '/');
+        if (clean !== '/' && clean.charAt(clean.length - 1) !== '/') {
+            clean += '/';
+        }
+        return clean;
     }
 
     function initDropdowns() {
@@ -101,15 +109,41 @@
     }
 
     function initActiveNav() {
-        var currentPath = (window.location.pathname || '/').replace(/\/index\.php$/i, '/');
+        var currentPath = normalizePath(window.location.pathname || '/');
         var navLinks = document.querySelectorAll('header nav a[href]');
+        var exactMatches = new Set();
+
         navLinks.forEach(function (link) {
             var href = link.getAttribute('href') || '';
             if (!href || href.indexOf('#') !== -1 || /^https?:\/\//i.test(href)) return;
             try {
-                var target = new URL(href, window.location.href);
-                var targetPath = target.pathname.replace(/\/index\.php$/i, '/');
+                var targetPath = normalizePath(new URL(href, window.location.href).pathname);
                 if (targetPath === currentPath) {
+                    exactMatches.add(link);
+                }
+            } catch (_) {
+                // Ignore malformed relative URLs
+            }
+        });
+
+        navLinks.forEach(function (link) {
+            var href = link.getAttribute('href') || '';
+            if (!href || href.indexOf('#') !== -1 || /^https?:\/\//i.test(href)) return;
+            try {
+                var targetPath = normalizePath(new URL(href, window.location.href).pathname);
+                var isExact = exactMatches.has(link);
+                var isParentSection = false;
+                if (!isExact && exactMatches.size === 0) {
+                    if (targetPath === '/courses/' && currentPath.indexOf('/courses/') === 0) {
+                        isParentSection = true;
+                    } else if (targetPath === '/blog/' && currentPath.indexOf('/blog/') === 0) {
+                        isParentSection = true;
+                    } else if (targetPath === '/contact/' && currentPath.indexOf('/locations/') === 0) {
+                        isParentSection = true;
+                    }
+                }
+
+                if (isExact || isParentSection) {
                     link.setAttribute('aria-current', 'page');
                     link.classList.add('is-active');
                     var parentDropdown = link.closest('[data-famo-dropdown]');
@@ -123,10 +157,71 @@
         });
     }
 
+    function initStaticFaqs() {
+        // Pages loading animation.js already wire FAQAnimations; avoid double-binding.
+        if (document.querySelector('script[src*="animation.js"]')) return;
+
+        var faqItems = document.querySelectorAll('.faq-item');
+        if (!faqItems.length) return;
+
+        function closeItem(item) {
+            var q = item.querySelector('.faq-question');
+            var a = item.querySelector('.faq-answer');
+            var ic = item.querySelector('.faq-icon');
+            item.classList.remove('active');
+            if (q) q.setAttribute('aria-expanded', 'false');
+            if (a) a.style.maxHeight = '0px';
+            if (ic) ic.style.transform = 'rotate(0deg)';
+        }
+
+        function openItem(item) {
+            var q = item.querySelector('.faq-question');
+            var a = item.querySelector('.faq-answer');
+            var ic = item.querySelector('.faq-icon');
+            item.classList.add('active');
+            if (q) q.setAttribute('aria-expanded', 'true');
+            if (a) a.style.maxHeight = 'none';
+            if (ic) ic.style.transform = 'rotate(180deg)';
+        }
+
+        faqItems.forEach(function (item) {
+            if (item.dataset.faqBound === '1') return;
+            item.dataset.faqBound = '1';
+
+            var question = item.querySelector('.faq-question');
+            var answer = item.querySelector('.faq-answer');
+            if (!question || !answer) return;
+
+            answer.style.maxHeight = '0px';
+            question.setAttribute('aria-expanded', 'false');
+
+            function toggle() {
+                var wasActive = item.classList.contains('active');
+                document.querySelectorAll('.faq-item.active').forEach(function (other) {
+                    if (other !== item) closeItem(other);
+                });
+                if (wasActive) {
+                    closeItem(item);
+                } else {
+                    openItem(item);
+                }
+            }
+
+            question.addEventListener('click', toggle);
+            question.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    toggle();
+                }
+            });
+        });
+    }
+
     function init() {
         initActiveNav();
         initDropdowns();
         initStaticMobileMenu();
+        initStaticFaqs();
     }
 
     if (document.readyState === 'loading') {

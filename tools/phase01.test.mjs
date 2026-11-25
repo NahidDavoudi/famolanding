@@ -11,6 +11,30 @@ const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, '..');
 const BASE_URL = process.env.TEST_BASE_URL || 'http://127.0.0.1:3000';
 
+const CANONICAL_STATIC_PATHS = [
+  '/',
+  '/courses/',
+  '/courses/math-babol/',
+  '/courses/physics-babol/',
+  '/courses/chemistry-babol/',
+  '/courses/biology-babol/',
+  '/courses/rafa-eshkal-babol/',
+  '/courses/elementary-babol/',
+  '/courses/middle-school-babol/',
+  '/courses/high-school-babol/',
+  '/courses/konkur-babol/',
+  '/courses/tizhooshan-babol/',
+  '/counseling-babol/',
+  '/services/',
+  '/services/smart-platform/',
+  '/team/',
+  '/results/',
+  '/blog/',
+  '/contact/',
+  '/locations/amirkola/',
+  '/locations/babolsar-mazandaran/',
+];
+
 function fetchRaw(urlPath) {
   return new Promise((resolve, reject) => {
     const req = http.get(`${BASE_URL}${urlPath}`, (res) => {
@@ -28,7 +52,7 @@ function fetchRaw(urlPath) {
   });
 }
 
-test('Phase 0: .htaccess has security blocks, loop-safe index.php 301, 404 handler, and no <Directory>', () => {
+test('SEO Architecture: .htaccess has security blocks, loop-safe THE_REQUEST 301s, clean-URL rewrites, and no <Directory>', () => {
   const ht = fs.readFileSync(path.join(ROOT, '.htaccess'), 'utf8');
   assert.doesNotMatch(ht, /<Directory\b/i, '.htaccess must not contain <Directory>');
   assert.doesNotMatch(ht, /RewriteCond\s+%\{HTTPS\}\s+off/i, '.htaccess must not force HTTPS behind Caddy');
@@ -36,27 +60,28 @@ test('Phase 0: .htaccess has security blocks, loop-safe index.php 301, 404 handl
   assert.match(ht, /config\\\.php/i);
   assert.match(ht, /layouts/i);
   assert.match(ht, /THE_REQUEST.*index\\\.php/i);
+  assert.match(ht, /THE_REQUEST.*pages\/course\\\.php/i);
+  assert.match(ht, /THE_REQUEST.*pages\/post\\\.php/i);
+  assert.match(ht, /pages\/landing\.php\?slug=/);
+  assert.match(ht, /pages\/results\.php/);
   assert.match(ht, /ErrorDocument\s+404\s+\/404\.php/);
   assert.match(ht, /r\.php\?token=/);
 });
 
-test('Phase 0: sitemap.xml contains only the 8 canonical indexable pages and zero query/duplicate URLs', () => {
+test('SEO Architecture: sitemap.xml contains all 21 canonical clean URLs with trailing slashes and zero .php/?/# URLs', () => {
   const xml = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
   const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
-  assert.equal(locs.length, 8, `Expected 8 canonical URLs in sitemap.xml, got ${locs.length}`);
-  assert.deepEqual(locs, [
-    'https://famoacademy.ir/',
-    'https://famoacademy.ir/pages/course.php',
-    'https://famoacademy.ir/pages/services.php',
-    'https://famoacademy.ir/pages/team.php',
-    'https://famoacademy.ir/pages/admissions.php',
-    'https://famoacademy.ir/pages/testimonials.php',
-    'https://famoacademy.ir/pages/blog.php',
-    'https://famoacademy.ir/pages/contact.php',
-  ]);
-  assert.doesNotMatch(xml, /\?category=/);
-  assert.doesNotMatch(xml, /post\.php\?slug=/);
-  assert.doesNotMatch(xml, /2026-11-/);
+  assert.equal(locs.length, 21, `Expected 21 canonical URLs in sitemap.xml, got ${locs.length}`);
+  assert.deepEqual(
+    locs,
+    CANONICAL_STATIC_PATHS.map((p) => `https://famoacademy.ir${p}`),
+  );
+  for (const loc of locs) {
+    assert.ok(loc.endsWith('/'), `Sitemap URL missing trailing slash: ${loc}`);
+    assert.doesNotMatch(loc, /\.php/);
+    assert.doesNotMatch(loc, /\?/);
+    assert.doesNotMatch(loc, /#/);
+  }
 });
 
 test('Phase 0: all 4 service images are optimized (< 130 KB WebP) with matching AVIF variants', () => {
@@ -73,15 +98,19 @@ test('Phase 0: all 4 service images are optimized (< 130 KB WebP) with matching 
   }
 });
 
-test('Phase 1: truthfulness & banned claims check across rewritten core files', () => {
+test('Truthfulness & banned claims check across core and SEO landing files', () => {
   const files = [
     'index.php',
     '404.php',
     'layouts/head-common.php',
     'layouts/header.php',
     'layouts/footer.php',
+    'layouts/seo-pages.json',
+    'pages/landing.php',
     'pages/course.php',
     'pages/services.php',
+    'pages/team.php',
+    'pages/results.php',
     'pages/contact.php',
     'assets/js/main.js',
   ];
@@ -107,16 +136,41 @@ test('Phase 1: truthfulness & banned claims check across rewritten core files', 
   }
 });
 
-test('Phase 0/1 HTTP: security 403, /index.php 301, and real 404 responses', async () => {
+test('HTTP Security & 301 Redirects: legacy .php URLs, trailing-slash normalization, 403 hardening, and 404', async () => {
   const rConfig = await fetchRaw('/config.php');
   assert.equal(rConfig.status, 403);
 
   const rLayout = await fetchRaw('/layouts/header.php');
   assert.equal(rLayout.status, 403);
 
-  const rIndex = await fetchRaw('/index.php');
-  assert.equal(rIndex.status, 301);
-  assert.equal(rIndex.headers.location, '/');
+  const redirectCases = [
+    ['/index.php', '/'],
+    ['/pages/course.php', '/courses/'],
+    ['/pages/services.php', '/services/'],
+    ['/pages/team.php', '/team/'],
+    ['/pages/admissions.php', '/results/'],
+    ['/pages/testimonials.php', '/results/'],
+    ['/pages/results.php', '/results/'],
+    ['/pages/contact.php', '/contact/'],
+    ['/pages/blog.php', '/blog/'],
+    ['/pages/blog.php?category=planning', '/blog/?category=planning'],
+    ['/pages/post.php?slug=exam-stress-and-sleep', '/blog/exam-stress-and-sleep/'],
+    ['/pages/post.php', '/blog/'],
+    ['/courses', '/courses/'],
+    ['/courses/math-babol', '/courses/math-babol/'],
+    ['/counseling-babol', '/counseling-babol/'],
+    ['/services/smart-platform', '/services/smart-platform/'],
+    ['/locations/amirkola', '/locations/amirkola/'],
+    ['/results', '/results/'],
+    ['/team', '/team/'],
+    ['/blog/exam-stress-and-sleep', '/blog/exam-stress-and-sleep/'],
+  ];
+
+  for (const [fromPath, expectedLoc] of redirectCases) {
+    const res = await fetchRaw(fromPath);
+    assert.equal(res.status, 301, `${fromPath} expected 301, got ${res.status}`);
+    assert.equal(res.headers.location, expectedLoc, `${fromPath} location mismatch`);
+  }
 
   const r404 = await fetchRaw('/non-existent-page-xyz');
   assert.equal(r404.status, 404);
@@ -124,22 +178,20 @@ test('Phase 0/1 HTTP: security 403, /index.php 301, and real 404 responses', asy
   assert.doesNotMatch(r404.body, /<\?(=|php)/);
 });
 
-test('Phase 0/1 HTTP: core pages return 200, zero PHP tag leaks, single H1, exact canonical, and valid JSON-LD', async () => {
-  const cases = [
-    { path: '/', canonicalSuffix: '/', expectH1: true },
-    { path: '/pages/course.php', canonicalSuffix: '/pages/course.php', expectH1: true },
-    { path: '/pages/services.php', canonicalSuffix: '/pages/services.php', expectH1: true },
-    { path: '/pages/contact.php', canonicalSuffix: '/pages/contact.php', expectH1: true },
-    { path: '/pages/blog.php?category=math', canonicalSuffix: '/pages/blog.php', expectH1: true },
-    { path: '/pages/admissions.php', canonicalSuffix: '/pages/admissions.php', expectH1: true },
-    { path: '/pages/testimonials.php', canonicalSuffix: '/pages/testimonials.php', expectH1: true },
-    { path: '/pages/team.php', canonicalSuffix: '/pages/team.php', expectH1: true },
+test('HTTP Clean URLs: all 21 sitemap URLs + dynamic blog route return 200, zero PHP leaks, single H1, exact canonical, valid JSON-LD, and zero legacy .php links', async () => {
+  const routes = [
+    ...CANONICAL_STATIC_PATHS.map((p) => ({ path: p, canonicalSuffix: p })),
+    { path: '/blog/?category=math', canonicalSuffix: '/blog/' },
+    { path: '/blog/exam-stress-and-sleep/', canonicalSuffix: '/blog/exam-stress-and-sleep/' },
   ];
 
-  for (const c of cases) {
+  for (const c of routes) {
     const res = await fetchRaw(c.path);
     assert.equal(res.status, 200, `${c.path} returned ${res.status}`);
     assert.doesNotMatch(res.body, /<\?(=|php)/, `PHP tag leaked in ${c.path}`);
+    assert.doesNotMatch(res.body, /assets\.famoacademy\.ir/, `External assets subdomain found in ${c.path}`);
+    assert.doesNotMatch(res.body, /href=["'][^"']*pages\/[a-z]+\.php/i, `Legacy pages/*.php internal link found in ${c.path}`);
+
     const canonMatch = res.body.match(/<link rel="canonical" href="([^"]+)">/);
     assert.ok(canonMatch, `Missing canonical link in ${c.path}`);
     const canonHref = canonMatch[1];
@@ -150,9 +202,7 @@ test('Phase 0/1 HTTP: core pages return 200, zero PHP tag leaks, single H1, exac
     );
 
     const h1Count = (res.body.match(/<h1\b/gi) || []).length;
-    if (c.expectH1) {
-      assert.equal(h1Count, 1, `Expected exactly 1 <h1> on ${c.path}, got ${h1Count}`);
-    }
+    assert.equal(h1Count, 1, `Expected exactly 1 <h1> on ${c.path}, got ${h1Count}`);
 
     const ldScripts = [...res.body.matchAll(/<script[^>]+type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)];
     assert.ok(ldScripts.length >= 1, `Missing JSON-LD on ${c.path}`);
@@ -160,6 +210,28 @@ test('Phase 0/1 HTTP: core pages return 200, zero PHP tag leaks, single H1, exac
       assert.doesNotThrow(() => JSON.parse(m[1]), `Invalid JSON-LD on ${c.path}`);
     }
   }
+});
+
+test('Crawlable SSR / Fail-soft Fallbacks: /courses/, /team/, /results/, /blog/ never emit API error copy', async () => {
+  for (const route of ['/courses/', '/team/', '/results/', '/blog/']) {
+    const res = await fetchRaw(route);
+    assert.equal(res.status, 200);
+    assert.doesNotMatch(res.body, /خطا در بارگذاری/, `Error message found in initial HTML of ${route}`);
+  }
+
+  const coursesRes = await fetchRaw('/courses/');
+  assert.match(coursesRes.body, /href="\/courses\/math-babol\/"/);
+  assert.match(coursesRes.body, /href="\/courses\/rafa-eshkal-babol\/"/);
+  assert.match(coursesRes.body, /id="coursesContainer"/);
+
+  const teamRes = await fetchRaw('/team/');
+  assert.match(teamRes.body, /id="instructorsContainer"/);
+  assert.match(teamRes.body, /id="supportersContainer"/);
+
+  const resultsRes = await fetchRaw('/results/');
+  assert.match(resultsRes.body, /id="admissionsContainer"/);
+  assert.match(resultsRes.body, /id="testimonialsList"/);
+  assert.match(resultsRes.body, /id="testimonialForm"/);
 });
 
 test('Phase 0/1 HTTP: AVIF & WebP service assets serve with correct MIME types', async () => {
@@ -172,7 +244,7 @@ test('Phase 0/1 HTTP: AVIF & WebP service assets serve with correct MIME types',
   assert.equal(webp.headers['content-type'], 'image/webp');
 });
 
-test('Home declutter: section order, preserved JS IDs, 5 course chips, and removed heavy sections on /', async () => {
+test('Home declutter: section order, preserved JS IDs, clean-URL course/subject chips, and removed heavy sections on /', async () => {
   const res = await fetchRaw('/');
   assert.equal(res.status, 200);
   const html = res.body;
@@ -209,23 +281,32 @@ test('Home declutter: section order, preserved JS IDs, 5 course chips, and remov
     assert.ok(html.includes(jsId), `Required JS hook missing on /: ${jsId}`);
   }
 
-  for (const chipHref of [
-    'pages/course.php#elementary',
-    'pages/course.php#middle-school',
-    'pages/course.php#high-school',
-    'pages/course.php#konkur',
-    'pages/course.php#tizhooshan',
+  for (const cleanHref of [
+    'href="/courses/elementary-babol/"',
+    'href="/courses/middle-school-babol/"',
+    'href="/courses/high-school-babol/"',
+    'href="/courses/konkur-babol/"',
+    'href="/courses/tizhooshan-babol/"',
+    'href="/courses/math-babol/"',
+    'href="/courses/physics-babol/"',
+    'href="/courses/chemistry-babol/"',
+    'href="/courses/biology-babol/"',
+    'href="/courses/rafa-eshkal-babol/"',
+    'href="/counseling-babol/"',
+    'href="/services/smart-platform/"',
+    'href="/services/#process"',
+    'href="/results/"',
+    'href="/results/#testimonials"',
   ]) {
-    assert.ok(html.includes(chipHref), `Missing course chip link on /: ${chipHref}`);
+    assert.ok(html.includes(cleanHref), `Missing expected clean link on /: ${cleanHref}`);
   }
 
-  assert.doesNotMatch(html, /href="#smart-platform"/, 'Header/Home must link to pages/services.php#smart-platform, not #smart-platform');
-  assert.match(html, /href="pages\/services\.php#smart-platform"/);
-  assert.match(html, /href="pages\/services\.php#process"/);
+  assert.doesNotMatch(html, /href="#smart-platform"/);
+  assert.doesNotMatch(html, /pages\/course\.php#/);
 });
 
-test('Home declutter: migrated sections (#advantages, #process, #smart-platform) live cleanly on /pages/services.php', async () => {
-  const res = await fetchRaw('/pages/services.php');
+test('Home declutter: migrated sections (#advantages, #process, #smart-platform) live cleanly on /services/', async () => {
+  const res = await fetchRaw('/services/');
   assert.equal(res.status, 200);
   const html = res.body;
 
@@ -240,12 +321,11 @@ test('Home declutter: migrated sections (#advantages, #process, #smart-platform)
     'id="process"',
     'id="smart-platform"',
   ]) {
-    assert.ok(html.includes(anchorId), `Missing expected anchor ${anchorId} on /pages/services.php`);
+    assert.ok(html.includes(anchorId), `Missing expected anchor ${anchorId} on /services/`);
   }
 
-  // Ensure no duplicated #services block and zero broken relative links
   assert.ok(!html.includes('id="services"'), 'services.php must not duplicate homepage #services grid');
-  assert.doesNotMatch(html, /<\?(=|php)/, 'PHP tag leaked in /pages/services.php');
+  assert.doesNotMatch(html, /<\?(=|php)/, 'PHP tag leaked in /services/');
 });
 
 test('WCAG AA Contrast Audit: all audited AFTER color pairs pass minimum ratios', () => {
@@ -299,6 +379,8 @@ test('Local assets: all required shared assets exist locally and zero external a
     'layouts/head-common.php',
     'layouts/header.php',
     'layouts/footer.php',
+    'pages/landing.php',
+    'pages/results.php',
     'assets/js/main.js',
     'assets/js/courses.js',
     'assets/js/team.js',
@@ -312,13 +394,7 @@ test('Local assets: all required shared assets exist locally and zero external a
   }
 });
 
-test('Local assets HTTP: pages emit zero assets.famoacademy.ir URLs and serve local WOFF2/CSS/JS/images with 200', async () => {
-  for (const route of ['/', '/pages/course.php', '/pages/services.php', '/pages/team.php', '/pages/blog.php', '/r/invalidtoken']) {
-    const res = await fetchRaw(route);
-    assert.doesNotMatch(res.body, /assets\.famoacademy\.ir/, `Rendered ${route} still contains assets.famoacademy.ir`);
-    assert.doesNotMatch(res.body, /<\?(=|php)/, `Raw PHP tag leaked in ${route}`);
-  }
-
+test('Local assets HTTP: serve local WOFF2/CSS/JS/images with 200 and expected MIME types', async () => {
   const mimeChecks = [
     ['/assets/fonts/Vazirmatn-Regular.woff2', 'font/woff2'],
     ['/assets/fonts/Vazirmatn-Bold.woff2', 'font/woff2'],
@@ -342,5 +418,3 @@ test('Local assets HTTP: pages emit zero assets.famoacademy.ir URLs and serve lo
     );
   }
 });
-
-

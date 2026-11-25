@@ -1,43 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    <!-- Core canonical, indexable pages only. Blog posts are listed dynamically in sitemap-blog.php. -->
+    <!-- Canonical indexable clean URLs only. Blog articles are listed dynamically in sitemap-blog.php. -->
     <url>
         <loc>https://famoacademy.ir/</loc>
         <changefreq>weekly</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>https://famoacademy.ir/pages/course.php</loc>
-        <changefreq>monthly</changefreq>
-        <priority>0.9</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/services.php</loc>
-        <changefreq>monthly</changefreq>
-        <priority>0.9</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/team.php</loc>
-        <changefreq>monthly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/admissions.php</loc>
-        <changefreq>monthly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    <url>
-        <loc>https://famoacademy.ir/pages/testimonials.php</loc>
+        <loc>https://famoacademy.ir/courses/</loc>
         <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/courses/math-babol/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/courses/physics-babol/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.85</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/courses/chemistry-babol/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.85</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/courses/biology-babol/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.85</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/courses/rafa-eshkal-babol/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.85</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/courses/elementary-babol/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.85</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/courses/middle-school-babol/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.85</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/courses/high-school-babol/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.85</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/courses/konkur-babol/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/courses/tizhooshan-babol/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/counseling-babol/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.9</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/services/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.85</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/services/smart-platform/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.85</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/team/</loc>
+        <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://famoacademy.ir/pages/blog.php</loc>
+        <loc>https://famoacademy.ir/results/</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.85</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/blog/</loc>
         <changefreq>daily</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
-        <loc>https://famoacademy.ir/pages/contact.php</loc>
+        <loc>https://famoacademy.ir/contact/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/locations/amirkola/</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://famoacademy.ir/locations/babolsar-mazandaran/</loc>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>

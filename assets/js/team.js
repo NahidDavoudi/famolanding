@@ -188,6 +188,11 @@ function renderSupporterCard(supporter) {
 async function loadInstructors() {
     const container = document.getElementById('instructorsContainer');
     if (!container) return;
+    if (container.dataset.ssr === '1') {
+        if (window.refreshLucideIcons) window.refreshLucideIcons(container);
+        return;
+    }
+    const hasFallback = container.dataset.hasFallback === '1';
     container.setAttribute('aria-busy', 'true');
 
     try {
@@ -195,7 +200,9 @@ async function loadInstructors() {
         container.setAttribute('aria-busy', 'false');
 
         if (!result.data || result.data.length === 0) {
-            container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">استادی ثبت نشده است</p>';
+            if (!hasFallback) {
+                container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">استادی ثبت نشده است</p>';
+            }
             return;
         }
 
@@ -204,13 +211,20 @@ async function loadInstructors() {
     } catch (error) {
         console.error('Error loading instructors:', error);
         container.setAttribute('aria-busy', 'false');
-        container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">خطا در بارگذاری اساتید</p>';
+        if (!hasFallback) {
+            container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">خطا در بارگذاری اساتید</p>';
+        }
     }
 }
 
 async function loadSupporters() {
     const container = document.getElementById('supportersContainer');
     if (!container) return;
+    if (container.dataset.ssr === '1') {
+        if (window.refreshLucideIcons) window.refreshLucideIcons(container);
+        return;
+    }
+    const hasFallback = container.dataset.hasFallback === '1';
     container.setAttribute('aria-busy', 'true');
 
     try {
@@ -218,7 +232,9 @@ async function loadSupporters() {
         container.setAttribute('aria-busy', 'false');
 
         if (!result.data || result.data.length === 0) {
-            container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">پشتیبانی ثبت نشده است</p>';
+            if (!hasFallback) {
+                container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">پشتیبانی ثبت نشده است</p>';
+            }
             return;
         }
 
@@ -227,7 +243,9 @@ async function loadSupporters() {
     } catch (error) {
         console.error('Error loading supporters:', error);
         container.setAttribute('aria-busy', 'false');
-        container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">خطا در بارگذاری پشتیبانان</p>';
+        if (!hasFallback) {
+            container.innerHTML = '<p class="col-span-full text-center text-gray-500 py-8">خطا در بارگذاری پشتیبانان</p>';
+        }
     }
 }
 

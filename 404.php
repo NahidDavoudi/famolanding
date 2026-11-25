@@ -44,21 +44,21 @@ $page_libs = [
                 </p>
 
                 <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-                    <a href="<?= $baseEsc ?>"
+                    <a href="/"
                         class="inline-flex items-center gap-2 bg-[#445D84] text-white font-bold px-7 py-3 rounded-full hover:bg-[#344868] transition duration-300 shadow-md">
                         <i class="icon icon--sm" data-lucide="house" aria-hidden="true"></i>
                         بازگشت به صفحه اصلی
                     </a>
-                    <a href="<?= $baseEsc ?>pages/course.php"
+                    <a href="/courses/"
                         class="inline-flex items-center gap-2 border-2 border-[#445D84] text-[#445D84] font-bold px-7 py-3 rounded-full hover:bg-[#445D84] hover:text-white transition duration-300">
                         <i class="icon icon--sm" data-lucide="book-open" aria-hidden="true"></i>
                         مشاهده دوره‌ها
                     </a>
-                    <a href="<?= $baseEsc ?>pages/services.php"
+                    <a href="/services/"
                         class="inline-flex items-center gap-2 bg-[#EFE9DD] text-[#445D84] font-bold px-6 py-3 rounded-full hover:bg-[#E2D9C6] transition duration-300">
                         خدمات آموزشی
                     </a>
-                    <a href="<?= $baseEsc ?>pages/contact.php"
+                    <a href="/contact/"
                         class="inline-flex items-center gap-2 bg-[#EFE9DD] text-[#445D84] font-bold px-6 py-3 rounded-full hover:bg-[#E2D9C6] transition duration-300">
                         تماس با ما
                     </a>
