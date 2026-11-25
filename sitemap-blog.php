@@ -20,7 +20,7 @@ for ($page = 1; $page <= $maxPages; $page++) {
             continue;
         }
         $slug = (string) $post['slug'];
-        $loc = famo_canonical_url('pages/post.php?slug=' . rawurlencode($slug));
+        $loc = famo_canonical_url('blog/' . rawurlencode($slug) . '/');
         $rawDate = (string) ($post['updated_at'] ?? $post['published_at'] ?? '');
         $lastmod = '';
         if (preg_match('/^(\d{4}-\d{2}-\d{2})/', $rawDate, $m) === 1) {

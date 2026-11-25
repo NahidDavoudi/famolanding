@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../config.php';
-$base = '../';
+$base = '/';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
 $siteUrl = famo_public_site_url();
-$servicesPageUrl = famo_canonical_url('pages/services.php');
+$servicesPageUrl = famo_canonical_url('services/');
 $loginUrlRaw = famo_login_url();
 $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'https://login.famoacademy.ir/'), ENT_QUOTES, 'UTF-8');
 
 $pageTitle = 'خدمات آموزشی فامو | کلاس خصوصی و رفع اشکال در بابل';
 $metaDescription = 'خدمات آموزشی فامو شامل کلاس خصوصی، آزمون اختصاصی، رفع اشکال، مشاوره تحصیلی و بررسی عملکرد دانش‌آموزان در بابل.';
-$canonicalPath = 'pages/services.php';
+$canonicalPath = 'services/';
 $webPageType = 'WebPage';
 $ogImage = $siteUrl . '/assets/images/services/private_classes.webp';
 $ogImageAlt = 'خدمات آموزشی و کلاس‌های خصوصی آموزشگاه فامو بابل';
@@ -258,9 +258,13 @@ $page_libs = [
                     <p class="text-gray-600 leading-relaxed mb-3">
                         گاهی مشکل دانش‌آموز به یک درس یا چند مبحث مشخص محدود است. در چنین شرایطی، تکرار کامل مطالب لزوماً بهترین راهکار نیست.
                     </p>
-                    <p class="text-gray-600 leading-relaxed">
+                    <p class="text-gray-600 leading-relaxed mb-4">
                         جلسات رفع اشکال فامو به‌صورت انفرادی برگزار می‌شوند تا مباحث دشوار، نقاط ابهام و اشکالات دانش‌آموز با تمرکز بیشتری بررسی شوند.
                     </p>
+                    <a href="/courses/rafa-eshkal-babol/" class="famo-inline-link">
+                        مشاهده صفحه اختصاصی کلاس رفع اشکال بابل
+                        <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+                    </a>
                 </div>
                 <div class="famo-detail-img-wrap">
                     <picture>
@@ -281,9 +285,13 @@ $page_libs = [
                     <p class="text-gray-600 leading-relaxed mb-3">
                         برنامه‌ریزی تحصیلی زمانی مؤثرتر است که با سطح علمی، اهداف و شرایط دانش‌آموز هماهنگ باشد.
                     </p>
-                    <p class="text-gray-600 leading-relaxed">
+                    <p class="text-gray-600 leading-relaxed mb-4">
                         در فامو، مشاوره و برنامه‌ریزی بر اساس وضعیت فردی دانش‌آموز انجام می‌شود تا مسیر مطالعه، تمرین و آموزش هدفمندتر دنبال شود.
                     </p>
+                    <a href="/counseling-babol/" class="famo-inline-link">
+                        مشاهده صفحه اختصاصی مشاوره تحصیلی بابل
+                        <i class="icon icon--sm" data-lucide="chevron-left" aria-hidden="true"></i>
+                    </a>
                 </div>
                 <div class="famo-detail-img-wrap">
                     <picture>
@@ -437,9 +445,9 @@ $page_libs = [
                             <i class="icon icon--sm" data-lucide="user" aria-hidden="true"></i>
                             ورود به پنل دانش‌آموزی
                         </a>
-                        <a href="#weekly-report"
+                        <a href="/services/smart-platform/"
                             class="inline-flex items-center gap-2 border-2 border-[#445D84] text-[#445D84] font-bold px-6 py-3 rounded-full hover:bg-[#445D84] hover:text-white transition duration-300">
-                            جزئیات کارنامه و پایش
+                            صفحه اختصاصی سامانه هوشمند
                         </a>
                     </div>
                 </div>
@@ -499,12 +507,12 @@ $page_libs = [
                     برای بررسی وضعیت تحصیلی و انتخاب خدمات مناسب، با آموزشگاه فامو در بابل در ارتباط باشید یا برنامه‌های مقاطع مختلف را ببینید.
                 </p>
                 <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-                    <a href="<?= $baseEsc ?>pages/contact.php#consultation"
+                    <a href="/contact/#consultation"
                         class="inline-flex items-center gap-2 famo-btn-cream font-bold px-8 py-3 rounded-full transition duration-300 shadow-lg">
                         <i class="icon icon--sm" data-lucide="phone" aria-hidden="true"></i>
                         درخواست مشاوره
                     </a>
-                    <a href="<?= $baseEsc ?>pages/course.php"
+                    <a href="/courses/"
                         class="inline-flex items-center gap-2 famo-btn-outline-cream font-bold px-7 py-3 rounded-full transition duration-300">
                         <i class="icon icon--sm" data-lucide="book-open" aria-hidden="true"></i>
                         مشاهده برنامه‌ها و دوره‌ها

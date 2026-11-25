@@ -1,16 +1,16 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../config.php';
-$base = '../';
+$base = '/';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
 $siteUrl = famo_public_site_url();
-$contactPageUrl = famo_canonical_url('pages/contact.php');
+$contactPageUrl = famo_canonical_url('contact/');
 $loginUrlRaw = famo_login_url();
 $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'https://login.famoacademy.ir/'), ENT_QUOTES, 'UTF-8');
 
-$pageTitle = 'تماس با آموزشگاه فامو در بابل | آدرس و شماره تماس';
-$metaDescription = 'اطلاعات تماس، نشانی و موقعیت آموزشگاه فامو در بابل؛ راه‌های ارتباطی مستقیم برای درخواست مشاوره و دریافت اطلاعات برنامه‌های آموزشی.';
-$canonicalPath = 'pages/contact.php';
+$pageTitle = 'آدرس و تماس آموزشگاه فامو بابل | میدان باغ فردوس و رزرو مشاوره';
+$metaDescription = 'اطلاعات تماس، نشانی و موقعیت آموزشگاه فامو در میدان باغ فردوس بابل؛ راه‌های ارتباطی مستقیم برای رزرو مشاوره و ثبت‌نام دوره‌های آموزشی.';
+$canonicalPath = 'contact/';
 $webPageType = 'ContactPage';
 $breadcrumbs = [
     ['name' => 'خانه', 'url' => famo_canonical_url('')],
@@ -147,12 +147,22 @@ $page_libs = [
                         </div>
                     </div>
 
-                    <div class="mt-6 pt-5 border-t border-[#EFE9DD] flex flex-wrap items-center justify-between gap-3 text-sm">
-                        <span class="text-gray-600">دانش‌آموز فعلی فامو هستید؟</span>
-                        <a href="<?= $loginUrlEsc ?>" class="inline-flex items-center gap-1.5 text-[#445D84] font-bold hover:underline">
-                            <i class="icon icon--sm" data-lucide="user" aria-hidden="true"></i>
-                            ورود مستقیم به پنل دانش‌آموزی
-                        </a>
+                    <div class="mt-6 pt-5 border-t border-[#EFE9DD] space-y-3 text-sm">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <span class="text-gray-600">راهنمای دسترسی از شهرهای اطراف:</span>
+                            <div class="flex flex-wrap gap-3 font-bold">
+                                <a href="/locations/amirkola/" class="text-[#445D84] hover:underline">دانش‌آموزان امیرکلا</a>
+                                <span class="text-gray-300" aria-hidden="true">|</span>
+                                <a href="/locations/babolsar-mazandaran/" class="text-[#445D84] hover:underline">بابلسر، آمل و قائمشهر</a>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <span class="text-gray-600">دانش‌آموز فعلی فامو هستید؟</span>
+                            <a href="<?= $loginUrlEsc ?>" class="inline-flex items-center gap-1.5 text-[#445D84] font-bold hover:underline">
+                                <i class="icon icon--sm" data-lucide="user" aria-hidden="true"></i>
+                                ورود مستقیم به پنل دانش‌آموزی
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

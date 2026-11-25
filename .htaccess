@@ -6,9 +6,58 @@ RewriteEngine On
 RewriteRule ^(?:\.env(?:\..*)?|\.git(?:/.*)?|config\.php|Dockerfile|docker-compose\.yml|package\.json|package-lock\.json)$ - [F,L,NC]
 RewriteRule ^(?:layouts|docker|scripts|tools)(?:/.*)?$ - [F,L,NC]
 
-# Canonicalize /index.php to / without redirect loops (checks original client request line)
+# Canonicalize legacy .php URLs to clean trailing-slash URLs (THE_REQUEST prevents internal rewrite loops)
 RewriteCond %{THE_REQUEST} \s/+index\.php[\s?] [NC]
 RewriteRule ^index\.php$ / [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+pages/course\.php[\s?] [NC]
+RewriteRule ^pages/course\.php$ /courses/ [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+pages/services\.php[\s?] [NC]
+RewriteRule ^pages/services\.php$ /services/ [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+pages/team\.php[\s?] [NC]
+RewriteRule ^pages/team\.php$ /team/ [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+pages/admissions\.php[\s?] [NC]
+RewriteRule ^pages/admissions\.php$ /results/ [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+pages/testimonials\.php[\s?] [NC]
+RewriteRule ^pages/testimonials\.php$ /results/ [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+pages/results\.php[\s?] [NC]
+RewriteRule ^pages/results\.php$ /results/ [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+pages/contact\.php[\s?] [NC]
+RewriteRule ^pages/contact\.php$ /contact/ [R=301,L]
+
+RewriteCond %{THE_REQUEST} \s/+pages/blog\.php[\s?] [NC]
+RewriteRule ^pages/blog\.php$ /blog/ [R=301,L,QSA]
+
+RewriteCond %{THE_REQUEST} \s/+pages/post\.php\? [NC]
+RewriteCond %{QUERY_STRING} (?:^|&)slug=([^&\s]+) [NC]
+RewriteRule ^pages/post\.php$ /blog/%1/? [R=301,L,NE]
+
+RewriteCond %{THE_REQUEST} \s/+pages/post\.php[\s?] [NC]
+RewriteRule ^pages/post\.php$ /blog/? [R=301,L]
+
+# Enforce canonical trailing slash on clean routes
+RewriteRule ^(courses|services|team|results|contact|blog|counseling-babol)$ /$1/ [R=301,L]
+RewriteRule ^(courses/(?:math-babol|physics-babol|chemistry-babol|biology-babol|rafa-eshkal-babol|elementary-babol|middle-school-babol|high-school-babol|konkur-babol|tizhooshan-babol)|services/smart-platform|locations/(?:amirkola|babolsar-mazandaran))$ /$1/ [R=301,L]
+RewriteRule ^blog/([^/]+)$ /blog/$1/ [R=301,L]
+
+# Clean URL internal rewrites
+RewriteRule ^courses/$ pages/course.php [L,QSA]
+RewriteRule ^courses/(math-babol|physics-babol|chemistry-babol|biology-babol|rafa-eshkal-babol|elementary-babol|middle-school-babol|high-school-babol|konkur-babol|tizhooshan-babol)/$ pages/landing.php?slug=courses/$1 [L,QSA]
+RewriteRule ^counseling-babol/$ pages/landing.php?slug=counseling-babol [L,QSA]
+RewriteRule ^services/$ pages/services.php [L,QSA]
+RewriteRule ^services/smart-platform/$ pages/landing.php?slug=services/smart-platform [L,QSA]
+RewriteRule ^locations/(amirkola|babolsar-mazandaran)/$ pages/landing.php?slug=locations/$1 [L,QSA]
+RewriteRule ^team/$ pages/team.php [L,QSA]
+RewriteRule ^results/$ pages/results.php [L,QSA]
+RewriteRule ^contact/$ pages/contact.php [L,QSA]
+RewriteRule ^blog/$ pages/blog.php [L,QSA]
+RewriteRule ^blog/([^/]+)/$ pages/post.php?slug=$1 [L,QSA]
 
 # Weekly exam result share links
 RewriteRule ^r/([A-Za-z0-9_-]{32,64})/?$ r.php?token=$1 [L,QSA]

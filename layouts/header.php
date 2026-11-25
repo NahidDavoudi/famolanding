@@ -1,7 +1,7 @@
 <?php
-$base = $base ?? '';
+$base = $base ?? '/';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
-$homeHref = $base === '' ? './' : $baseEsc;
+$homeHref = '/';
 $loginUrlRaw = famo_login_url();
 $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'https://auth.famoacademy.ir/'), ENT_QUOTES, 'UTF-8');
 ?>
@@ -27,37 +27,37 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
             <nav class="famo-header-desktop" aria-label="منوی اصلی">
                 <ul class="famo-desktop-nav">
                     <li>
-                        <a href="<?= $homeHref ?>"
+                        <a href="/"
                             class="famo-nav-link font-medium text-sm py-2 px-2.5 rounded-lg transition duration-300 flex items-center">
                             خانه
                         </a>
                     </li>
                     <li>
-                        <a href="<?= $baseEsc ?>pages/course.php"
+                        <a href="/courses/"
                             class="famo-nav-link font-medium text-sm py-2 px-2.5 rounded-lg transition duration-300 flex items-center">
                             دوره‌ها
                         </a>
                     </li>
                     <li>
-                        <a href="<?= $baseEsc ?>pages/services.php"
+                        <a href="/services/"
                             class="famo-nav-link font-medium text-sm py-2 px-2.5 rounded-lg transition duration-300 flex items-center">
                             خدمات
                         </a>
                     </li>
                     <li>
-                        <a href="<?= $baseEsc ?>pages/team.php"
+                        <a href="/team/"
                             class="famo-nav-link font-medium text-sm py-2 px-2.5 rounded-lg transition duration-300 flex items-center">
                             اساتید
                         </a>
                     </li>
                     <li>
-                        <a href="<?= $baseEsc ?>pages/services.php#smart-platform"
+                        <a href="/services/smart-platform/"
                             class="famo-nav-link font-medium text-sm py-2 px-2.5 rounded-lg transition duration-300 flex items-center">
                             سامانه هوشمند
                         </a>
                     </li>
                     <li>
-                        <a href="<?= $baseEsc ?>pages/blog.php"
+                        <a href="/blog/"
                             class="famo-nav-link font-medium text-sm py-2 px-2.5 rounded-lg transition duration-300 flex items-center">
                             مقالات
                         </a>
@@ -68,24 +68,30 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
                             data-famo-dropdown-trigger
                             aria-expanded="false"
                             aria-haspopup="true">
-                            نتایج و تجربه‌ها
+                            نتایج و مشاوره
                             <i class="icon icon--sm" data-lucide="chevron-down" aria-hidden="true"></i>
                         </button>
                         <ul class="famo-nav-dropdown__menu" data-famo-dropdown-menu hidden>
                             <li>
-                                <a href="<?= $baseEsc ?>pages/admissions.php" class="famo-nav-dropdown__link">
+                                <a href="/results/" class="famo-nav-dropdown__link">
                                     <i class="icon icon--sm" data-lucide="award" aria-hidden="true"></i>
                                     قبولی‌های سال‌های قبل
                                 </a>
                             </li>
                             <li>
-                                <a href="<?= $baseEsc ?>pages/testimonials.php" class="famo-nav-dropdown__link">
+                                <a href="/results/#testimonials" class="famo-nav-dropdown__link">
                                     <i class="icon icon--sm" data-lucide="message-circle" aria-hidden="true"></i>
                                     نظرات شاگردان و اولیا
                                 </a>
                             </li>
                             <li>
-                                <a href="<?= $baseEsc ?>pages/team.php#support" class="famo-nav-dropdown__link">
+                                <a href="/counseling-babol/" class="famo-nav-dropdown__link">
+                                    <i class="icon icon--sm" data-lucide="compass" aria-hidden="true"></i>
+                                    مشاوره تحصیلی بابل
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/team/#support" class="famo-nav-dropdown__link">
                                     <i class="icon icon--sm" data-lucide="users" aria-hidden="true"></i>
                                     پشتیبانان آموزشی
                                 </a>
@@ -93,7 +99,7 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
                         </ul>
                     </li>
                     <li>
-                        <a href="<?= $baseEsc ?>pages/contact.php"
+                        <a href="/contact/"
                             class="famo-nav-link font-medium text-sm py-2 px-2.5 rounded-lg transition duration-300 flex items-center">
                             تماس با ما
                         </a>
@@ -102,7 +108,7 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
 
                 <!-- Independent Primary & Portal CTAs -->
                 <div class="famo-header-actions">
-                    <a href="<?= $baseEsc ?>pages/contact.php#consultation"
+                    <a href="/contact/#consultation"
                         class="famo-btn-cream text-sm font-bold px-4 py-2 rounded-full transition duration-300 shadow-md flex items-center gap-1.5 whitespace-nowrap">
                         <i class="icon icon--sm" data-lucide="phone" aria-hidden="true"></i>
                         درخواست مشاوره
@@ -127,28 +133,30 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
         <!-- Mobile Navigation -->
         <nav id="mobileMenu" aria-label="منوی موبایل" class="hidden famo-header-mobile-menu mt-4 pt-4 border-t border-white/20 animate-fade-in-up">
             <ul class="flex flex-col space-y-1.5">
-                <li><a href="<?= $homeHref ?>"
+                <li><a href="/"
                         class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">خانه</a></li>
-                <li><a href="<?= $baseEsc ?>pages/course.php"
+                <li><a href="/courses/"
                         class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">دوره‌ها</a></li>
-                <li><a href="<?= $baseEsc ?>pages/services.php"
+                <li><a href="/services/"
                         class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">خدمات آموزشی</a></li>
-                <li><a href="<?= $baseEsc ?>pages/team.php"
+                <li><a href="/counseling-babol/"
+                        class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">مشاوره تحصیلی بابل</a></li>
+                <li><a href="/team/"
                         class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">اساتید</a></li>
-                <li><a href="<?= $baseEsc ?>pages/team.php#support"
+                <li><a href="/team/#support"
                         class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">پشتیبانان آموزشی</a></li>
-                <li><a href="<?= $baseEsc ?>pages/services.php#smart-platform"
+                <li><a href="/services/smart-platform/"
                         class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">سامانه هوشمند</a></li>
-                <li><a href="<?= $baseEsc ?>pages/blog.php"
+                <li><a href="/blog/"
                         class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">مقالات</a></li>
-                <li><a href="<?= $baseEsc ?>pages/admissions.php"
-                        class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">قبولی‌های سال‌های قبل</a></li>
-                <li><a href="<?= $baseEsc ?>pages/testimonials.php"
+                <li><a href="/results/"
+                        class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">قبولی‌ها و نتایج</a></li>
+                <li><a href="/results/#testimonials"
                         class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">نظرات شاگردان و اولیا</a></li>
-                <li><a href="<?= $baseEsc ?>pages/contact.php"
+                <li><a href="/contact/"
                         class="block text-white font-medium py-2.5 px-3 rounded-lg hover:bg-white/10 transition duration-300">تماس با ما</a></li>
                 <li class="pt-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <a href="<?= $baseEsc ?>pages/contact.php#consultation"
+                    <a href="/contact/#consultation"
                         class="block famo-btn-cream font-bold text-center py-3 px-4 rounded-xl transition duration-300">
                         درخواست مشاوره
                     </a>

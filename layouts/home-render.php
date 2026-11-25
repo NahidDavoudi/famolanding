@@ -283,8 +283,10 @@ function famo_render_course_slide(array $course, int $index): string
         ? '<p class="famo-course-desc">' . famo_esc($description) . '</p>'
         : '';
 
+    $courseHref = famo_course_clean_url($course);
+
     return '<div class="swiper-slide">'
-        . '<a class="famo-course-card" href="pages/course.php#course-' . famo_esc($courseId) . '" aria-label="' . famo_esc($courseName) . ' - مشاهده جزئیات دوره">'
+        . '<a class="famo-course-card" href="' . famo_esc($courseHref) . '" aria-label="' . famo_esc($courseName) . ' - مشاهده جزئیات دوره">'
         . '<div class="famo-course-media" style="background-image: ' . $gradient . ';">'
         . $mediaInner
         . $badgeBlock
@@ -565,3 +567,118 @@ function famo_render_team_dots(array $teamList): string
     }
     return $html;
 }
+
+/**
+ * Map a course API object to its dedicated clean-URL landing page (never hash fragments).
+ *
+ * @param array<string, mixed> $course
+ */
+function famo_course_clean_url(array $course): string
+{
+    $name = famo_str($course['name'] ?? '');
+    $grades = famo_str($course['target_grades'] ?? '');
+    $haystack = $name . ' ' . $grades;
+
+    $map = [
+        'رفع اشکال'  => '/courses/rafa-eshkal-babol/',
+        'تیزهوشان'   => '/courses/tizhooshan-babol/',
+        'مشاوره'     => '/counseling-babol/',
+        'زیست'       => '/courses/biology-babol/',
+        'تجربی'      => '/courses/biology-babol/',
+        'شیمی'       => '/courses/chemistry-babol/',
+        'فیزیک'      => '/courses/physics-babol/',
+        'ریاضی'      => '/courses/math-babol/',
+        'حسابان'     => '/courses/math-babol/',
+        'ابتدایی'    => '/courses/elementary-babol/',
+        'متوسطه اول' => '/courses/middle-school-babol/',
+        'متوسطه دوم' => '/courses/high-school-babol/',
+        'کنکور'      => '/courses/konkur-babol/',
+    ];
+
+    foreach ($map as $keyword => $url) {
+        if ($keyword !== '' && str_contains($haystack, $keyword)) {
+            return $url;
+        }
+    }
+
+    return '/courses/';
+}
+
+/**
+ * Render one detailed course grid card for /courses/ (matches renderCourseCard in assets/js/courses.js).
+ *
+ * @param array<string, mixed> $course
+ */
+function famo_render_course_grid_card(array $course): string
+{
+    $from = famo_safe_hex($course['gradient_color_from'] ?? null, '#445D84');
+    $to = famo_safe_hex($course['gradient_color_to'] ?? null, '#6D8B9E');
+    $rawImg = famo_str($course['background_image_url'] ?? '');
+    if ($rawImg === '') {
+        $rawImg = famo_str($course['image_url'] ?? '');
+    }
+    if ($rawImg === '') {
+        $rawImg = famo_str($course['image'] ?? '');
+    }
+    $imageUrl = famo_safe_url(famo_resolve_image_url($rawImg));
+    $courseId = famo_str($course['id'] ?? '');
+    $courseName = famo_str($course['name'] ?? '');
+    $badgeLabel = famo_str($course['badge_label'] ?? '');
+    $targetGrades = famo_str($course['target_grades'] ?? '');
+    $format = famo_str($course['format'] ?? '');
+    $bodyText = famo_str($course['full_description'] ?? '');
+    if ($bodyText === '') {
+        $bodyText = famo_str($course['description'] ?? '');
+    }
+    $detailUrl = famo_course_clean_url($course);
+
+    $badgeBlock = $badgeLabel !== ''
+        ? '<span class="course-badge">' . famo_esc($badgeLabel) . '</span>'
+        : '';
+
+    $metaItems = '';
+    if ($targetGrades !== '') {
+        $metaItems .= '<span>' . famo_esc($targetGrades) . '</span>';
+    }
+    if ($format !== '') {
+        $metaItems .= '<span>' . famo_esc($format) . '</span>';
+    }
+    $metaBlock = $metaItems !== '' ? '<div class="course-meta">' . $metaItems . '</div>' : '';
+
+    $featuresHtml = '';
+    if (is_array($course['features'] ?? null)) {
+        foreach ($course['features'] as $feat) {
+            $featStr = trim(famo_str($feat));
+            if ($featStr !== '') {
+                $featuresHtml .= '<li>' . famo_svg_icon('icon-check', 'icon--sm text-[#445D84]') . '<span>' . famo_esc($featStr) . '</span></li>';
+            }
+        }
+    }
+    $featuresBlock = $featuresHtml !== '' ? '<ul class="course-features">' . $featuresHtml . '</ul>' : '';
+
+    $mediaInner = $imageUrl !== ''
+        ? '<img src="' . famo_esc($imageUrl) . '" alt="' . famo_esc($courseName) . '" loading="lazy" decoding="async" class="course-image">'
+        : '<div class="course-image-fallback">' . famo_svg_icon(famo_fa_to_svg($course['icon'] ?? null), 'icon--3xl text-white/90') . '</div>';
+
+    $detailLink = $detailUrl !== '/courses/'
+        ? '<a href="' . famo_esc($detailUrl) . '" class="text-sm font-bold text-[#445D84] hover:underline inline-flex items-center gap-1">جزئیات بیشتر ' . famo_svg_icon('icon-chevron-left', 'icon--sm') . '</a>'
+        : '';
+
+    return '<article id="course-' . famo_esc($courseId) . '" class="course-card">'
+        . '<div class="course-image-wrapper" style="background: linear-gradient(135deg, ' . $from . ', ' . $to . ');">'
+        . $mediaInner
+        . $badgeBlock
+        . '</div>'
+        . '<div class="course-body">'
+        . '<h3 class="course-name">' . famo_esc($courseName) . '</h3>'
+        . $metaBlock
+        . ($bodyText !== '' ? '<p class="course-desc">' . famo_esc($bodyText) . '</p>' : '')
+        . $featuresBlock
+        . '<div class="course-footer">'
+        . '<a href="/contact/#consultation" class="course-cta">درخواست مشاوره</a>'
+        . $detailLink
+        . '</div>'
+        . '</div>'
+        . '</article>';
+}
+

@@ -331,13 +331,18 @@ function renderGroups(container, groups) {
     container.replaceChildren(frag);
 }
 
-async function loadAdmissions() {
+async function loadAdmissions(isInitial = false) {
     const container = document.getElementById('admissionsContainer');
     if (!container) return;
 
+    const isFiltered = state.selectedYear !== null || state.selectedExamType !== 'all';
+    const preserveFallback = isInitial && !isFiltered && container.dataset.hasFallback === '1';
+
     state.loading = true;
     container.setAttribute('aria-busy', 'true');
-    container.replaceChildren(buildSkeletonMarkup());
+    if (!preserveFallback) {
+        container.replaceChildren(buildSkeletonMarkup());
+    }
 
     const params = new URLSearchParams();
     params.set('group_by', 'year');
@@ -364,8 +369,10 @@ async function loadAdmissions() {
         }
 
         if (!res.ok || !payload || payload.success === false) {
-            const msg = payload?.error?.message || 'دریافت فهرست قبولی‌ها با خطا مواجه شد.';
-            renderErrorState(container, msg);
+            if (!preserveFallback) {
+                const msg = payload?.error?.message || 'دریافت فهرست قبولی‌ها با خطا مواجه شد.';
+                renderErrorState(container, msg);
+            }
             return;
         }
 
@@ -385,16 +392,19 @@ async function loadAdmissions() {
         }
 
         const groups = normalizeGroups(data);
-        const isFiltered = state.selectedYear !== null || state.selectedExamType !== 'all';
 
         if (groups.length === 0) {
-            renderEmptyState(container, isFiltered);
+            if (!preserveFallback) {
+                renderEmptyState(container, isFiltered);
+            }
             return;
         }
 
         renderGroups(container, groups);
     } catch {
-        renderErrorState(container, 'ارتباط با سرور برقرار نشد. لطفاً اتصال اینترنت خود را بررسی کرده و دوباره تلاش کنید.');
+        if (!preserveFallback) {
+            renderErrorState(container, 'ارتباط با سرور برقرار نشد. لطفاً اتصال اینترنت خود را بررسی کرده و دوباره تلاش کنید.');
+        }
     } finally {
         state.loading = false;
         container.setAttribute('aria-busy', 'false');
@@ -403,7 +413,19 @@ async function loadAdmissions() {
 
 onDomReady(() => {
     initPageChrome();
+    const container = document.getElementById('admissionsContainer');
+    const yearsAttr = container?.dataset.ssrYears || '';
+    if (yearsAttr) {
+        state.availableYears = yearsAttr
+            .split(',')
+            .map((y) => Number.parseInt(y.trim(), 10))
+            .filter((y) => Number.isInteger(y) && y >= 1380 && y <= 1450)
+            .sort((a, b) => b - a);
+    }
     renderYearTabs();
     renderExamTypeChips();
-    loadAdmissions();
+    if (container && container.dataset.ssr === '1') {
+        return;
+    }
+    loadAdmissions(true);
 });

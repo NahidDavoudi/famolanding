@@ -107,6 +107,29 @@ function safeHex(value, fallback) {
     return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(s) ? s : fallback;
 }
 
+function courseCleanUrl(course) {
+    const haystack = `${course?.name || ''} ${course?.target_grades || ''}`;
+    const pairs = [
+        ['رفع اشکال', '/courses/rafa-eshkal-babol/'],
+        ['تیزهوشان', '/courses/tizhooshan-babol/'],
+        ['مشاوره', '/counseling-babol/'],
+        ['زیست', '/courses/biology-babol/'],
+        ['تجربی', '/courses/biology-babol/'],
+        ['شیمی', '/courses/chemistry-babol/'],
+        ['فیزیک', '/courses/physics-babol/'],
+        ['ریاضی', '/courses/math-babol/'],
+        ['حسابان', '/courses/math-babol/'],
+        ['ابتدایی', '/courses/elementary-babol/'],
+        ['متوسطه اول', '/courses/middle-school-babol/'],
+        ['متوسطه دوم', '/courses/high-school-babol/'],
+        ['کنکور', '/courses/konkur-babol/'],
+    ];
+    for (const [kw, url] of pairs) {
+        if (haystack.includes(kw)) return url;
+    }
+    return '/courses/';
+}
+
 function renderCourseCard(course) {
     const hasPrice = course.price !== null && course.price !== undefined && String(course.price).trim() !== '';
     const priceText = hasPrice ? formatPrice(course.price) : '';
@@ -137,24 +160,21 @@ function renderCourseCard(course) {
             ${badgeBlock}
         </div>
 
-        <!-- نام، توضیحات و قیمت زیر تصویر -->
+        <!-- نام، توضیحات و اقدام -->
         <div class="course-body">
-            <h2 class="course-name">${esc(course.name)}</h2>
+            <h3 class="course-name">${esc(course.name)}</h3>
             ${metaBlock}
             ${bodyText ? `<p class="course-desc">${esc(bodyText)}</p>` : ''}
             ${featuresBlock}
 
             <div class="course-footer">
-                <a href="contact.php#consultation" class="course-cta">درخواست مشاوره</a>
+                <a href="/contact/#consultation" class="course-cta">درخواست مشاوره</a>
+                ${courseCleanUrl(course) !== '/courses/'
+                    ? `<a href="${esc(courseCleanUrl(course))}" class="text-sm font-bold text-[#445D84] hover:underline inline-flex items-center gap-1">جزئیات بیشتر ${svgIcon('icon-chevron-left', 'icon--sm')}</a>`
+                    : ''}
             </div>
         </div>
     </article>`;
-    // <div class="course-price-box">
-    //                 <span class="course-price-label">هزینه دوره</span>
-    //                 ${hasPrice
-    //                     ? `<span class="course-price-value">${esc(priceText)}${priceUnit ? `<span class="course-price-unit">${esc(priceUnit)}</span>` : ''}</span>`
-    //                     : `<span class="course-price-value">تماس بگیرید</span>`}
-    //             </div>
 }
 
 function updateCourseSchema(courses) {
@@ -162,7 +182,7 @@ function updateCourseSchema(courses) {
     if (!schemaTag) return;
     try {
         const siteUrl = ((window.APP_CONFIG && window.APP_CONFIG.publicUrl) || window.location.origin).replace(/\/+$/, '');
-        const pageUrl = `${siteUrl}/pages/course.php`;
+        const pageUrl = `${siteUrl}/courses/`;
         const schema = {
             '@context': 'https://schema.org',
             '@type': 'ItemList',
@@ -173,7 +193,7 @@ function updateCourseSchema(courses) {
                     '@type': 'Course',
                     name: course.name,
                     description: course.full_description || course.description || 'دوره آموزشی تخصصی آموزشگاه فامو بابل',
-                    url: `${pageUrl}#course-${encodeURIComponent(String(course.id ?? index + 1))}`,
+                    url: `${siteUrl}${courseCleanUrl(course)}`,
                     inLanguage: 'fa-IR',
                     provider: {
                         '@type': 'EducationalOrganization',
@@ -215,11 +235,18 @@ function updateCourseSchema(courses) {
 async function loadCourses() {
     const container = document.getElementById('coursesContainer');
     if (!container) return;
+    if (container.dataset.ssr === '1') {
+        if (window.refreshLucideIcons) window.refreshLucideIcons(container);
+        return;
+    }
+    const hasFallback = container.dataset.hasFallback === '1';
     try {
         const result = await API.get('/public/courses');
         const courses = result.data || [];
         if (courses.length === 0) {
-            container.innerHTML = '<div class="famo-empty-message">در حال حاضر دوره‌ای ثبت نشده است</div>';
+            if (!hasFallback) {
+                container.innerHTML = '<div class="famo-empty-message">در حال حاضر دوره‌ای ثبت نشده است</div>';
+            }
             return;
         }
         container.innerHTML = courses.map(renderCourseCard).join('');
@@ -227,7 +254,9 @@ async function loadCourses() {
         updateCourseSchema(courses);
     } catch (error) {
         console.error('Error loading courses:', error);
-        container.innerHTML = '<div class="famo-empty-message">خطا در بارگذاری دوره‌ها</div>';
+        if (!hasFallback) {
+            container.innerHTML = '<div class="famo-empty-message">خطا در بارگذاری دوره‌ها</div>';
+        }
     }
 }
 

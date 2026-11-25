@@ -1,7 +1,7 @@
 <?php
-$base = $base ?? '';
+$base = $base ?? '/';
 $baseEsc = htmlspecialchars($base, ENT_QUOTES, 'UTF-8');
-$homeHref = $base === '' ? './' : $baseEsc;
+$homeHref = '/';
 $loginUrlRaw = famo_login_url();
 $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'https://login.famoacademy.ir/'), ENT_QUOTES, 'UTF-8');
 ?>
@@ -48,43 +48,58 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
             <!-- Quick Links -->
             <nav aria-label="دسترسی سریع">
                 <h2 class="text-lg font-bold mb-5 famo-on-dark-cream">دسترسی سریع</h2>
-                <ul class="space-y-2.5 text-sm">
-                    <li><a href="<?= $homeHref ?>"
+                <ul class="space-y-2 text-sm">
+                    <li><a href="/"
                             class="famo-footer-link transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
                         خانه
                     </a></li>
-                    <li><a href="<?= $baseEsc ?>pages/course.php"
+                    <li><a href="/courses/"
                             class="famo-footer-link transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
                         دوره‌ها و مقاطع آموزشی
                     </a></li>
-                    <li><a href="<?= $baseEsc ?>pages/services.php"
+                    <li><a href="/courses/math-babol/"
                             class="famo-footer-link transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
-                        خدمات آموزشی
+                        کلاس خصوصی ریاضی بابل
                     </a></li>
-                    <li><a href="<?= $baseEsc ?>pages/team.php"
+                    <li><a href="/courses/konkur-babol/"
+                            class="famo-footer-link transition duration-300 hover:pr-2 flex items-center">
+                        <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
+                        آموزشگاه کنکور بابل
+                    </a></li>
+                    <li><a href="/courses/tizhooshan-babol/"
+                            class="famo-footer-link transition duration-300 hover:pr-2 flex items-center">
+                        <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
+                        آموزشگاه تیزهوشان بابل
+                    </a></li>
+                    <li><a href="/counseling-babol/"
+                            class="famo-footer-link transition duration-300 hover:pr-2 flex items-center">
+                        <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
+                        مشاوره تحصیلی بابل
+                    </a></li>
+                    <li><a href="/services/"
+                            class="famo-footer-link transition duration-300 hover:pr-2 flex items-center">
+                        <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
+                        خدمات آموزشی و سامانه هوشمند
+                    </a></li>
+                    <li><a href="/team/"
                             class="famo-footer-link transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
                         اساتید و پشتیبانان
                     </a></li>
-                    <li><a href="<?= $baseEsc ?>pages/admissions.php"
+                    <li><a href="/results/"
                             class="famo-footer-link transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
-                        قبولی‌های سال‌های قبل
+                        قبولی‌ها و نظرات
                     </a></li>
-                    <li><a href="<?= $baseEsc ?>pages/testimonials.php"
+                    <li><a href="/blog/"
                             class="famo-footer-link transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
-                        نظرات شاگردان و اولیا
+                        وبلاگ و مقالات آموزشی
                     </a></li>
-                    <li><a href="<?= $baseEsc ?>pages/blog.php"
-                            class="famo-footer-link transition duration-300 hover:pr-2 flex items-center">
-                        <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
-                        مقالات آموزشی
-                    </a></li>
-                    <li><a href="<?= $baseEsc ?>pages/contact.php"
+                    <li><a href="/contact/"
                             class="famo-footer-link transition duration-300 hover:pr-2 flex items-center">
                         <i class="icon icon--sm ml-2" data-lucide="chevron-left" aria-hidden="true"></i>
                         تماس با ما
@@ -117,6 +132,14 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
                         <a href="https://t.me/famoacademy" target="_blank" rel="noopener noreferrer" dir="ltr" class="famo-footer-link transition">@famoacademy</a>
                     </div>
                 </address>
+                <div class="mt-5 pt-4 border-t border-white/15">
+                    <p class="text-xs famo-on-dark-cream font-bold mb-2">مناطق تحت پوشش در مازندران</p>
+                    <div class="flex flex-wrap gap-x-3 gap-y-1.5 text-xs">
+                        <a href="/locations/amirkola/" class="famo-footer-link hover:underline">دانش‌آموزان امیرکلا</a>
+                        <span class="text-white/30" aria-hidden="true">•</span>
+                        <a href="/locations/babolsar-mazandaran/" class="famo-footer-link hover:underline">بابلسر، آمل و قائمشهر</a>
+                    </div>
+                </div>
             </div>
 
             <!-- Student Portal & Map -->
@@ -128,7 +151,7 @@ $loginUrlEsc = htmlspecialchars(($loginUrlRaw !== '' ? $loginUrlRaw . '/' : 'htt
                         <i class="icon icon--sm" data-lucide="user" aria-hidden="true"></i>
                         ورود به پنل دانش‌آموزی
                     </a>
-                    <a href="<?= $baseEsc ?>pages/contact.php#consultation"
+                    <a href="/contact/#consultation"
                         class="famo-footer-consult-btn">
                         <i class="icon icon--sm" data-lucide="phone" aria-hidden="true"></i>
                         درخواست مشاوره

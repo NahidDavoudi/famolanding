@@ -197,6 +197,29 @@ function renderCourseFeatureChip(text) {
     return `<span>${esc(text)}</span>`;
 }
 
+function courseCleanUrl(course) {
+    const haystack = `${course?.name || ''} ${course?.target_grades || ''}`;
+    const pairs = [
+        ['رفع اشکال', '/courses/rafa-eshkal-babol/'],
+        ['تیزهوشان', '/courses/tizhooshan-babol/'],
+        ['مشاوره', '/counseling-babol/'],
+        ['زیست', '/courses/biology-babol/'],
+        ['تجربی', '/courses/biology-babol/'],
+        ['شیمی', '/courses/chemistry-babol/'],
+        ['فیزیک', '/courses/physics-babol/'],
+        ['ریاضی', '/courses/math-babol/'],
+        ['حسابان', '/courses/math-babol/'],
+        ['ابتدایی', '/courses/elementary-babol/'],
+        ['متوسطه اول', '/courses/middle-school-babol/'],
+        ['متوسطه دوم', '/courses/high-school-babol/'],
+        ['کنکور', '/courses/konkur-babol/'],
+    ];
+    for (const [kw, url] of pairs) {
+        if (haystack.includes(kw)) return url;
+    }
+    return '/courses/';
+}
+
 // Build one course card slide for the home carousel.
 // Index: 0-based position; first 3 slides skip lazy loading (visible on load).
 function buildCourseSlide(course, index) {
@@ -218,7 +241,7 @@ function buildCourseSlide(course, index) {
 
     return `
         <div class="swiper-slide">
-            <a class="famo-course-card" href="pages/course.php#course-${esc(course.id)}"
+            <a class="famo-course-card" href="${esc(courseCleanUrl(course))}"
                aria-label="${esc(course.name)} - مشاهده جزئیات دوره">
                 <div class="famo-course-media" style="background-image: ${gradient};">
                     ${imageUrl
