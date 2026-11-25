@@ -90,8 +90,20 @@ $page_libs = [
         <div class="container mx-auto max-w-6xl hero-inner">
             <!-- تصویر اصلی هیرو: تمام‌عرض، بدون lazy load -->
             <div class="hero-media">
-                <img src="/assets/images/poster_hero.webp" alt="محیط آموزشی و کلاس‌های خصوصی آموزشگاه فامو در بابل" width="2816" height="1584" decoding="async" fetchpriority="high" class="hero-media-img">
-            </div>
+            <img
+            src="/assets/images/poster_hero-1024.webp"
+            srcset="
+                /assets/images/poster_hero-640.webp 640w,
+                /assets/images/poster_hero-1024.webp 1024w,
+                /assets/images/poster_hero-1600.webp 1600w
+            "
+            sizes="(max-width: 768px) 100vw, 50vw"
+            alt="محیط آموزشی و کلاس‌های خصوصی آموزشگاه فامو در بابل"
+            width="1600"
+            height="900"
+            fetchpriority="high"
+            class="hero-media-img"
+            >            </div>
 
             <p class="famo-eyebrow mt-5">آموزشگاه فامو | بابل</p>
 
