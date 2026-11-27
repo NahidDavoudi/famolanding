@@ -1009,14 +1009,25 @@ async function loadHomeHighlights() {
         );
     }
 
-    if (testiBox) {
+    if (testiBox && testiBox.dataset.ssr !== '1') {
         tasks.push(
-            API.get('/public/testimonials?per_page=2')
+            API.get('/public/testimonials?page=1&per_page=2')
                 .then((res) => {
-                    const items = Array.isArray(res?.data) ? res.data.slice(0, 2) : [];
+                    const rawItems = Array.isArray(res?.data?.items)
+                        ? res.data.items
+                        : (Array.isArray(res?.data) ? res.data : []);
+                    const items = rawItems.slice(0, 2);
                     if (items.length === 0) return;
+                    const roleMap = {
+                        student: 'دانش‌آموز',
+                        parent: 'ولی دانش‌آموز',
+                        graduate: 'فارغ‌التحصیل',
+                        other: 'سایر',
+                    };
                     testiBox.innerHTML = items.map((item) => {
-                        const meta = item.author_meta ? ` — ${item.author_meta}` : '';
+                        const roleLbl = roleMap[String(item.author_role || '').trim()] || '';
+                        const metaParts = [roleLbl, item.author_meta ? toPersianDigits(item.author_meta) : ''].filter(Boolean);
+                        const meta = metaParts.length > 0 ? ` — ${metaParts.join('، ')}` : '';
                         return `
                             <div class="famo-excerpt-item">
                                 <p class="famo-excerpt-title">${esc(item.author_name || '')}<span class="text-xs font-normal text-gray-500">${esc(meta)}</span></p>

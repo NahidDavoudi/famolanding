@@ -6,6 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   famoHomeData,
+  famoTestimonialsPageData,
   renderCourseSlide,
   renderCourseGridCard,
   normalizeInstructor,
@@ -14,6 +15,11 @@ import {
   renderPersonCard,
   renderTeamCards,
   renderTeamDots,
+  renderHomeTestimonialExcerpt,
+  renderTestimonialSummary,
+  renderTestimonialCard,
+  renderTestimonialsPagination,
+  buildTestimonialsSchema,
 } from './home-ssr-preview.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -249,9 +255,12 @@ function buildOrgAndWebsite(siteUrl, ogImage) {
   };
 }
 
-function buildPreviewGraph(relPath, seo, extraSchemas = [], customCrumbs = null) {
+function buildPreviewGraph(relPath, seo, extraSchemas = [], customCrumbs = null, organizationExtra = null) {
   const siteUrl = famoPublicSiteUrl();
   const { orgId, websiteId, org, website } = buildOrgAndWebsite(siteUrl, seo.ogImage);
+  if (organizationExtra && typeof organizationExtra === 'object') {
+    Object.assign(org, organizationExtra);
+  }
   const webpageId = `${seo.canonical}#webpage`;
   const breadcrumbId = `${seo.canonical}#breadcrumb`;
 
@@ -473,14 +482,14 @@ function buildPreviewCourseSchema() {
   });
 }
 
-function applyCommonReplacements(content, { relPath, base, seo, extraSchemas = [], customCrumbs = null }) {
-  const loginBase = famoEnv('LOGIN_URL', 'https://login.famoacademy.ir').replace(/\/+$/, '');
+function applyCommonReplacements(content, { relPath, base, seo, extraSchemas = [], customCrumbs = null, organizationExtra = null }) {
+  const loginBase = famoEnv('LOGIN_URL', 'https://auth.famoacademy.ir').replace(/\/+$/, '');
   const loginUrl = `${loginBase}/`;
   const homeHref = base === '' ? './' : base;
 
   return content
     .replace(/<\?=\s*famo_config_script\(\)\s*\?>/g, famoConfigScript())
-    .replace(/<\?=\s*\$jsonLdGraph\s*\?>/g, buildPreviewGraph(relPath, seo, extraSchemas, customCrumbs))
+    .replace(/<\?=\s*\$jsonLdGraph\s*\?>/g, buildPreviewGraph(relPath, seo, extraSchemas, customCrumbs, organizationExtra))
     .replace(/<\?=\s*\$courseSchemaJson\s*\?>/g, buildPreviewCourseSchema())
     .replace(/<\?=\s*\$homeHref\s*\?>/g, homeHref)
     .replace(/<\?=\s*\$base\s*===\s*''\s*\?\s*'\.\/'\s*:\s*\$baseEsc\s*\?>/g, homeHref)
@@ -554,8 +563,9 @@ function renderPhpPreviewFile(relPath, base = '/', vars = {}) {
   content = evalLibsConditionals(content, libs);
 
   // Page-specific PHP block evaluation
+  let organizationExtra = null;
   if (relPath === 'index.php') {
-    const homeData = vars.homeData || { courses: null, instructors: null, supporters: null };
+    const homeData = vars.homeData || { courses: null, instructors: null, supporters: null, testimonials: null };
     const ssrCoursesRaw = Array.isArray(homeData.courses)
       ? homeData.courses.filter((c) => c && typeof c === 'object')
       : [];
@@ -568,6 +578,15 @@ function renderPhpPreviewFile(relPath, base = '/', vars = {}) {
     const hasTeamSsr = Array.isArray(homeData.instructors) && Array.isArray(homeData.supporters) && ssrTeam.length > 0;
     const ssrTeamTotal = ssrTeam.length;
     const ssrTeamOffMode = hasTeamSsr && ssrTeamTotal < 3;
+
+    const ssrTestiPayload = homeData.testimonials && typeof homeData.testimonials === 'object' ? homeData.testimonials : null;
+    const ssrTestiItems = Array.isArray(ssrTestiPayload?.items) ? ssrTestiPayload.items.slice(0, 2) : [];
+    const ssrTestiSummary = ssrTestiPayload?.summary && typeof ssrTestiPayload.summary === 'object' ? ssrTestiPayload.summary : null;
+    const hasTestimonialsSsr = ssrTestiItems.length > 0;
+    if (hasTestimonialsSsr) {
+      const schemaExtra = buildTestimonialsSchema(ssrTestiSummary, ssrTestiItems, 2);
+      if (Object.keys(schemaExtra).length > 0) organizationExtra = schemaExtra;
+    }
 
     content = content
       .replace(/<\?=\s*\$ssrTeamOffMode\s*\?\s*' curve-carousel--off-mode'\s*:\s*''\s*\?>/g, ssrTeamOffMode ? ' curve-carousel--off-mode' : '')
@@ -584,7 +603,9 @@ function renderPhpPreviewFile(relPath, base = '/', vars = {}) {
         hasCoursesSsr
           ? ssrCourses.map((c, idx) => renderCourseSlide(c, idx)).join('\n')
           : fallbackHtml
-      ));
+      ))
+      .replace(/<\?=\s*\$hasTestimonialsSsr\s*\?\s*' data-ssr="1"'\s*:\s*''\s*\?>/g, hasTestimonialsSsr ? ' data-ssr="1"' : '')
+      .replace(/<\?php if \(\$hasTestimonialsSsr\): foreach \(\$ssrTestiItems as \$tItem\): echo famo_render_home_testimonial_excerpt\(\$tItem\); endforeach; endif; \?>/g, hasTestimonialsSsr ? ssrTestiItems.map((t) => renderHomeTestimonialExcerpt(t)).join('') : '');
   } else if (relPath === 'pages/course.php') {
     const homeData = vars.homeData || { courses: null };
     const rawCourses = Array.isArray(homeData.courses)
@@ -669,13 +690,23 @@ function renderPhpPreviewFile(relPath, base = '/', vars = {}) {
       .replace(/<\?=\s*\$hasSupportersSsr\s*\?\s*' data-ssr="1"'\s*:\s*' data-has-fallback="1"'\s*\?>/g, hasSupportersSsr ? ' data-ssr="1"' : ' data-has-fallback="1"')
       .replace(/<\?php if \(\$hasSupportersSsr\): \?>[\s\S]*?<\?php else: \?>([\s\S]*?)<\?php endif; \?>/, (_m, fb) => (hasSupportersSsr ? ssrSupporters.map((p) => renderPersonCard(p)).join('\n') : fb));
   } else if (relPath === 'pages/results.php') {
+    const ssrTestiPayload = vars.testimonialsData && typeof vars.testimonialsData === 'object' ? vars.testimonialsData : null;
+    const testiSummary = ssrTestiPayload?.summary && typeof ssrTestiPayload.summary === 'object' ? ssrTestiPayload.summary : null;
+    const ssrTestiItems = Array.isArray(ssrTestiPayload?.items) ? ssrTestiPayload.items.filter((x) => x && typeof x === 'object') : [];
+    const testiTotalPages = Math.max(1, Number.parseInt(String(ssrTestiPayload?.pagination?.total_pages ?? 1), 10) || 1);
+    const hasTestiSsr = ssrTestiItems.length > 0;
+    if (hasTestiSsr || testiSummary) {
+      const schemaExtra = buildTestimonialsSchema(testiSummary, ssrTestiItems, 9);
+      if (Object.keys(schemaExtra).length > 0) organizationExtra = schemaExtra;
+    }
+
     content = content
       .replace(/<\?=\s*\$hasAdmSsr\s*\?\s*' data-ssr="1"'\s*:\s*' data-has-fallback="1"'\s*\?>/g, ' data-has-fallback="1"')
       .replace(/<\?php if \(\$hasAdmSsr\): \?>[\s\S]*?<\?php else: \?>([\s\S]*?)<\?php endif; \?>/, (_m, fb) => fb)
-      .replace(/<\?=\s*\$testiSummary\s*\?[\s\S]*?:\s*'ثبت‌شده'\s*\?>/g, 'ثبت‌شده')
-      .replace(/<\?=\s*\(\$testiSummary[\s\S]*?:\s*'شفاف'\s*\?>/g, 'شفاف')
-      .replace(/<\?=\s*\$hasTestiSsr\s*\?\s*' data-ssr="1"'\s*:\s*' data-has-fallback="1"'\s*\?>/g, ' data-has-fallback="1"')
-      .replace(/<\?php if \(\$hasTestiSsr\): \?>[\s\S]*?<\?php else: \?>([\s\S]*?)<\?php endif; \?>/, (_m, fb) => fb);
+      .replace(/<\?php if \(\$testiSummary !== null\): \?>[\s\S]*?<\?php else: \?>([\s\S]*?)<\?php endif; \?>/, (_m, fb) => (testiSummary ? renderTestimonialSummary(testiSummary) : fb))
+      .replace(/<\?=\s*\$hasTestiSsr\s*\?\s*' data-ssr="1" data-ssr-total-pages="'\s*\.\s*\$testiTotalPages\s*\.\s*'"'\s*:\s*' data-has-fallback="1"'\s*\?>/g, hasTestiSsr ? ` data-ssr="1" data-ssr-total-pages="${testiTotalPages}"` : ' data-has-fallback="1"')
+      .replace(/<\?php if \(\$hasTestiSsr\): \?>[\s\S]*?<\?php else: \?>([\s\S]*?)<\?php endif; \?>/, (_m, fb) => (hasTestiSsr ? ssrTestiItems.map((it) => renderTestimonialCard(it, 'h4')).join('\n') : fb))
+      .replace(/<\?=\s*\(\$hasTestiSsr\s*&&\s*\$testiTotalPages\s*>\s*1\)\s*\?\s*famo_render_testimonials_pagination\(1,\s*\$testiTotalPages\)\s*:\s*''\s*\?>/g, (hasTestiSsr && testiTotalPages > 1) ? renderTestimonialsPagination(1, testiTotalPages) : '');
   } else if (relPath === 'pages/blog.php') {
     content = content
       .replace(/<\?=\s*\$hasPostsSsr\s*\?\s*' data-ssr="1"'\s*:\s*' data-has-fallback="1"'\s*\?>/g, ' data-has-fallback="1"')
@@ -687,7 +718,7 @@ function renderPhpPreviewFile(relPath, base = '/', vars = {}) {
       .replace(/<\?php if \(is_array\(\$ssrPost\)\):[\s\S]*?<\?php elseif \(\$isNotFound\): \?>([\s\S]*?)<\?php else: \?>([\s\S]*?)<\?php endif; \?>/, (_m, nfHtml, fbHtml) => (isNotFound ? nfHtml : fbHtml));
   }
 
-  return applyCommonReplacements(content, { relPath, base, seo });
+  return applyCommonReplacements(content, { relPath, base, seo, organizationExtra });
 }
 
 function renderLandingPreviewPage(pageData) {
@@ -1173,7 +1204,11 @@ const server = http.createServer(async (req, res) => {
     const filePath = path.join(ROOT_DIR, safeRel);
     if (filePath.startsWith(ROOT_DIR) && fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
       const ext = path.extname(filePath).toLowerCase();
-      res.writeHead(200, { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' });
+      const headers = { 'Content-Type': MIME_TYPES[ext] || 'application/octet-stream' };
+      if (pathname === '/sitemap.xml') {
+        headers['Cache-Control'] = 'public, max-age=300, must-revalidate';
+      }
+      res.writeHead(200, headers);
       fs.createReadStream(filePath).pipe(res);
       return;
     }
@@ -1214,6 +1249,8 @@ const server = http.createServer(async (req, res) => {
     const vars = {};
     if (targetFile === 'pages/course.php' || targetFile === 'pages/team.php') {
       vars.homeData = await famoHomeData();
+    } else if (targetFile === 'pages/results.php') {
+      vars.testimonialsData = await famoTestimonialsPageData({ perPage: 9 });
     }
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(renderPhpPreviewFile(targetFile, '/', vars));
@@ -1252,8 +1289,11 @@ const server = http.createServer(async (req, res) => {
     res.end(renderPhpPreviewFile('404.php', '/'));
     return;
   }
-  if (pathname === '/sitemap-blog.php') {
-    res.writeHead(200, { 'Content-Type': 'application/xml; charset=utf-8' });
+  if (pathname === '/sitemap-blog.php' || pathname === '/sitemap-blog.xml') {
+    res.writeHead(200, {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=1800',
+    });
     res.end('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>\n');
     return;
   }

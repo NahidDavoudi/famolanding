@@ -682,3 +682,295 @@ function famo_render_course_grid_card(array $course): string
         . '</article>';
 }
 
+const FAMO_AUTHOR_ROLE_LABELS = [
+    'student'  => 'دانش‌آموز',
+    'parent'   => 'ولی دانش‌آموز',
+    'graduate' => 'فارغ‌التحصیل',
+    'other'    => 'سایر',
+];
+
+function famo_to_persian_digits(string $value): string
+{
+    return strtr($value, [
+        '0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴',
+        '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹',
+    ]);
+}
+
+function famo_format_persian_rating(float $value): string
+{
+    if (!is_finite($value) || $value <= 0) {
+        return famo_to_persian_digits('0');
+    }
+    $rounded = round($value, 1);
+    $formatted = ((float) (int) $rounded === $rounded)
+        ? (string) (int) $rounded
+        : number_format($rounded, 1, '.', '');
+    return famo_to_persian_digits(str_replace('.', '٫', $formatted));
+}
+
+function famo_format_author_role(mixed $role): string
+{
+    $key = trim(famo_str($role));
+    return FAMO_AUTHOR_ROLE_LABELS[$key] ?? FAMO_AUTHOR_ROLE_LABELS['other'];
+}
+
+function famo_render_star_svg(bool $filled = true, int $size = 18): string
+{
+    $cls = $filled ? 'famo-star famo-star--filled' : 'famo-star famo-star--empty';
+    $dim = max(10, min(32, $size));
+    return '<svg viewBox="0 0 24 24" width="' . $dim . '" height="' . $dim . '" aria-hidden="true" class="' . $cls . '">'
+        . '<path d="M12 2.5l2.93 5.94 6.56.95-4.75 4.63 1.12 6.53L12 17.46 6.14 20.55l1.12-6.53L2.51 9.39l6.56-.95L12 2.5z"></path>'
+        . '</svg>';
+}
+
+function famo_render_stars_row(mixed $ratingValue, int $size = 18, string $extraClass = ''): string
+{
+    if (is_bool($ratingValue) || is_array($ratingValue) || is_object($ratingValue)) {
+        return '';
+    }
+    $raw = trim((string) $ratingValue);
+    if ($raw === '' || !is_numeric($raw)) {
+        return '';
+    }
+    $rating = (int) $raw;
+    if ($rating < 1 || $rating > 5) {
+        return '';
+    }
+    $cls = $extraClass !== '' ? 'famo-stars ' . $extraClass : 'famo-stars';
+    $label = 'امتیاز ' . famo_to_persian_digits((string) $rating) . ' از ' . famo_to_persian_digits('5');
+    $stars = '';
+    for ($i = 1; $i <= 5; $i++) {
+        $stars .= famo_render_star_svg($i <= $rating, $size);
+    }
+    return '<div class="' . famo_esc($cls) . '" aria-label="' . famo_esc($label) . '">' . $stars . '</div>';
+}
+
+/**
+ * Render one testimonial excerpt item for homepage #homeTestimonialsExcerpt.
+ *
+ * @param array<string, mixed> $item
+ */
+function famo_render_home_testimonial_excerpt(array $item): string
+{
+    $authorName = trim(famo_str($item['author_name'] ?? ''));
+    $authorMeta = trim(famo_str($item['author_meta'] ?? ''));
+    $roleLabel = famo_format_author_role($item['author_role'] ?? '');
+    $content = trim(famo_str($item['content'] ?? ''));
+    if ($authorName === '' && $content === '') {
+        return '';
+    }
+
+    $subParts = [];
+    if ($roleLabel !== '') {
+        $subParts[] = $roleLabel;
+    }
+    if ($authorMeta !== '') {
+        $subParts[] = famo_to_persian_digits($authorMeta);
+    }
+    $metaStr = count($subParts) > 0 ? ' — ' . implode('، ', $subParts) : '';
+    $starsHtml = famo_render_stars_row($item['rating'] ?? null, 14);
+
+    return '<div class="famo-excerpt-item">'
+        . '<div class="flex items-center justify-between gap-2 flex-wrap mb-1">'
+        . '<p class="famo-excerpt-title m-0">'
+        . famo_esc($authorName)
+        . ($metaStr !== '' ? '<span class="text-xs font-normal text-gray-500">' . famo_esc($metaStr) . '</span>' : '')
+        . '</p>'
+        . $starsHtml
+        . '</div>'
+        . '<p class="famo-excerpt-body">' . famo_esc($content) . '</p>'
+        . '</div>';
+}
+
+/**
+ * Render summary banner matching renderSummary() in assets/js/testimonials.js.
+ *
+ * @param array<string, mixed> $summary
+ */
+function famo_render_testimonial_summary(array $summary): string
+{
+    $totalApproved = max(0, (int) ($summary['total_approved'] ?? 0));
+    $avgRating = (float) ($summary['average_rating'] ?? 0);
+    $hasRating = $totalApproved > 0 && is_finite($avgRating) && $avgRating > 0;
+    $roundedStars = $hasRating ? (int) round($avgRating) : 0;
+
+    $stars = '';
+    for ($i = 1; $i <= 5; $i++) {
+        $stars .= famo_render_star_svg($i <= $roundedStars, 18);
+    }
+
+    $avgDisplay = $hasRating ? famo_format_persian_rating($avgRating) : '—';
+    $outOfDisplay = $totalApproved > 0 ? 'از ' . famo_to_persian_digits('5') : '';
+
+    return '<div class="famo-testi-summary-grid">'
+        . '<div class="famo-testi-stat">'
+        . '<div class="famo-testi-stat-value">' . famo_esc(famo_to_persian_digits((string) $totalApproved)) . '</div>'
+        . '<div class="famo-testi-stat-label">نظر تأییدشده</div>'
+        . '</div>'
+        . '<div class="famo-testi-stat">'
+        . '<div class="famo-testi-stat-rating-row">'
+        . '<span class="famo-testi-stat-value">' . famo_esc($avgDisplay) . '</span>'
+        . '<span class="famo-testi-stat-outof">' . famo_esc($outOfDisplay) . '</span>'
+        . '</div>'
+        . '<div class="famo-stars famo-stars--summary" aria-hidden="true">' . $stars . '</div>'
+        . '<div class="famo-testi-stat-label">میانگین امتیاز رضایت</div>'
+        . '</div>'
+        . '<div class="famo-testi-stat-cta">'
+        . '<p class="famo-testi-stat-note">تجربه حضور در کلاس‌ها یا مشاوره فامو را داشته‌اید؟</p>'
+        . '<a href="#submit-testimonial" class="famo-state-btn">ثبت نظر جدید</a>'
+        . '</div>'
+        . '</div>';
+}
+
+/**
+ * Render one full testimonial card matching buildTestimonialCard() in assets/js/testimonials.js.
+ *
+ * @param array<string, mixed> $item
+ */
+function famo_render_testimonial_card(array $item, string $headingTag = 'h4'): string
+{
+    $tag = ($headingTag === 'h3') ? 'h3' : 'h4';
+    $isFeatured = !empty($item['is_featured']);
+    $cardClass = $isFeatured ? 'famo-testi-card hover-lift famo-testi-card--featured' : 'famo-testi-card hover-lift';
+
+    $authorName = trim(famo_str($item['author_name'] ?? ''));
+    $initial = famo_first_char($authorName);
+    if ($initial === '') {
+        $initial = 'ف';
+    }
+    $roleLabel = famo_format_author_role($item['author_role'] ?? '');
+    $authorMeta = trim(famo_str($item['author_meta'] ?? ''));
+    $content = famo_str($item['content'] ?? '');
+    $courseName = trim(famo_str($item['course_name'] ?? ''));
+    $instructorName = trim(famo_str($item['instructor_name'] ?? ''));
+
+    $metaHtml = $authorMeta !== ''
+        ? '<p class="famo-testi-meta">' . famo_esc(famo_to_persian_digits($authorMeta)) . '</p>'
+        : '';
+    $starsHtml = famo_render_stars_row($item['rating'] ?? null, 18);
+
+    $tagsHtml = '';
+    if ($courseName !== '' || $instructorName !== '') {
+        $tagsHtml .= '<div class="famo-testi-tags">';
+        if ($courseName !== '') {
+            $tagsHtml .= '<span class="famo-adm-chip famo-adm-chip--exam">دوره: ' . famo_esc($courseName) . '</span>';
+        }
+        if ($instructorName !== '') {
+            $tagsHtml .= '<span class="famo-adm-chip famo-adm-chip--field">استاد: ' . famo_esc($instructorName) . '</span>';
+        }
+        $tagsHtml .= '</div>';
+    }
+
+    return '<article class="' . $cardClass . '">'
+        . '<div class="famo-testi-card-head">'
+        . '<div class="famo-testi-author">'
+        . '<div class="famo-testi-avatar" aria-hidden="true">' . famo_esc($initial) . '</div>'
+        . '<div class="famo-testi-author-info">'
+        . '<div class="famo-testi-name-row">'
+        . '<' . $tag . ' class="famo-testi-name">' . famo_esc($authorName) . '</' . $tag . '>'
+        . '<span class="famo-testi-role-badge">' . famo_esc($roleLabel) . '</span>'
+        . '</div>'
+        . $metaHtml
+        . '</div>'
+        . '</div>'
+        . $starsHtml
+        . '</div>'
+        . '<p class="famo-testi-content">' . famo_esc($content) . '</p>'
+        . $tagsHtml
+        . '</article>';
+}
+
+/**
+ * Render initial SSR pagination shell matching renderPagination() in assets/js/testimonials.js.
+ */
+function famo_render_testimonials_pagination(int $page, int $totalPages): string
+{
+    if ($totalPages <= 1) {
+        return '';
+    }
+    $safePage = max(1, min($page, $totalPages));
+    $prevDisabled = $safePage <= 1 ? ' disabled' : '';
+    $nextDisabled = $safePage >= $totalPages ? ' disabled' : '';
+    $info = 'صفحه ' . famo_to_persian_digits((string) $safePage) . ' از ' . famo_to_persian_digits((string) $totalPages);
+
+    return '<nav class="famo-pagination" aria-label="صفحه‌بندی نظرات">'
+        . '<button type="button" class="famo-page-btn" data-page-dir="prev"' . $prevDisabled . '>صفحه قبل</button>'
+        . '<span class="famo-page-info">' . famo_esc($info) . '</span>'
+        . '<button type="button" class="famo-page-btn" data-page-dir="next"' . $nextDisabled . '>صفحه بعد</button>'
+        . '</nav>';
+}
+
+/**
+ * Build Schema.org AggregateRating + Review entries for EducationalOrganization
+ * strictly from real approved API data (never fabricated).
+ *
+ * @param ?array<string, mixed> $summary
+ * @param array<int, mixed> $items
+ * @return array<string, mixed>
+ */
+function famo_build_testimonials_schema(?array $summary, array $items, int $maxReviews = 9): array
+{
+    $extra = [];
+
+    if (is_array($summary)) {
+        $totalApproved = (int) ($summary['total_approved'] ?? 0);
+        $avgRating = (float) ($summary['average_rating'] ?? 0);
+        if ($totalApproved > 0 && is_finite($avgRating) && $avgRating > 0 && $avgRating <= 5) {
+            $extra['aggregateRating'] = [
+                '@type'       => 'AggregateRating',
+                'ratingValue' => round($avgRating, 2),
+                'reviewCount' => $totalApproved,
+                'bestRating'  => 5,
+                'worstRating' => 1,
+            ];
+        }
+    }
+
+    $reviews = [];
+    foreach ($items as $item) {
+        if (count($reviews) >= $maxReviews) {
+            break;
+        }
+        if (!is_array($item)) {
+            continue;
+        }
+        $authorName = trim(famo_str($item['author_name'] ?? ''));
+        $body = trim(famo_str($item['content'] ?? ''));
+        if ($authorName === '' || $body === '') {
+            continue;
+        }
+        $review = [
+            '@type'      => 'Review',
+            'inLanguage' => 'fa-IR',
+            'author'     => [
+                '@type' => 'Person',
+                'name'  => $authorName,
+            ],
+            'reviewBody' => $body,
+        ];
+        $ratingRaw = $item['rating'] ?? null;
+        if (!is_bool($ratingRaw) && is_numeric($ratingRaw)) {
+            $rating = (int) $ratingRaw;
+            if ($rating >= 1 && $rating <= 5) {
+                $review['reviewRating'] = [
+                    '@type'       => 'Rating',
+                    'ratingValue' => $rating,
+                    'bestRating'  => 5,
+                    'worstRating' => 1,
+                ];
+            }
+        }
+        $createdAt = trim(famo_str($item['created_at'] ?? ''));
+        if ($createdAt !== '' && preg_match('/^\d{4}-\d{2}-\d{2}/', $createdAt, $m) === 1) {
+            $review['datePublished'] = $m[0];
+        }
+        $reviews[] = $review;
+    }
+
+    if (count($reviews) > 0) {
+        $extra['review'] = $reviews;
+    }
+
+    return $extra;
+}

@@ -23,6 +23,19 @@ $hasTeamSsr = is_array($homeData['instructors']) && is_array($homeData['supporte
 $ssrTeamTotal = count($ssrTeam);
 $ssrTeamOffMode = $hasTeamSsr && $ssrTeamTotal < 3;
 
+$ssrTestiPayload = is_array($homeData['testimonials'] ?? null) ? $homeData['testimonials'] : null;
+$ssrTestiItems = is_array($ssrTestiPayload['items'] ?? null)
+    ? array_slice(array_values(array_filter($ssrTestiPayload['items'], 'is_array')), 0, 2)
+    : [];
+$ssrTestiSummary = is_array($ssrTestiPayload['summary'] ?? null) ? $ssrTestiPayload['summary'] : null;
+$hasTestimonialsSsr = count($ssrTestiItems) > 0;
+if ($hasTestimonialsSsr) {
+    $testiSchemaExtra = famo_build_testimonials_schema($ssrTestiSummary, $ssrTestiItems, 2);
+    if (count($testiSchemaExtra) > 0) {
+        $organizationExtra = $testiSchemaExtra;
+    }
+}
+
 $pageTitle = 'آموزشگاه فامو بابل | آموزش خصوصی و هوشمند';
 $metaDescription = 'آموزشگاه فامو در بابل؛ ارائه کلاس‌های خصوصی، آزمون‌های شخصی‌سازی‌شده و پیگیری هوشمند عملکرد تحصیلی دانش‌آموزان.';
 $canonicalPath = '';
@@ -425,7 +438,7 @@ $page_libs = [
                         <p class="famo-highlight-desc">
                             بازخورد واقعی و تأییدشده دانش‌آموزان، فارغ‌التحصیلان و اولیا درباره تجربه همکاری با فامو را بخوانید یا دیدگاه خود را ثبت کنید.
                         </p>
-                        <div id="homeTestimonialsExcerpt" class="famo-excerpt-list" aria-live="polite"></div>
+                        <div id="homeTestimonialsExcerpt" class="famo-excerpt-list" aria-live="polite"<?= $hasTestimonialsSsr ? ' data-ssr="1"' : '' ?>><?php if ($hasTestimonialsSsr): foreach ($ssrTestiItems as $tItem): echo famo_render_home_testimonial_excerpt($tItem); endforeach; endif; ?></div>
                     </div>
                     <div>
                         <a href="/results/#testimonials"

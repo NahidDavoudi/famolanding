@@ -7,4 +7,4 @@ Disallow: /r/
 Disallow: /r.php
 
 Sitemap: https://famoacademy.ir/sitemap.xml
-Sitemap: https://famoacademy.ir/sitemap-blog.php
+Sitemap: https://famoacademy.ir/sitemap-blog.xml

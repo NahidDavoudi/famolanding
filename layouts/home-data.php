@@ -5,13 +5,14 @@ require_once __DIR__ . '/../config.php';
 
 /**
  * Extensible endpoint map for homepage SSR data.
- * Adding another homepage feed (e.g. 'admissions' => '/public/admissions?featured=1',
- * 'testimonials' => '/public/testimonials?per_page=2') is a single-line entry here.
+ * Adding another homepage feed (e.g. 'admissions' => '/public/admissions?featured=1')
+ * is a single-line entry here.
  */
 const FAMO_HOME_DATA_ENDPOINTS = [
-    'courses'     => '/public/courses',
-    'instructors' => '/public/instructors',
-    'supporters'  => '/public/supporters',
+    'courses'      => '/public/courses',
+    'instructors'  => '/public/instructors',
+    'supporters'   => '/public/supporters',
+    'testimonials' => '/public/testimonials?page=1&per_page=3',
 ];
 
 const FAMO_HOME_CACHE_TTL_SECONDS        = 60;
@@ -19,11 +20,13 @@ const FAMO_HOME_CACHE_MAX_STALE_SECONDS  = 3600;
 const FAMO_HOME_CACHE_RETRY_AFTER_SECOND = 15;
 const FAMO_HOME_CACHE_FILENAME           = 'home-data-v1.json';
 const FAMO_HOME_LOCK_FILENAME            = 'home-data-v1.lock';
+const FAMO_TESTI_CACHE_FILENAME          = 'testimonials-page1-v1.json';
+const FAMO_TESTI_LOCK_FILENAME           = 'testimonials-page1-v1.lock';
 
 /**
  * Return an array keyed by every configured endpoint, all set to null.
  *
- * @return array<string, ?array<int, mixed>>
+ * @return array<string, ?array<mixed>>
  */
 function famo_home_empty_result(): array
 {
@@ -35,7 +38,7 @@ function famo_home_empty_result(): array
 }
 
 /**
- * Normalize an endpoint data value: only non-empty arrays are returned; empty arrays become null.
+ * Normalize an endpoint list value: only non-empty arrays are returned; empty arrays become null.
  *
  * @return ?array<int, mixed>
  */
@@ -45,6 +48,71 @@ function famo_home_normalize_list(mixed $value): ?array
         return null;
     }
     return array_values($value);
+}
+
+/**
+ * Normalize a testimonials payload from either the live API shape
+ * (`{ data: { items: [...], summary: {...} }, pagination: {...} }`) or a flat list (`{ data: [...] }`).
+ * Returns null when there are no valid testimonial items.
+ *
+ * @return ?array{items: array<int, array<string, mixed>>, summary: ?array<string, mixed>, pagination: ?array<string, mixed>}
+ */
+function famo_home_normalize_testimonials(mixed $dataValue, mixed $rootPayload = null): ?array
+{
+    if (!is_array($dataValue)) {
+        return null;
+    }
+
+    $rawItems = null;
+    $summary = null;
+    $pagination = null;
+
+    if (array_key_exists('items', $dataValue)) {
+        $rawItems = is_array($dataValue['items']) ? $dataValue['items'] : [];
+        if (isset($dataValue['summary']) && is_array($dataValue['summary'])) {
+            $summary = $dataValue['summary'];
+        }
+        if (isset($dataValue['pagination']) && is_array($dataValue['pagination'])) {
+            $pagination = $dataValue['pagination'];
+        }
+    } elseif (array_is_list($dataValue)) {
+        $rawItems = $dataValue;
+    } else {
+        return null;
+    }
+
+    if (is_array($rootPayload)) {
+        if ($summary === null && isset($rootPayload['summary']) && is_array($rootPayload['summary'])) {
+            $summary = $rootPayload['summary'];
+        }
+        if ($pagination === null && isset($rootPayload['pagination']) && is_array($rootPayload['pagination'])) {
+            $pagination = $rootPayload['pagination'];
+        }
+    }
+
+    $items = array_values(array_filter($rawItems, 'is_array'));
+    if (count($items) === 0) {
+        return null;
+    }
+
+    return [
+        'items'      => $items,
+        'summary'    => $summary,
+        'pagination' => $pagination,
+    ];
+}
+
+/**
+ * Normalize any configured homepage endpoint value by key.
+ *
+ * @return ?array<mixed>
+ */
+function famo_home_normalize_endpoint_value(string $key, mixed $dataValue, mixed $rootPayload = null): ?array
+{
+    if ($key === 'testimonials') {
+        return famo_home_normalize_testimonials($dataValue, $rootPayload);
+    }
+    return famo_home_normalize_list($dataValue);
 }
 
 /**
@@ -75,7 +143,7 @@ function famo_home_read_cache_file(string $cacheFile): ?array
  * Extract per-key data from a cached payload, enforcing the 1-hour max stale limit per key.
  *
  * @param array<string, mixed> $cached
- * @return array<string, ?array<int, mixed>>
+ * @return array<string, ?array<mixed>>
  */
 function famo_home_extract_cached_data(array $cached, int $now): array
 {
@@ -92,7 +160,7 @@ function famo_home_extract_cached_data(array $cached, int $now): array
             $out[$key] = null;
             continue;
         }
-        $out[$key] = famo_home_normalize_list($dataMap[$key] ?? null);
+        $out[$key] = famo_home_normalize_endpoint_value($key, $dataMap[$key] ?? null);
     }
 
     return $out;
@@ -102,7 +170,7 @@ function famo_home_extract_cached_data(array $cached, int $now): array
  * Fetch all configured homepage endpoints concurrently using curl_multi.
  * Never forwards visitor headers/IP. Never throws.
  *
- * @return array<string, array{ok: bool, data: ?array<int, mixed>, status: int}>
+ * @return array<string, array{ok: bool, data: ?array<mixed>, status: int}>
  */
 function famo_home_fetch_endpoints_concurrent(): array
 {
@@ -167,7 +235,7 @@ function famo_home_fetch_endpoints_concurrent(): array
 
             $results[$key] = [
                 'ok'     => true,
-                'data'   => famo_home_normalize_list($decoded['data']),
+                'data'   => famo_home_normalize_endpoint_value($key, $decoded['data'], $decoded),
                 'status' => 200,
             ];
         }
@@ -183,7 +251,7 @@ function famo_home_fetch_endpoints_concurrent(): array
         if (($res['status'] ?? 0) === 200 && is_array($decoded) && array_key_exists('data', $decoded) && is_array($decoded['data'])) {
             $results[$key] = [
                 'ok'     => true,
-                'data'   => famo_home_normalize_list($decoded['data']),
+                'data'   => famo_home_normalize_endpoint_value($key, $decoded['data'], $decoded),
                 'status' => 200,
             ];
         }
@@ -210,7 +278,8 @@ function famo_home_write_cache_atomic(string $cacheDir, string $cacheFile, array
         $suffix = str_replace('.', '', uniqid('', true));
     }
 
-    $tmpFile = $cacheDir . '/home-data-v1.' . getmypid() . '.' . $suffix . '.tmp';
+    $prefix = pathinfo($cacheFile, PATHINFO_FILENAME);
+    $tmpFile = $cacheDir . '/' . $prefix . '.' . getmypid() . '.' . $suffix . '.tmp';
     $written = @file_put_contents($tmpFile, $json);
     if ($written === false) {
         @unlink($tmpFile);
@@ -225,9 +294,9 @@ function famo_home_write_cache_atomic(string $cacheDir, string $cacheFile, array
 /**
  * Merge freshly fetched endpoint results with previous cached values (up to 1 hour old on failure).
  *
- * @param array<string, array{ok: bool, data: ?array<int, mixed>, status: int}> $fetched
+ * @param array<string, array{ok: bool, data: ?array<mixed>, status: int}> $fetched
  * @param ?array<string, mixed> $previousCache
- * @return array{payload: array<string, mixed>, data: array<string, ?array<int, mixed>>}
+ * @return array{payload: array<string, mixed>, data: array<string, ?array<mixed>>}
  */
 function famo_home_merge_results(array $fetched, ?array $previousCache, int $now): array
 {
@@ -251,9 +320,9 @@ function famo_home_merge_results(array $fetched, ?array $previousCache, int $now
         } else {
             $anyFailure = true;
             $keyTs = isset($prevUpdated[$key]) ? (int) $prevUpdated[$key] : $prevFetchedAt;
-            $prevList = famo_home_normalize_list($prevData[$key] ?? null);
-            if ($prevList !== null && $keyTs > 0 && ($now - $keyTs) <= FAMO_HOME_CACHE_MAX_STALE_SECONDS) {
-                $newData[$key] = $prevList;
+            $prevVal = famo_home_normalize_endpoint_value($key, $prevData[$key] ?? null);
+            if ($prevVal !== null && $keyTs > 0 && ($now - $keyTs) <= FAMO_HOME_CACHE_MAX_STALE_SECONDS) {
+                $newData[$key] = $prevVal;
                 $newUpdated[$key] = $keyTs;
             } else {
                 $newData[$key] = null;
@@ -276,13 +345,12 @@ function famo_home_merge_results(array $fetched, ?array $previousCache, int $now
 }
 
 /**
- * Fetch and cache homepage SSR data (courses, instructors, supporters).
+ * Fetch and cache homepage SSR data (courses, instructors, supporters, testimonials).
  *
- * Returns an associative array with keys: courses, instructors, supporters.
- * Each value is either a non-empty array or null (empty arrays are treated as null).
- * Never throws; degrades gracefully on any API, lock, or filesystem issue.
+ * Returns an associative array keyed by FAMO_HOME_DATA_ENDPOINTS.
+ * Empty arrays/items are treated as null. Never throws; degrades gracefully on any issue.
  *
- * @return array<string, ?array<int, mixed>>
+ * @return array<string, ?array<mixed>>
  */
 function famo_home_data(): array
 {
@@ -364,5 +432,123 @@ function famo_home_data(): array
         }
     } catch (\Throwable) {
         return famo_home_empty_result();
+    }
+}
+
+/**
+ * Fetch and cache page 1 of public testimonials for /results/ SSR (60s TTL, 1h stale, 15s backoff).
+ * Respects HOME_SSR=0 kill switch. Never forwards visitor headers/IP. Never throws.
+ *
+ * @return ?array{items: array<int, array<string, mixed>>, summary: ?array<string, mixed>, pagination: ?array<string, mixed>}
+ */
+function famo_testimonials_page_data(int $perPage = 9): ?array
+{
+    try {
+        if (trim(famo_env('HOME_SSR', '')) === '0') {
+            return null;
+        }
+
+        $safePerPage = max(1, min(30, $perPage));
+        $endpoint = '/public/testimonials?page=1&per_page=' . $safePerPage;
+        $now = time();
+        $cacheDir = __DIR__ . '/../storage/cache';
+        $cacheFile = $cacheDir . '/' . FAMO_TESTI_CACHE_FILENAME;
+        $lockFile = $cacheDir . '/' . FAMO_TESTI_LOCK_FILENAME;
+
+        $extractStale = static function (?array $cachedPayload, int $ts): ?array {
+            if (!is_array($cachedPayload)) {
+                return null;
+            }
+            $fetchedAt = (int) ($cachedPayload['fetched_at'] ?? 0);
+            if ($fetchedAt <= 0 || ($ts - $fetchedAt) > FAMO_HOME_CACHE_MAX_STALE_SECONDS) {
+                return null;
+            }
+            return famo_home_normalize_testimonials($cachedPayload['data'] ?? null);
+        };
+
+        $fetchOnce = static function () use ($endpoint): array {
+            $res = famo_internal_api_get($endpoint, 2);
+            $decoded = $res['json'] ?? null;
+            if (
+                ($res['status'] ?? 0) === 200
+                && is_array($decoded)
+                && array_key_exists('data', $decoded)
+                && is_array($decoded['data'])
+            ) {
+                return [
+                    'ok'   => true,
+                    'data' => famo_home_normalize_testimonials($decoded['data'], $decoded),
+                ];
+            }
+            return ['ok' => false, 'data' => null];
+        };
+
+        $canCache = is_dir($cacheDir) && is_writable($cacheDir);
+        if (!$canCache) {
+            $fetched = $fetchOnce();
+            return $fetched['ok'] ? $fetched['data'] : null;
+        }
+
+        $cached = famo_home_read_cache_file($cacheFile);
+        if ($cached !== null) {
+            $fetchedAt = (int) ($cached['fetched_at'] ?? 0);
+            $retryAfter = (int) ($cached['retry_after'] ?? 0);
+            if ($fetchedAt > 0 && ($now - $fetchedAt) < FAMO_HOME_CACHE_TTL_SECONDS) {
+                return $extractStale($cached, $now);
+            }
+            if ($retryAfter > 0 && $now < $retryAfter) {
+                return $extractStale($cached, $now);
+            }
+        }
+
+        $lockFp = @fopen($lockFile, 'c');
+        if ($lockFp === false) {
+            $fetched = $fetchOnce();
+            return $fetched['ok'] ? $fetched['data'] : null;
+        }
+
+        try {
+            if (!@flock($lockFp, LOCK_EX | LOCK_NB)) {
+                return $extractStale($cached, $now);
+            }
+
+            $freshCheck = famo_home_read_cache_file($cacheFile);
+            if ($freshCheck !== null) {
+                $fetchedAt = (int) ($freshCheck['fetched_at'] ?? 0);
+                $retryAfter = (int) ($freshCheck['retry_after'] ?? 0);
+                if (
+                    ($fetchedAt > 0 && ($now - $fetchedAt) < FAMO_HOME_CACHE_TTL_SECONDS)
+                    || ($retryAfter > 0 && $now < $retryAfter)
+                ) {
+                    return $extractStale($freshCheck, $now);
+                }
+                $cached = $freshCheck;
+            }
+
+            $fetched = $fetchOnce();
+            if ($fetched['ok']) {
+                $payload = [
+                    'fetched_at'  => $now,
+                    'retry_after' => 0,
+                    'data'        => $fetched['data'],
+                ];
+                famo_home_write_cache_atomic($cacheDir, $cacheFile, $payload);
+                return $fetched['data'];
+            }
+
+            $staleData = $extractStale($cached, $now);
+            $payload = [
+                'fetched_at'  => $staleData !== null ? (int) ($cached['fetched_at'] ?? 0) : 0,
+                'retry_after' => $now + FAMO_HOME_CACHE_RETRY_AFTER_SECOND,
+                'data'        => $staleData,
+            ];
+            famo_home_write_cache_atomic($cacheDir, $cacheFile, $payload);
+            return $staleData;
+        } finally {
+            @flock($lockFp, LOCK_UN);
+            @fclose($lockFp);
+        }
+    } catch (\Throwable) {
+        return null;
     }
 }

@@ -13,6 +13,7 @@ export const FAMO_HOME_DATA_ENDPOINTS = {
   courses: '/public/courses',
   instructors: '/public/instructors',
   supporters: '/public/supporters',
+  testimonials: '/public/testimonials?page=1&per_page=3',
 };
 
 const CACHE_TTL_SEC = 60;
@@ -20,6 +21,8 @@ const CACHE_MAX_STALE_SEC = 3600;
 const CACHE_RETRY_AFTER_SEC = 15;
 const CACHE_FILENAME = 'home-data-v1.json';
 const LOCK_FILENAME = 'home-data-v1.lock';
+const TESTI_CACHE_FILENAME = 'testimonials-page1-v1.json';
+const TESTI_LOCK_FILENAME = 'testimonials-page1-v1.lock';
 
 export const FA_ICON_MAP = {
   'fa-home': 'icon-home', 'fa-book': 'icon-book', 'fa-book-open': 'icon-book',
@@ -337,6 +340,150 @@ export function renderTeamDots(teamList) {
     .join('');
 }
 
+const AUTHOR_ROLE_LABELS = {
+  student: 'دانش‌آموز',
+  parent: 'ولی دانش‌آموز',
+  graduate: 'فارغ‌التحصیل',
+  other: 'سایر',
+};
+
+export function toPersianDigits(value) {
+  return String(value ?? '').replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
+}
+
+export function formatPersianRating(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num) || num <= 0) return toPersianDigits('0');
+  const rounded = Math.round(num * 10) / 10;
+  const formatted = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+  return toPersianDigits(formatted.replace('.', '٫'));
+}
+
+export function formatAuthorRole(role) {
+  const key = strVal(role).trim();
+  return AUTHOR_ROLE_LABELS[key] || AUTHOR_ROLE_LABELS.other;
+}
+
+export function renderStarSvg(filled = true, size = 18) {
+  const cls = filled ? 'famo-star famo-star--filled' : 'famo-star famo-star--empty';
+  const dim = Math.max(10, Math.min(32, Number(size) || 18));
+  return `<svg viewBox="0 0 24 24" width="${dim}" height="${dim}" aria-hidden="true" class="${cls}"><path d="M12 2.5l2.93 5.94 6.56.95-4.75 4.63 1.12 6.53L12 17.46 6.14 20.55l1.12-6.53L2.51 9.39l6.56-.95L12 2.5z"></path></svg>`;
+}
+
+export function renderStarsRow(ratingValue, size = 18, extraClass = '') {
+  if (typeof ratingValue === 'boolean' || ratingValue === null || ratingValue === undefined || typeof ratingValue === 'object') return '';
+  const raw = String(ratingValue).trim();
+  if (!raw || Number.isNaN(Number(raw))) return '';
+  const rating = Math.trunc(Number(raw));
+  if (rating < 1 || rating > 5) return '';
+  const cls = extraClass ? `famo-stars ${extraClass}` : 'famo-stars';
+  const label = `امتیاز ${toPersianDigits(rating)} از ${toPersianDigits(5)}`;
+  let stars = '';
+  for (let i = 1; i <= 5; i += 1) stars += renderStarSvg(i <= rating, size);
+  return `<div class="${escHtml(cls)}" aria-label="${escHtml(label)}">${stars}</div>`;
+}
+
+export function renderHomeTestimonialExcerpt(item) {
+  const authorName = strVal(item?.author_name).trim();
+  const authorMeta = strVal(item?.author_meta).trim();
+  const roleLabel = formatAuthorRole(item?.author_role);
+  const content = strVal(item?.content).trim();
+  if (!authorName && !content) return '';
+  const subParts = [];
+  if (roleLabel) subParts.push(roleLabel);
+  if (authorMeta) subParts.push(toPersianDigits(authorMeta));
+  const metaStr = subParts.length > 0 ? ` — ${subParts.join('، ')}` : '';
+  const starsHtml = renderStarsRow(item?.rating, 14);
+  return `<div class="famo-excerpt-item"><div class="flex items-center justify-between gap-2 flex-wrap mb-1"><p class="famo-excerpt-title m-0">${escHtml(authorName)}${metaStr ? `<span class="text-xs font-normal text-gray-500">${escHtml(metaStr)}</span>` : ''}</p>${starsHtml}</div><p class="famo-excerpt-body">${escHtml(content)}</p></div>`;
+}
+
+export function renderTestimonialSummary(summary) {
+  const totalApproved = Math.max(0, Number.parseInt(String(summary?.total_approved ?? 0), 10) || 0);
+  const avgRating = Number(summary?.average_rating ?? 0);
+  const hasRating = totalApproved > 0 && Number.isFinite(avgRating) && avgRating > 0;
+  const roundedStars = hasRating ? Math.round(avgRating) : 0;
+  let stars = '';
+  for (let i = 1; i <= 5; i += 1) stars += renderStarSvg(i <= roundedStars, 18);
+  const avgDisplay = hasRating ? formatPersianRating(avgRating) : '—';
+  const outOfDisplay = totalApproved > 0 ? `از ${toPersianDigits(5)}` : '';
+  return `<div class="famo-testi-summary-grid"><div class="famo-testi-stat"><div class="famo-testi-stat-value">${escHtml(toPersianDigits(totalApproved))}</div><div class="famo-testi-stat-label">نظر تأییدشده</div></div><div class="famo-testi-stat"><div class="famo-testi-stat-rating-row"><span class="famo-testi-stat-value">${escHtml(avgDisplay)}</span><span class="famo-testi-stat-outof">${escHtml(outOfDisplay)}</span></div><div class="famo-stars famo-stars--summary" aria-hidden="true">${stars}</div><div class="famo-testi-stat-label">میانگین امتیاز رضایت</div></div><div class="famo-testi-stat-cta"><p class="famo-testi-stat-note">تجربه حضور در کلاس‌ها یا مشاوره فامو را داشته‌اید؟</p><a href="#submit-testimonial" class="famo-state-btn">ثبت نظر جدید</a></div></div>`;
+}
+
+export function renderTestimonialCard(item, headingTag = 'h4') {
+  const tag = headingTag === 'h3' ? 'h3' : 'h4';
+  const isFeatured = Boolean(item?.is_featured);
+  const cardClass = isFeatured ? 'famo-testi-card hover-lift famo-testi-card--featured' : 'famo-testi-card hover-lift';
+  const authorName = strVal(item?.author_name).trim();
+  const initial = authorName ? Array.from(authorName)[0] : 'ف';
+  const roleLabel = formatAuthorRole(item?.author_role);
+  const authorMeta = strVal(item?.author_meta).trim();
+  const content = strVal(item?.content);
+  const courseName = strVal(item?.course_name).trim();
+  const instructorName = strVal(item?.instructor_name).trim();
+
+  const metaHtml = authorMeta ? `<p class="famo-testi-meta">${escHtml(toPersianDigits(authorMeta))}</p>` : '';
+  const starsHtml = renderStarsRow(item?.rating, 18);
+  let tagsHtml = '';
+  if (courseName || instructorName) {
+    tagsHtml += '<div class="famo-testi-tags">';
+    if (courseName) tagsHtml += `<span class="famo-adm-chip famo-adm-chip--exam">دوره: ${escHtml(courseName)}</span>`;
+    if (instructorName) tagsHtml += `<span class="famo-adm-chip famo-adm-chip--field">استاد: ${escHtml(instructorName)}</span>`;
+    tagsHtml += '</div>';
+  }
+
+  return `<article class="${cardClass}"><div class="famo-testi-card-head"><div class="famo-testi-author"><div class="famo-testi-avatar" aria-hidden="true">${escHtml(initial)}</div><div class="famo-testi-author-info"><div class="famo-testi-name-row"><${tag} class="famo-testi-name">${escHtml(authorName)}</${tag}><span class="famo-testi-role-badge">${escHtml(roleLabel)}</span></div>${metaHtml}</div></div>${starsHtml}</div><p class="famo-testi-content">${escHtml(content)}</p>${tagsHtml}</article>`;
+}
+
+export function renderTestimonialsPagination(page, totalPages) {
+  if (totalPages <= 1) return '';
+  const safePage = Math.max(1, Math.min(page, totalPages));
+  const prevDisabled = safePage <= 1 ? ' disabled' : '';
+  const nextDisabled = safePage >= totalPages ? ' disabled' : '';
+  const info = `صفحه ${toPersianDigits(safePage)} از ${toPersianDigits(totalPages)}`;
+  return `<nav class="famo-pagination" aria-label="صفحه‌بندی نظرات"><button type="button" class="famo-page-btn" data-page-dir="prev"${prevDisabled}>صفحه قبل</button><span class="famo-page-info">${escHtml(info)}</span><button type="button" class="famo-page-btn" data-page-dir="next"${nextDisabled}>صفحه بعد</button></nav>`;
+}
+
+export function buildTestimonialsSchema(summary, items, maxReviews = 9) {
+  const extra = {};
+  if (summary && typeof summary === 'object') {
+    const totalApproved = Number.parseInt(String(summary.total_approved ?? 0), 10) || 0;
+    const avgRating = Number(summary.average_rating ?? 0);
+    if (totalApproved > 0 && Number.isFinite(avgRating) && avgRating > 0 && avgRating <= 5) {
+      extra.aggregateRating = {
+        '@type': 'AggregateRating',
+        ratingValue: Math.round(avgRating * 100) / 100,
+        reviewCount: totalApproved,
+        bestRating: 5,
+        worstRating: 1,
+      };
+    }
+  }
+  const reviews = [];
+  for (const item of Array.isArray(items) ? items : []) {
+    if (reviews.length >= maxReviews) break;
+    if (!item || typeof item !== 'object') continue;
+    const authorName = strVal(item.author_name).trim();
+    const body = strVal(item.content).trim();
+    if (!authorName || !body) continue;
+    const review = {
+      '@type': 'Review',
+      inLanguage: 'fa-IR',
+      author: { '@type': 'Person', name: authorName },
+      reviewBody: body,
+    };
+    const r = Number.parseInt(String(item.rating ?? ''), 10);
+    if (Number.isInteger(r) && r >= 1 && r <= 5) {
+      review.reviewRating = { '@type': 'Rating', ratingValue: r, bestRating: 5, worstRating: 1 };
+    }
+    const createdAt = strVal(item.created_at).trim();
+    const dateMatch = /^(\d{4}-\d{2}-\d{2})/.exec(createdAt);
+    if (dateMatch) review.datePublished = dateMatch[1];
+    reviews.push(review);
+  }
+  if (reviews.length > 0) extra.review = reviews;
+  return extra;
+}
+
 function emptyResult() {
   const out = {};
   for (const key of Object.keys(FAMO_HOME_DATA_ENDPOINTS)) out[key] = null;
@@ -345,6 +492,37 @@ function emptyResult() {
 
 function normalizeList(val) {
   return Array.isArray(val) && val.length > 0 ? val : null;
+}
+
+export function normalizeTestimonials(dataValue, rootPayload = null) {
+  if (!dataValue || typeof dataValue !== 'object') return null;
+  let rawItems = null;
+  let summary = null;
+  let pagination = null;
+
+  if (!Array.isArray(dataValue) && Object.prototype.hasOwnProperty.call(dataValue, 'items')) {
+    rawItems = Array.isArray(dataValue.items) ? dataValue.items : [];
+    if (dataValue.summary && typeof dataValue.summary === 'object') summary = dataValue.summary;
+    if (dataValue.pagination && typeof dataValue.pagination === 'object') pagination = dataValue.pagination;
+  } else if (Array.isArray(dataValue)) {
+    rawItems = dataValue;
+  } else {
+    return null;
+  }
+
+  if (rootPayload && typeof rootPayload === 'object') {
+    if (!summary && rootPayload.summary && typeof rootPayload.summary === 'object') summary = rootPayload.summary;
+    if (!pagination && rootPayload.pagination && typeof rootPayload.pagination === 'object') pagination = rootPayload.pagination;
+  }
+
+  const items = rawItems.filter((x) => x && typeof x === 'object');
+  if (items.length === 0) return null;
+  return { items, summary, pagination };
+}
+
+function normalizeEndpointValue(key, dataValue, rootPayload = null) {
+  if (key === 'testimonials') return normalizeTestimonials(dataValue, rootPayload);
+  return normalizeList(dataValue);
 }
 
 function readCacheFile(cacheFile) {
@@ -368,13 +546,13 @@ function extractCached(cached, nowSec) {
     if (keyTs <= 0 || (nowSec - keyTs) > CACHE_MAX_STALE_SEC) {
       out[key] = null;
     } else {
-      out[key] = normalizeList(dataMap[key]);
+      out[key] = normalizeEndpointValue(key, dataMap[key]);
     }
   }
   return out;
 }
 
-function fetchJsonEndpoint(url) {
+function fetchJsonEndpoint(url, key = '') {
   return new Promise((resolve) => {
     let parsed;
     try {
@@ -414,11 +592,15 @@ function fetchJsonEndpoint(url) {
           }
           try {
             const decoded = JSON.parse(Buffer.concat(chunks).toString('utf8'));
-            if (!decoded || typeof decoded !== 'object' || !Array.isArray(decoded.data)) {
+            if (!decoded || typeof decoded !== 'object' || !decoded.data || typeof decoded.data !== 'object') {
               finish({ ok: false, data: null, status });
               return;
             }
-            finish({ ok: true, data: normalizeList(decoded.data), status: 200 });
+            if (key !== 'testimonials' && !Array.isArray(decoded.data)) {
+              finish({ ok: false, data: null, status });
+              return;
+            }
+            finish({ ok: true, data: normalizeEndpointValue(key, decoded.data, decoded), status: 200 });
           } catch {
             finish({ ok: false, data: null, status });
           }
@@ -444,7 +626,7 @@ function fetchJsonEndpoint(url) {
 async function fetchAllConcurrent(baseUrl) {
   const entries = Object.entries(FAMO_HOME_DATA_ENDPOINTS);
   const settled = await Promise.all(
-    entries.map(async ([key, ep]) => [key, await fetchJsonEndpoint(`${baseUrl}/${ep.replace(/^\/+/, '')}`)]),
+    entries.map(async ([key, ep]) => [key, await fetchJsonEndpoint(`${baseUrl}/${ep.replace(/^\/+/, '')}`, key)]),
   );
   return Object.fromEntries(settled);
 }
@@ -466,9 +648,9 @@ function mergeResults(fetched, previousCache, nowSec) {
     } else {
       anyFailure = true;
       const keyTs = Number(prevUpdated[key]) || prevFetchedAt;
-      const prevList = normalizeList(prevData[key]);
-      if (prevList !== null && keyTs > 0 && (nowSec - keyTs) <= CACHE_MAX_STALE_SEC) {
-        newData[key] = prevList;
+      const prevVal = normalizeEndpointValue(key, prevData[key]);
+      if (prevVal !== null && keyTs > 0 && (nowSec - keyTs) <= CACHE_MAX_STALE_SEC) {
+        newData[key] = prevVal;
         newUpdated[key] = keyTs;
       } else {
         newData[key] = null;
@@ -490,7 +672,8 @@ function mergeResults(fetched, previousCache, nowSec) {
 
 function writeCacheAtomic(cacheDir, cacheFile, payload) {
   const suffix = crypto.randomBytes(4).toString('hex');
-  const tmpFile = path.join(cacheDir, `home-data-v1.${process.pid}.${suffix}.tmp`);
+  const prefix = path.basename(cacheFile, path.extname(cacheFile));
+  const tmpFile = path.join(cacheDir, `${prefix}.${process.pid}.${suffix}.tmp`);
   try {
     fs.writeFileSync(tmpFile, JSON.stringify(payload), 'utf8');
     fs.renameSync(tmpFile, cacheFile);
@@ -594,5 +777,102 @@ export async function famoHomeData(opts = {}) {
     }
   } catch {
     return emptyResult();
+  }
+}
+
+export async function famoTestimonialsPageData(opts = {}) {
+  try {
+    const killSwitch = (opts.homeSsr ?? envStr('HOME_SSR', '')).trim();
+    if (killSwitch === '0') return null;
+
+    const perPage = Math.max(1, Math.min(30, Number(opts.perPage) || 9));
+    const nowSec = typeof opts.nowSec === 'number' ? opts.nowSec : Math.floor(Date.now() / 1000);
+    const cacheDir = opts.cacheDir ?? path.join(ROOT_DIR, 'storage', 'cache');
+    const cacheFile = path.join(cacheDir, TESTI_CACHE_FILENAME);
+    const lockFile = path.join(cacheDir, TESTI_LOCK_FILENAME);
+    const apiBase = (opts.internalApiUrl ?? internalApiBase()).replace(/\/+$/, '');
+    const endpointUrl = `${apiBase}/public/testimonials?page=1&per_page=${perPage}`;
+
+    const extractStale = (cachedPayload) => {
+      if (!cachedPayload || typeof cachedPayload !== 'object') return null;
+      const ts = Number(cachedPayload.fetched_at) || 0;
+      if (ts <= 0 || (nowSec - ts) > CACHE_MAX_STALE_SEC) return null;
+      return normalizeTestimonials(cachedPayload.data);
+    };
+
+    let canCache = false;
+    try {
+      const st = fs.statSync(cacheDir);
+      if (st.isDirectory()) {
+        fs.accessSync(cacheDir, fs.constants.W_OK | fs.constants.R_OK);
+        canCache = true;
+      }
+    } catch {
+      canCache = false;
+    }
+
+    if (!canCache) {
+      const fetched = await fetchJsonEndpoint(endpointUrl, 'testimonials');
+      return fetched.ok ? fetched.data : null;
+    }
+
+    let cached = readCacheFile(cacheFile);
+    if (cached) {
+      const fetchedAt = Number(cached.fetched_at) || 0;
+      const retryAfter = Number(cached.retry_after) || 0;
+      if (fetchedAt > 0 && (nowSec - fetchedAt) < CACHE_TTL_SEC) return extractStale(cached);
+      if (retryAfter > 0 && nowSec < retryAfter) return extractStale(cached);
+    }
+
+    if (activeLocks.has(lockFile)) return extractStale(cached);
+
+    let lockFd = null;
+    try {
+      lockFd = fs.openSync(lockFile, 'wx');
+      activeLocks.add(lockFile);
+    } catch (err) {
+      if (err && err.code === 'EEXIST') return extractStale(cached);
+      const fetched = await fetchJsonEndpoint(endpointUrl, 'testimonials');
+      return fetched.ok ? fetched.data : null;
+    }
+
+    try {
+      const freshCheck = readCacheFile(cacheFile);
+      if (freshCheck) {
+        const fetchedAt = Number(freshCheck.fetched_at) || 0;
+        const retryAfter = Number(freshCheck.retry_after) || 0;
+        if (
+          (fetchedAt > 0 && (nowSec - fetchedAt) < CACHE_TTL_SEC) ||
+          (retryAfter > 0 && nowSec < retryAfter)
+        ) {
+          return extractStale(freshCheck);
+        }
+        cached = freshCheck;
+      }
+
+      const fetched = await fetchJsonEndpoint(endpointUrl, 'testimonials');
+      if (fetched.ok) {
+        writeCacheAtomic(cacheDir, cacheFile, {
+          fetched_at: nowSec,
+          retry_after: 0,
+          data: fetched.data,
+        });
+        return fetched.data;
+      }
+
+      const staleData = extractStale(cached);
+      writeCacheAtomic(cacheDir, cacheFile, {
+        fetched_at: staleData ? (Number(cached?.fetched_at) || 0) : 0,
+        retry_after: nowSec + CACHE_RETRY_AFTER_SEC,
+        data: staleData,
+      });
+      return staleData;
+    } finally {
+      activeLocks.delete(lockFile);
+      try { if (lockFd !== null) fs.closeSync(lockFd); } catch {}
+      try { fs.unlinkSync(lockFile); } catch {}
+    }
+  } catch {
+    return null;
   }
 }

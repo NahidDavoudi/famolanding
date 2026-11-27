@@ -68,10 +68,12 @@ test('SEO Architecture: .htaccess has security blocks, loop-safe THE_REQUEST 301
   assert.match(ht, /r\.php\?token=/);
 });
 
-test('SEO Architecture: sitemap.xml contains all 21 canonical clean URLs with trailing slashes and zero .php/?/# URLs', () => {
+test('SEO Architecture: sitemap.xml contains all 21 canonical clean URLs with lastmod, trailing slashes, and zero .php/?/# URLs', async () => {
   const xml = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
   const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+  const lastmods = [...xml.matchAll(/<lastmod>(\d{4}-\d{2}-\d{2})<\/lastmod>/g)].map((m) => m[1]);
   assert.equal(locs.length, 21, `Expected 21 canonical URLs in sitemap.xml, got ${locs.length}`);
+  assert.equal(lastmods.length, 21, `Expected 21 <lastmod> tags in sitemap.xml, got ${lastmods.length}`);
   assert.deepEqual(
     locs,
     CANONICAL_STATIC_PATHS.map((p) => `https://famoacademy.ir${p}`),
@@ -82,6 +84,14 @@ test('SEO Architecture: sitemap.xml contains all 21 canonical clean URLs with tr
     assert.doesNotMatch(loc, /\?/);
     assert.doesNotMatch(loc, /#/);
   }
+
+  const smRes = await fetchRaw('/sitemap.xml');
+  assert.equal(smRes.status, 200);
+  assert.match(String(smRes.headers['cache-control'] || ''), /max-age=300/);
+
+  const blogSmRes = await fetchRaw('/sitemap-blog.xml');
+  assert.equal(blogSmRes.status, 200);
+  assert.match(String(blogSmRes.headers['content-type'] || ''), /application\/xml/);
 });
 
 test('Phase 0: all 4 service images are optimized (< 130 KB WebP) with matching AVIF variants', () => {

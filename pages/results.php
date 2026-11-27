@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../layouts/home-data.php';
 require_once __DIR__ . '/../layouts/home-render.php';
 
 $base = '/';
@@ -23,27 +24,19 @@ $admData = is_array($admApiRes['json']['data'] ?? null) ? $admApiRes['json']['da
 $ssrAdmGroups = is_array($admData['groups'] ?? null) ? array_values(array_filter($admData['groups'], 'is_array')) : [];
 $hasAdmSsr = count($ssrAdmGroups) > 0;
 
-$testiApiRes = famo_internal_api_get('/public/testimonials?page=1&per_page=9', 2);
-$testiData = is_array($testiApiRes['json']['data'] ?? null) ? $testiApiRes['json']['data'] : [];
-$testiSummary = is_array($testiData['summary'] ?? ($testiApiRes['json']['summary'] ?? null))
-    ? ($testiData['summary'] ?? $testiApiRes['json']['summary'])
-    : null;
-$ssrTestiItems = is_array($testiData['items'] ?? null) ? array_values(array_filter($testiData['items'], 'is_array')) : [];
+$ssrTestiPayload = famo_testimonials_page_data(9);
+$testiSummary = is_array($ssrTestiPayload['summary'] ?? null) ? $ssrTestiPayload['summary'] : null;
+$ssrTestiItems = is_array($ssrTestiPayload['items'] ?? null)
+    ? array_values(array_filter($ssrTestiPayload['items'], 'is_array'))
+    : [];
+$testiPagination = is_array($ssrTestiPayload['pagination'] ?? null) ? $ssrTestiPayload['pagination'] : null;
+$testiTotalPages = max(1, (int) ($testiPagination['total_pages'] ?? 1));
 $hasTestiSsr = count($ssrTestiItems) > 0;
 
-if ($testiSummary !== null) {
-    $totalApproved = (int) ($testiSummary['total_approved'] ?? 0);
-    $avgRating = (float) ($testiSummary['average_rating'] ?? 0);
-    if ($totalApproved > 0 && $avgRating > 0) {
-        $organizationExtra = [
-            'aggregateRating' => [
-                '@type'       => 'AggregateRating',
-                'ratingValue' => round($avgRating, 2),
-                'reviewCount' => $totalApproved,
-                'bestRating'  => 5,
-                'worstRating' => 1,
-            ],
-        ];
+if ($hasTestiSsr || $testiSummary !== null) {
+    $testiSchemaExtra = famo_build_testimonials_schema($testiSummary, $ssrTestiItems, 9);
+    if (count($testiSchemaExtra) > 0) {
+        $organizationExtra = $testiSchemaExtra;
     }
 }
 
@@ -55,15 +48,8 @@ $examTypeLabels = [
     'other'      => 'سایر',
 ];
 
-$roleLabels = [
-    'student'  => 'دانش‌آموز',
-    'parent'   => 'ولی دانش‌آموز',
-    'graduate' => 'فارغ‌التحصیل',
-    'other'    => 'همراه فامو',
-];
-
 $toFaDigits = static function (string $s): string {
-    return strtr($s, ['0' => '۰', '1' => '۱', '2' => '۲', '3' => '۳', '4' => '۴', '5' => '۵', '6' => '۶', '7' => '۷', '8' => '۸', '9' => '۹']);
+    return famo_to_persian_digits($s);
 };
 
 $page_libs = [
@@ -222,19 +208,24 @@ $page_libs = [
             </div>
 
             <div id="testimonialsSummary" class="famo-testi-summary" aria-live="polite">
+<?php if ($testiSummary !== null): ?>
+                <?= famo_render_testimonial_summary($testiSummary) ?>
+<?php else: ?>
                 <div class="famo-testi-summary-grid">
                     <div class="famo-testi-stat">
-                        <div class="famo-testi-stat-value"><?= $testiSummary ? famo_esc($toFaDigits((string) ((int) ($testiSummary['total_approved'] ?? 0)))) : 'ثبت‌شده' ?></div>
+                        <div class="famo-testi-stat-value">ثبت‌شده</div>
                         <div class="famo-testi-stat-label">بازخورد تأییدشده در سامانه</div>
                     </div>
                     <div class="famo-testi-stat">
-                        <div class="famo-testi-stat-value"><?= ($testiSummary && (float) ($testiSummary['average_rating'] ?? 0) > 0) ? famo_esc($toFaDigits(number_format((float) $testiSummary['average_rating'], 1))) : 'شفاف' ?></div>
+                        <div class="famo-testi-stat-value">شفاف</div>
                         <div class="famo-testi-stat-label">میانگین امتیاز رضایت خانواده‌ها</div>
                     </div>
                     <div class="famo-testi-stat-cta">
+                        <p class="famo-testi-stat-note">تجربه حضور در کلاس‌ها یا مشاوره فامو را داشته‌اید؟</p>
                         <a href="#submit-testimonial" class="famo-state-btn">ثبت نظر جدید</a>
                     </div>
                 </div>
+<?php endif; ?>
             </div>
 
             <div class="famo-testi-list-header">
@@ -242,32 +233,10 @@ $page_libs = [
                 <div id="testimonialsRoleFilters" class="famo-filter-chips" aria-label="فیلتر بر اساس نقش نویسنده"></div>
             </div>
 
-            <div id="testimonialsList" class="famo-testi-grid" aria-busy="false"<?= $hasTestiSsr ? ' data-ssr="1"' : ' data-has-fallback="1"' ?>>
+            <div id="testimonialsList" class="famo-testi-grid" aria-busy="false"<?= $hasTestiSsr ? ' data-ssr="1" data-ssr-total-pages="' . $testiTotalPages . '"' : ' data-has-fallback="1"' ?>>
 <?php if ($hasTestiSsr): ?>
                 <?php foreach ($ssrTestiItems as $item): ?>
-                    <?php
-                    $aName = famo_str($item['author_name'] ?? '');
-                    $aRole = $roleLabels[famo_str($item['author_role'] ?? '')] ?? 'همراه فامو';
-                    $aMeta = trim(famo_str($item['author_meta'] ?? ''));
-                    $aBody = famo_str($item['content'] ?? '');
-                    ?>
-                    <article class="famo-testi-card hover-lift">
-                        <div class="famo-testi-card-head">
-                            <div class="famo-testi-author">
-                                <div class="famo-testi-avatar" aria-hidden="true"><?= famo_esc(famo_first_char($aName)) ?></div>
-                                <div class="famo-testi-author-info">
-                                    <div class="famo-testi-name-row">
-                                        <h4 class="famo-testi-name"><?= famo_esc($aName) ?></h4>
-                                        <span class="famo-testi-role-badge"><?= famo_esc($aRole) ?></span>
-                                    </div>
-                                    <?php if ($aMeta !== ''): ?>
-                                        <p class="famo-testi-meta"><?= famo_esc($toFaDigits($aMeta)) ?></p>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="famo-testi-content"><?= famo_esc($aBody) ?></p>
-                    </article>
+                    <?= famo_render_testimonial_card($item, 'h4') ?>
                 <?php endforeach; ?>
 <?php else: ?>
                 <div class="col-span-full famo-detail-block">
@@ -278,7 +247,7 @@ $page_libs = [
 <?php endif; ?>
             </div>
 
-            <div id="testimonialsPagination" class="famo-pagination-wrap"></div>
+            <div id="testimonialsPagination" class="famo-pagination-wrap"><?= ($hasTestiSsr && $testiTotalPages > 1) ? famo_render_testimonials_pagination(1, $testiTotalPages) : '' ?></div>
         </div>
     </section>
 

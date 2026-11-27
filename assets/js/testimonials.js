@@ -656,6 +656,10 @@ onDomReady(() => {
     initTestimonialForm();
     const listEl = document.getElementById('testimonialsList');
     if (listEl && listEl.dataset.ssr === '1') {
+        const totalPages = Number.parseInt(String(listEl.dataset.ssrTotalPages || '1'), 10) || 1;
+        if (totalPages > 1) {
+            renderPagination({ page: 1, total_pages: totalPages });
+        }
         return;
     }
     loadTestimonials(false, true);

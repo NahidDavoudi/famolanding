@@ -59,8 +59,18 @@ RewriteRule ^contact/$ pages/contact.php [L,QSA]
 RewriteRule ^blog/$ pages/blog.php [L,QSA]
 RewriteRule ^blog/([^/]+)/$ pages/post.php?slug=$1 [L,QSA]
 
+# Clean dynamic blog sitemap alias (keeps /sitemap-blog.php working too)
+RewriteRule ^sitemap-blog\.xml$ sitemap-blog.php [L]
+
 # Weekly exam result share links
 RewriteRule ^r/([A-Za-z0-9_-]{32,64})/?$ r.php?token=$1 [L,QSA]
+
+# Prevent stale browser/proxy caching of sitemap.xml
+<IfModule mod_headers.c>
+    <Files "sitemap.xml">
+        Header set Cache-Control "public, max-age=300, must-revalidate"
+    </Files>
+</IfModule>
 
 # Dedicated 404 page (serves true HTTP 404 status)
 ErrorDocument 404 /404.php
